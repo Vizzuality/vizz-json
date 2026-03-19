@@ -19,6 +19,7 @@ Vizzuality internal team — developers and stakeholders familiar with mapping c
 | Layer | Technology |
 |---|---|
 | Framework | TanStack Start (React) + TanStack Router, Query, Table |
+| UI components | shadcn/ui (preset b3Qx371gu, base theme) |
 | Styling | Tailwind CSS (dark theme) |
 | Map rendering | react-map-gl (MapLibre GL JS) + @deck.gl/react |
 | JSON converter | @deck.gl/json extended with `@@#params.X` support |
@@ -33,6 +34,33 @@ Vizzuality internal team — developers and stakeholders familiar with mapping c
 ### Dependency on @deck.gl/json
 
 The project uses `@deck.gl/json` as a dependency and extends it with `@@#params.X` parameter injection support. This is a wrapper/plugin approach — no fork. The extension adds a pre-processing step that resolves `@@#params.*` references from a runtime params object before passing to the standard deck.gl JSON converter.
+
+### React Component Rendering via @@type
+
+`@deck.gl/json`'s `JSONConverter` supports `reactComponents` in its configuration registry, meaning `@@type` can resolve to **React components** — not just deck.gl layer classes. This is a key capability for the project: complex legends, custom tooltips, and other UI elements that are difficult to express as pure JSON can be defined as registered React components and instantiated declaratively from JSON config.
+
+Example:
+```json
+{
+  "@@type": "GradientLegend",
+  "title": "Population Density",
+  "colorLow": "@@#params.colorLow",
+  "colorHigh": "@@#params.colorHigh",
+  "min": "@@#params.stopLow",
+  "max": "@@#params.stopHigh"
+}
+```
+
+Registered React components (legends, info panels, etc.) are built with shadcn/ui and registered in the `JSONConfiguration.reactComponents` catalog. The converter instantiates them via `React.createElement` with resolved props.
+
+### UI Components — shadcn/ui
+
+All UI components use shadcn/ui (initialized with `pnpm dlx shadcn@latest init --preset b3Qx371gu --base base --template-start`). This includes:
+- **Playground controls:** Slider, ColorPicker, Toggle, Select, Input (auto-generated in ParamsPanel)
+- **Layout:** ResizablePanelGroup for the editor/map/params split
+- **Navigation:** Tabs, Button, DropdownMenu for example switching
+- **Landing page:** Card, Badge, Separator for content sections
+- **Registered React components:** Legends and custom UI rendered via `@@type` are also built with shadcn/ui
 
 ### Data Sources
 
@@ -68,7 +96,7 @@ Compact reference grid showing all 5 prefixes:
 |---|---|---|
 | `@@#params.X` | Runtime parameter injection | `"@@#params.opacity"` → `0.8` |
 | `@@function` | Named function dispatch | `"@@function": "setQueryParams"` → built URL |
-| `@@type` | Class instantiation | `"@@type": "ScatterplotLayer"` → `new ScatterplotLayer()` |
+| `@@type` | Class or React component instantiation | `"@@type": "ScatterplotLayer"` → `new ScatterplotLayer()` or `"@@type": "GradientLegend"` → `<GradientLegend />` |
 | `@@=` | Inline expression → function | `"@@=[lng, lat]"` → `(d) => [d.lng, d.lat]` |
 | `@@#ENUM.X` | Constant/enum resolution | `"@@#GL.ONE"` → `1` |
 
@@ -182,6 +210,12 @@ Multi-layer config with conditional logic combining MapLibre `case` expression a
 - **@@ features:** `@@function` (ifParam), `@@#params`
 - **Data:** Country polygons with numeric indicator
 
+#### Example 10: React Components — `@@type` with Legend & UI
+Demonstrates `@@type` resolving to registered React components (built with shadcn/ui). A map layer with a parameterized `GradientLegend` component rendered from JSON config. Shows how complex UI that is hard to express in pure JSON can be defined declaratively.
+- **Params:** colorLow/colorHigh (pickers), stopLow/stopHigh (sliders), legendTitle (text), showLegend (toggle)
+- **@@ features:** `@@type` (React component), `@@#params`
+- **Data:** Same as Example 4 (graduated) but with legend overlay
+
 ### Expression Coverage Matrix
 
 | Example | match | interpolate | step | case | get | zoom | math | @@func | @@type | @@= |
@@ -195,6 +229,7 @@ Multi-layer config with conditional logic combining MapLibre `case` expression a
 | 7. Raster+func | — | — | — | — | — | — | — | ✓ | — | — |
 | 8. deck.gl | — | — | — | — | — | — | — | — | ✓ | ✓ |
 | 9. Conditional | — | — | — | ✓ | ✓ | — | ✓ | ✓ | — | — |
+| 10. React UI | — | ✓ | — | — | ✓ | — | — | — | ✓ (React) | — |
 
 ## Key Components
 
@@ -202,18 +237,19 @@ Multi-layer config with conditional logic combining MapLibre `case` expression a
 Wraps `@deck.gl/json`'s `JSONConverter` to add `@@#params.X` resolution as a pre-processing step before standard `@@` resolution.
 
 ### ParamsPanel
-React component that reads the `params[]` array from the JSON config and auto-generates UI controls based on type inference:
-- Number → slider
-- Hex color string → color picker
-- Boolean → toggle
-- String → text input
-- Object with `options` → select dropdown
+React component that reads the `params[]` array from the JSON config and auto-generates shadcn/ui controls based on type inference:
+- Number → shadcn Slider (with min/max/step if specified)
+- Hex color string → color picker (shadcn Popover + native input[type=color])
+- Boolean → shadcn Switch
+- String → shadcn Input
+- String with `options` array → shadcn Select
+- Object → inline Monaco editor (small)
 
 ### MapRenderer
 React component using react-map-gl that accepts resolved config and renders MapLibre layers. For deck.gl examples, uses `@deck.gl/react`'s `DeckGL` component overlaid on the MapLibre map via react-map-gl's interleaving support.
 
 ### ExampleStore
-Holds the 9 pre-built example configs as static JSON files. Each example is a single JSON file with a canonical structure:
+Holds the 10 pre-built example configs as static JSON files. Each example is a single JSON file with a canonical structure:
 ```json
 {
   "metadata": { "title": "...", "description": "...", "tier": "basic|intermediate|advanced" },
