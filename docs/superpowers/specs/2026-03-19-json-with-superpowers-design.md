@@ -246,7 +246,7 @@ React component that reads the `params[]` array from the JSON config and auto-ge
 - Object → inline Monaco editor (small)
 
 ### MapRenderer
-React component using react-map-gl that accepts resolved config and renders MapLibre layers. For deck.gl examples, uses `@deck.gl/react`'s `DeckGL` component overlaid on the MapLibre map via react-map-gl's interleaving support.
+React component using react-map-gl that accepts resolved config and renders MapLibre layers. deck.gl layers are rendered via `DeckGlOverlay` (from `@deck.gl/react`) in **interleaved mode** — always. This renders deck.gl layers into the MapLibre WebGL context so they can be z-ordered between MapLibre layers (e.g., a deck.gl ScatterplotLayer between a fill layer and labels). The overlay is added as a child of react-map-gl's `<Map>` component with `interleaved={true}`.
 
 ### ExampleStore
 Holds the 10 pre-built example configs as static JSON files. Each example is a single JSON file with a canonical structure:
