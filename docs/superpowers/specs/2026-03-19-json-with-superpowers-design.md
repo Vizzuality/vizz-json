@@ -149,17 +149,21 @@ Controls are inferred from the `params[]` array in the JSON config:
 
 ## Playground Examples
 
+All MapLibre/Mapbox examples follow the layer schema (`config` + `params_config` + `legend_config`). deck.gl examples use `@@type` in `config` instead of `source` + `styles`.
+
 ### Tier 1: Basic — Parameter Injection
 
 #### Example 1: Raster — COG with Opacity
 Simple raster layer demonstrating `@@#params` basics.
-- **Params:** opacity (slider 0–1), visibility (toggle)
+- **params_config:** opacity (slider 0–1), visibility (toggle)
+- **legend_config:** `{ type: "basic", items: [{ label: "Raster Layer", value: "visible" }] }`
 - **@@ features:** `@@#params.opacity`, `@@#params.visibility`
 - **Data:** Public COG from AWS Open Data
 
 #### Example 2: Vector — Simple Fill
 Vector fill layer with parameterized color and opacity.
-- **Params:** fillColor (picker), outlineColor (picker), opacity (slider)
+- **params_config:** fillColor (picker), outlineColor (picker), opacity (slider)
+- **legend_config:** `{ type: "basic", items: [{ label: "Countries", value: "@@#params.fillColor" }] }`
 - **@@ features:** `@@#params.fillColor`, `@@#params.opacity`, `@@#params.outlineColor`
 - **Data:** Natural Earth countries
 
@@ -167,25 +171,29 @@ Vector fill layer with parameterized color and opacity.
 
 #### Example 3: Choropleth — `match` Expression
 Country polygons colored by category using `match`. Each category color is parameterized.
-- **Params:** forestColor, waterColor, urbanColor, defaultColor (all pickers)
+- **params_config:** forestColor, waterColor, urbanColor, defaultColor (all pickers)
+- **legend_config:** `{ type: "choropleth", items: [{ label: "Forest", value: "@@#params.forestColor" }, { label: "Water", value: "@@#params.waterColor" }, ...] }`
 - **Expressions:** `match`, `get`
 - **Data:** Natural Earth with land cover categories
 
 #### Example 4: Graduated — `interpolate` Expression
 Continuous color ramp based on a numeric property. Breakpoint stops and colors are parameterized.
-- **Params:** stopLow/stopMid/stopHigh (sliders), colorLow/colorMid/colorHigh (pickers)
+- **params_config:** stopLow/stopMid/stopHigh (sliders), colorLow/colorMid/colorHigh (pickers)
+- **legend_config:** `{ type: "gradient", items: [{ label: "@@#params.stopLow", value: "@@#params.colorLow" }, { label: "@@#params.stopHigh", value: "@@#params.colorHigh" }] }`
 - **Expressions:** `interpolate` (linear), `get`
 - **Data:** Country polygons with population data
 
 #### Example 5: Classified Breaks — `step` Expression
 Discrete color classes with parameterized thresholds.
-- **Params:** break1/break2 (sliders), color1/color2/color3 (pickers)
+- **params_config:** break1/break2 (sliders), color1/color2/color3 (pickers)
+- **legend_config:** `{ type: "choropleth", items: [{ label: "< @@#params.break1", value: "@@#params.color1" }, ...] }`
 - **Expressions:** `step`, `get`
 - **Data:** USGS earthquake feed (point data with magnitude)
 
 #### Example 6: Data-Driven Circles — Zoom + Property
 Circle radius scales with both zoom level and a data property using nested `interpolate`.
-- **Params:** scaleLow (slider), scaleHigh (slider), color (picker)
+- **params_config:** scaleLow (slider), scaleHigh (slider), color (picker)
+- **legend_config:** `{ type: "gradient", items: [{ label: "Small", value: "@@#params.color" }, { label: "Large", value: "@@#params.color" }] }`
 - **Expressions:** `interpolate` (linear), `get`, `zoom`, `*` (math)
 - **Data:** Cities with population
 
@@ -193,26 +201,30 @@ Circle radius scales with both zoom level and a data property using nested `inte
 
 #### Example 7: Raster COG — `@@function` URL Builder
 TiTiler raster with `@@function` to build tile URLs from parameterized colormap and rescale values.
-- **Params:** colormap (select), rescale (range slider), opacity (slider)
+- **params_config:** colormap (select), rescale (range slider), opacity (slider)
+- **legend_config:** `{ type: "gradient", items: [{ label: "Low", value: "@@#params.colormap" }, { label: "High", value: "@@#params.colormap" }] }`
 - **@@ features:** `@@function` (setQueryParams), `@@#params`
 - **Data:** Public COG via TiTiler
 
 #### Example 8: deck.gl — ScatterplotLayer
 Full deck.gl layer using `@@type` for class instantiation and `@@=` for accessor expressions.
-- **Params:** dataUrl (text), scale (slider), pointColor (picker), opacity (slider)
+- **params_config:** dataUrl (text), scale (slider), pointColor (picker), opacity (slider)
+- **legend_config:** `{ type: "basic", items: [{ label: "Points", value: "@@#params.pointColor" }] }`
 - **@@ features:** `@@type`, `@@=`, `@@#params`
 - **Data:** Public earthquake/city dataset
 
 #### Example 9: Conditional Styling — `case` + `@@function`
 Multi-layer config with conditional logic combining MapLibre `case` expression and `@@function`.
-- **Params:** threshold (slider), aboveColor/belowColor (pickers), showLabels (toggle)
+- **params_config:** threshold (slider), aboveColor/belowColor (pickers), showLabels (toggle)
+- **legend_config:** `{ type: "choropleth", items: [{ label: "Above threshold", value: "@@#params.aboveColor" }, { label: "Below threshold", value: "@@#params.belowColor" }] }`
 - **Expressions:** `case`, `get`, `>` (comparison)
 - **@@ features:** `@@function` (ifParam), `@@#params`
 - **Data:** Country polygons with numeric indicator
 
 #### Example 10: React Components — `@@type` with Legend & UI
 Demonstrates `@@type` resolving to registered React components (built with shadcn/ui). A map layer with a parameterized `GradientLegend` component rendered from JSON config. Shows how complex UI that is hard to express in pure JSON can be defined declaratively.
-- **Params:** colorLow/colorHigh (pickers), stopLow/stopHigh (sliders), legendTitle (text), showLegend (toggle)
+- **params_config:** colorLow/colorHigh (pickers), stopLow/stopHigh (sliders), legendTitle (text), showLegend (toggle)
+- **legend_config:** `{ type: "gradient", items: [{ label: "@@#params.stopLow", value: "@@#params.colorLow" }, { label: "@@#params.stopHigh", value: "@@#params.colorHigh" }] }`
 - **@@ features:** `@@type` (React component), `@@#params`
 - **Data:** Same as Example 4 (graduated) but with legend overlay
 
@@ -237,7 +249,7 @@ Demonstrates `@@type` resolving to registered React components (built with shadc
 Wraps `@deck.gl/json`'s `JSONConverter` to add `@@#params.X` resolution as a pre-processing step before standard `@@` resolution.
 
 ### ParamsPanel
-React component that reads the `params[]` array from the JSON config and auto-generates shadcn/ui controls based on type inference:
+React component that reads the `params_config[]` array from the layer schema and auto-generates shadcn/ui controls based on type inference from the `default` value:
 - Number → shadcn Slider (with min/max/step if specified)
 - Hex color string → color picker (shadcn Popover + native input[type=color])
 - Boolean → shadcn Switch
@@ -249,19 +261,48 @@ React component that reads the `params[]` array from the JSON config and auto-ge
 React component using react-map-gl that accepts resolved config and renders MapLibre layers. deck.gl layers are rendered via `DeckGlOverlay` (from `@deck.gl/react`) in **interleaved mode** — always. This renders deck.gl layers into the MapLibre WebGL context so they can be z-ordered between MapLibre layers (e.g., a deck.gl ScatterplotLayer between a fill layer and labels). The overlay is added as a child of react-map-gl's `<Map>` component with `interleaved={true}`.
 
 ### ExampleStore
-Holds the 10 pre-built example configs as static JSON files. Each example is a single JSON file with a canonical structure:
+Holds the 10 pre-built example configs as static JSON files. Each MapLibre/Mapbox example follows a canonical layer schema:
+
+```typescript
+type LayerSchema = {
+  config: {
+    source: {
+      // MapLibre/Mapbox source spec (type, tiles, data, url, etc.)
+    },
+    styles: [
+      // MapLibre/Mapbox layer specs (type, paint, layout, filter, etc.)
+      // @@ prefixes are used inside source and styles for parameterization
+    ]
+  },
+  params_config: [
+    {
+      key: string,       // matches @@#params.<key> references in config
+      default: unknown   // determines both the default value and the control type
+    }
+  ],
+  legend_config: {
+    type: "basic" | "choropleth" | "gradient",
+    items: [{
+      label: string,
+      value: string | number  // can use @@#params references
+    }]
+  }
+}
+```
+
+For deck.gl examples, the `config` section uses `@@type` / `@@=` instead of `source` + `styles`, but `params_config` and `legend_config` remain the same.
+
+Each example file also includes a `metadata` object for the example selector:
 ```json
 {
   "metadata": { "title": "...", "description": "...", "tier": "basic|intermediate|advanced" },
-  "params": [
-    { "key": "opacity", "default": 0.8 },
-    { "key": "fillColor", "default": "#3b82f6" }
-  ],
-  "source": { ... },
-  "styles": [ ... ]
+  "config": { ... },
+  "params_config": [ ... ],
+  "legend_config": { ... }
 }
 ```
-The `params` array is always embedded in the config — no separate files. The `ParamsPanel` reads `config.params` to auto-generate controls.
+
+The `ParamsPanel` reads `params_config` to auto-generate controls. The `LegendPanel` reads `legend_config` to render the appropriate legend type (basic list, choropleth swatches, or gradient bar) — all built with shadcn/ui and registerable as `@@type` React components.
 
 ## Non-Goals (Parked for Later)
 
