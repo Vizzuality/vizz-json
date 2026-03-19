@@ -108,8 +108,8 @@ Controls are inferred from the `params[]` array in the JSON config:
 - `string` matching hex color pattern → color picker
 - `boolean` → toggle switch
 - `string` (other) → text input
-- `object` (colormap) → JSON editor or specialized colormap picker
-- `enum`/`select` → dropdown (if `options` array provided in param definition)
+- `object` → inline JSON editor (e.g., colormap objects)
+- `string` with `options` array in param definition → select dropdown
 
 #### Key Interactions
 
@@ -213,10 +213,19 @@ React component that reads the `params[]` array from the JSON config and auto-ge
 React component using react-map-gl that accepts resolved config and renders MapLibre layers. For deck.gl examples, uses `@deck.gl/react`'s `DeckGL` component overlaid on the MapLibre map via react-map-gl's interleaving support.
 
 ### ExampleStore
-Holds the 9 pre-built example configs as static JSON files. Each example includes:
-- `config.json` — the `@@`-annotated JSON
-- `params` array (embedded in config or separate)
-- `metadata` — title, description, tier, tags
+Holds the 9 pre-built example configs as static JSON files. Each example is a single JSON file with a canonical structure:
+```json
+{
+  "metadata": { "title": "...", "description": "...", "tier": "basic|intermediate|advanced" },
+  "params": [
+    { "key": "opacity", "default": 0.8 },
+    { "key": "fillColor", "default": "#3b82f6" }
+  ],
+  "source": { ... },
+  "styles": [ ... ]
+}
+```
+The `params` array is always embedded in the config — no separate files. The `ParamsPanel` reads `config.params` to auto-generate controls.
 
 ## Non-Goals (Parked for Later)
 
