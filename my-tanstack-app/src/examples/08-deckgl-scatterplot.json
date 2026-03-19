@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "title": "deck.gl — ScatterplotLayer",
+    "description": "Class instantiation via @@type with @@= accessor expressions",
+    "tier": "advanced"
+  },
+  "config": {
+    "@@type": "ScatterplotLayer",
+    "id": "earthquakes-scatter",
+    "data": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson",
+    "getPosition": "@@=geometry.coordinates",
+    "getRadius": "@@#params.radius",
+    "getFillColor": "@@#params.point_color",
+    "opacity": "@@#params.opacity",
+    "radiusMinPixels": 2,
+    "radiusMaxPixels": 20,
+    "pickable": true
+  },
+  "params_config": [
+    {
+      "key": "radius",
+      "default": 5000,
+      "min": 1000,
+      "max": 50000,
+      "step": 1000
+    },
+    {
+      "key": "point_color",
+      "default": "#ef4444"
+    },
+    {
+      "key": "opacity",
+      "default": 0.8,
+      "min": 0,
+      "max": 1,
+      "step": 0.05
+    }
+  ],
+  "legend_config": {
+    "type": "basic",
+    "items": [
+      { "label": "Earthquakes", "value": "@@#params.point_color" }
+    ]
+  }
+}

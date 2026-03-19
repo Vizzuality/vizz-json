@@ -1,0 +1,56 @@
+{
+  "metadata": {
+    "title": "Raster COG — @@function URL Builder",
+    "description": "Dynamic tile URL construction via @@function",
+    "tier": "advanced"
+  },
+  "config": {
+    "source": {
+      "type": "raster",
+      "tiles": [
+        {
+          "@@function": "setQueryParams",
+          "url": "https://s2downloads.eox.at/demo/Sentinel-2/3857/{z}/{x}/{y}.png",
+          "query": {
+            "colormap": "@@#params.colormap",
+            "rescale": "@@#params.rescale"
+          }
+        }
+      ],
+      "tileSize": 256
+    },
+    "styles": [
+      {
+        "type": "raster",
+        "paint": {
+          "raster-opacity": "@@#params.opacity"
+        }
+      }
+    ]
+  },
+  "params_config": [
+    {
+      "key": "colormap",
+      "default": "viridis",
+      "options": ["viridis", "plasma", "inferno", "magma", "cividis"]
+    },
+    {
+      "key": "rescale",
+      "default": "0,3000"
+    },
+    {
+      "key": "opacity",
+      "default": 1.0,
+      "min": 0,
+      "max": 1,
+      "step": 0.05
+    }
+  ],
+  "legend_config": {
+    "type": "gradient",
+    "items": [
+      { "label": "Low", "value": "#440154" },
+      { "label": "High", "value": "#fde725" }
+    ]
+  }
+}

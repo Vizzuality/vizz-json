@@ -1,5 +1,8 @@
 import { JSONConfiguration, JSONConverter } from "@deck.gl/json";
 import { ScatterplotLayer, ColumnLayer, GeoJsonLayer } from "@deck.gl/layers";
+import { GradientLegend } from "#/components/legends/gradient-legend";
+import { ChoroplethLegend } from "#/components/legends/choropleth-legend";
+import { BasicLegend } from "#/components/legends/basic-legend";
 import { registeredFunctions } from "./functions";
 
 export function createConverterConfig() {
@@ -13,7 +16,11 @@ export function createConverterConfig() {
     functions: { ...registeredFunctions },
     enumerations: {},
     constants: {},
-    reactComponents: {},
+    reactComponents: {
+      GradientLegend,
+      ChoroplethLegend,
+      BasicLegend,
+    },
   });
 }
 
