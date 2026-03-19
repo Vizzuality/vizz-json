@@ -1,4 +1,5 @@
-import { Map, useControl, type MapRef } from "react-map-gl/maplibre";
+import { Map, useControl  } from "react-map-gl/maplibre";
+import type {MapRef} from "react-map-gl/maplibre";
 import { MapboxOverlay } from "@deck.gl/mapbox";
 import type { MapboxOverlayProps } from "@deck.gl/mapbox";
 import { useEffect, useRef, useCallback } from "react";
