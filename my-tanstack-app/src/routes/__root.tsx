@@ -2,6 +2,7 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
+  useRouterState,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
@@ -43,7 +44,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'JSON with Superpowers',
       },
     ],
     links: [
@@ -57,6 +58,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const location = useRouterState({ select: (s) => s.location })
+  const isPlayground = location.pathname === '/playground'
+
   return (
     <html lang={getLocale()} suppressHydrationWarning>
       <head>
@@ -65,9 +69,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
         <TanStackQueryProvider>
-          <Header />
+          {!isPlayground && <Header />}
           {children}
-          <Footer />
+          {!isPlayground && <Footer />}
           <TanStackDevtools
             config={{
               position: 'bottom-right',
