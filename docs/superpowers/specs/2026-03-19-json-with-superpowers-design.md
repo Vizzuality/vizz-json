@@ -44,10 +44,10 @@ Example:
 {
   "@@type": "GradientLegend",
   "title": "Population Density",
-  "colorLow": "@@#params.colorLow",
-  "colorHigh": "@@#params.colorHigh",
-  "min": "@@#params.stopLow",
-  "max": "@@#params.stopHigh"
+  "color_low": "@@#params.color_low",
+  "color_high": "@@#params.color_high",
+  "min": "@@#params.stop_low",
+  "max": "@@#params.stop_high"
 }
 ```
 
@@ -162,24 +162,24 @@ Simple raster layer demonstrating `@@#params` basics.
 
 #### Example 2: Vector — Simple Fill
 Vector fill layer with parameterized color and opacity.
-- **params_config:** fillColor (picker), outlineColor (picker), opacity (slider)
-- **legend_config:** `{ type: "basic", items: [{ label: "Countries", value: "@@#params.fillColor" }] }`
-- **@@ features:** `@@#params.fillColor`, `@@#params.opacity`, `@@#params.outlineColor`
+- **params_config:** fill_color (picker), outline_color (picker), opacity (slider)
+- **legend_config:** `{ type: "basic", items: [{ label: "Countries", value: "@@#params.fill_color" }] }`
+- **@@ features:** `@@#params.fill_color`, `@@#params.opacity`, `@@#params.outline_color`
 - **Data:** Natural Earth countries
 
 ### Tier 2: Intermediate — MapLibre Expressions + Params
 
 #### Example 3: Choropleth — `match` Expression
 Country polygons colored by category using `match`. Each category color is parameterized.
-- **params_config:** forestColor, waterColor, urbanColor, defaultColor (all pickers)
-- **legend_config:** `{ type: "choropleth", items: [{ label: "Forest", value: "@@#params.forestColor" }, { label: "Water", value: "@@#params.waterColor" }, ...] }`
+- **params_config:** forest_color, water_color, urban_color, default_color (all pickers)
+- **legend_config:** `{ type: "choropleth", items: [{ label: "Forest", value: "@@#params.forest_color" }, { label: "Water", value: "@@#params.water_color" }, ...] }`
 - **Expressions:** `match`, `get`
 - **Data:** Natural Earth with land cover categories
 
 #### Example 4: Graduated — `interpolate` Expression
 Continuous color ramp based on a numeric property. Breakpoint stops and colors are parameterized.
-- **params_config:** stopLow/stopMid/stopHigh (sliders), colorLow/colorMid/colorHigh (pickers)
-- **legend_config:** `{ type: "gradient", items: [{ label: "@@#params.stopLow", value: "@@#params.colorLow" }, { label: "@@#params.stopHigh", value: "@@#params.colorHigh" }] }`
+- **params_config:** stop_low/stop_mid/stop_high (sliders), color_low/color_mid/color_high (pickers)
+- **legend_config:** `{ type: "gradient", items: [{ label: "@@#params.stop_low", value: "@@#params.color_low" }, { label: "@@#params.stop_high", value: "@@#params.color_high" }] }`
 - **Expressions:** `interpolate` (linear), `get`
 - **Data:** Country polygons with population data
 
@@ -192,7 +192,7 @@ Discrete color classes with parameterized thresholds.
 
 #### Example 6: Data-Driven Circles — Zoom + Property
 Circle radius scales with both zoom level and a data property using nested `interpolate`.
-- **params_config:** scaleLow (slider), scaleHigh (slider), color (picker)
+- **params_config:** scale_low (slider), scale_high (slider), color (picker)
 - **legend_config:** `{ type: "gradient", items: [{ label: "Small", value: "@@#params.color" }, { label: "Large", value: "@@#params.color" }] }`
 - **Expressions:** `interpolate` (linear), `get`, `zoom`, `*` (math)
 - **Data:** Cities with population
@@ -208,23 +208,23 @@ TiTiler raster with `@@function` to build tile URLs from parameterized colormap 
 
 #### Example 8: deck.gl — ScatterplotLayer
 Full deck.gl layer using `@@type` for class instantiation and `@@=` for accessor expressions.
-- **params_config:** dataUrl (text), scale (slider), pointColor (picker), opacity (slider)
-- **legend_config:** `{ type: "basic", items: [{ label: "Points", value: "@@#params.pointColor" }] }`
+- **params_config:** data_url (text), scale (slider), point_color (picker), opacity (slider)
+- **legend_config:** `{ type: "basic", items: [{ label: "Points", value: "@@#params.point_color" }] }`
 - **@@ features:** `@@type`, `@@=`, `@@#params`
 - **Data:** Public earthquake/city dataset
 
 #### Example 9: Conditional Styling — `case` + `@@function`
 Multi-layer config with conditional logic combining MapLibre `case` expression and `@@function`.
-- **params_config:** threshold (slider), aboveColor/belowColor (pickers), showLabels (toggle)
-- **legend_config:** `{ type: "choropleth", items: [{ label: "Above threshold", value: "@@#params.aboveColor" }, { label: "Below threshold", value: "@@#params.belowColor" }] }`
+- **params_config:** threshold (slider), above_color/below_color (pickers), show_labels (toggle)
+- **legend_config:** `{ type: "choropleth", items: [{ label: "Above threshold", value: "@@#params.above_color" }, { label: "Below threshold", value: "@@#params.below_color" }] }`
 - **Expressions:** `case`, `get`, `>` (comparison)
 - **@@ features:** `@@function` (ifParam), `@@#params`
 - **Data:** Country polygons with numeric indicator
 
 #### Example 10: React Components — `@@type` with Legend & UI
 Demonstrates `@@type` resolving to registered React components (built with shadcn/ui). A map layer with a parameterized `GradientLegend` component rendered from JSON config. Shows how complex UI that is hard to express in pure JSON can be defined declaratively.
-- **params_config:** colorLow/colorHigh (pickers), stopLow/stopHigh (sliders), legendTitle (text), showLegend (toggle)
-- **legend_config:** `{ type: "gradient", items: [{ label: "@@#params.stopLow", value: "@@#params.colorLow" }, { label: "@@#params.stopHigh", value: "@@#params.colorHigh" }] }`
+- **params_config:** color_low/color_high (pickers), stop_low/stop_high (sliders), legend_title (text), show_legend (toggle)
+- **legend_config:** `{ type: "gradient", items: [{ label: "@@#params.stop_low", value: "@@#params.color_low" }, { label: "@@#params.stop_high", value: "@@#params.color_high" }] }`
 - **@@ features:** `@@type` (React component), `@@#params`
 - **Data:** Same as Example 4 (graduated) but with legend overlay
 
