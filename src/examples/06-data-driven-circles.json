@@ -1,52 +1,161 @@
 {
   "metadata": {
-    "title": "Data-Driven Circles — zoom + property",
-    "description": "Circle radius scales with zoom level and population using nested interpolate expressions",
+    "title": "Data-Driven Circles — heatmap crossfade",
+    "description": "Heatmap at low zoom crossfades to magnitude-scaled circles — transition range is fully controllable",
     "tier": "intermediate"
   },
   "config": {
     "source": {
       "type": "geojson",
-      "data": "https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson"
+      "data": "https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson"
     },
     "styles": [
+      {
+        "type": "heatmap",
+        "paint": {
+          "heatmap-weight": [
+            "interpolate",
+            ["linear"],
+            ["get", "mag"],
+            0,
+            0,
+            6,
+            1
+          ],
+          "heatmap-intensity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            0,
+            1,
+            9,
+            3
+          ],
+          "heatmap-color": [
+            "interpolate",
+            ["linear"],
+            ["heatmap-density"],
+            0,
+            "rgba(0, 0, 0, 0)",
+            0.2,
+            "#2c7bb6",
+            0.4,
+            "#abd9e9",
+            0.6,
+            "#ffffbf",
+            0.8,
+            "#fdae61",
+            1.0,
+            "#d7191c"
+          ],
+          "heatmap-radius": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            0,
+            2,
+            9,
+            20
+          ],
+          "heatmap-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            "@@#params.transition_start",
+            1,
+            "@@#params.transition_end",
+            0
+          ]
+        }
+      },
       {
         "type": "circle",
         "paint": {
           "circle-radius": [
             "interpolate",
             ["linear"],
-            ["zoom"],
-            2,
-            ["*", ["get", "pop_est"], "@@#params.scale_low"],
-            8,
-            ["*", ["get", "pop_est"], "@@#params.scale_high"]
+            ["get", "mag"],
+            1,
+            ["*", 2, "@@#params.circle_scale"],
+            3,
+            ["*", 4, "@@#params.circle_scale"],
+            5,
+            ["*", 8, "@@#params.circle_scale"],
+            7,
+            ["*", 14, "@@#params.circle_scale"]
           ],
-          "circle-color": "@@#params.color",
-          "circle-opacity": "@@#params.opacity"
-        },
-        "layout": {
-          "visibility": "@@#params.visibility"
+          "circle-color": [
+            "interpolate",
+            ["linear"],
+            ["get", "mag"],
+            1,
+            "#2c7bb6",
+            3,
+            "#abd9e9",
+            5,
+            "#fdae61",
+            7,
+            "#d7191c"
+          ],
+          "circle-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            "@@#params.transition_start",
+            0,
+            "@@#params.transition_end",
+            "@@#params.opacity"
+          ],
+          "circle-stroke-width": 1,
+          "circle-stroke-opacity": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            "@@#params.transition_start",
+            0,
+            "@@#params.transition_end",
+            1
+          ],
+          "circle-stroke-color": "#ffffff"
         }
       }
     ]
   },
   "params_config": [
-    { "key": "scale_low", "default": 0.000001 },
-    { "key": "scale_high", "default": 0.00001 },
-    { "key": "color", "default": "#3b82f6", "group": "legend" },
-    { "key": "opacity", "default": 0.7, "min": 0, "max": 1, "step": 0.05 },
     {
-      "key": "visibility",
-      "default": "visible",
-      "options": ["visible", "none"]
+      "key": "transition_start",
+      "default": 5,
+      "min": 0,
+      "max": 14,
+      "step": 1
+    },
+    {
+      "key": "transition_end",
+      "default": 7,
+      "min": 2,
+      "max": 16,
+      "step": 1
+    },
+    {
+      "key": "circle_scale",
+      "default": 1,
+      "min": 0.5,
+      "max": 3,
+      "step": 0.1
+    },
+    {
+      "key": "opacity",
+      "default": 0.8,
+      "min": 0,
+      "max": 1,
+      "step": 0.05
     }
   ],
   "legend_config": {
     "type": "gradient",
     "items": [
-      { "label": "Small population", "value": "@@#params.color" },
-      { "label": "Large population", "value": "@@#params.color" }
+      { "label": "Low magnitude", "value": "#2c7bb6" },
+      { "label": "High magnitude", "value": "#d7191c" }
     ]
   }
 }
