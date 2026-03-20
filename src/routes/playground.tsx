@@ -19,6 +19,7 @@ import type {
   ResolvedParams,
   InferredParam,
 } from '#/lib/types'
+import type { RawLegendConfig } from '#/lib/legend-param-mapping'
 
 export const Route = createFileRoute('/playground')({
   component: PlaygroundPage,
@@ -102,6 +103,18 @@ function PlaygroundPage() {
     }
   }, [debouncedJson, paramValues])
 
+  // Extract raw legend_config BEFORE resolution (for param key mapping)
+  const rawLegendConfig = useMemo<RawLegendConfig | null>(() => {
+    try {
+      const parsed = JSON.parse(debouncedJson) as {
+        legend_config?: LegendConfig
+      }
+      return parsed.legend_config ?? null
+    } catch {
+      return null
+    }
+  }, [debouncedJson])
+
   // -------------------------------------------------------------------------
   // Toggle resolved view
   // -------------------------------------------------------------------------
@@ -144,6 +157,7 @@ function PlaygroundPage() {
           metadata={currentMetadata}
           paramsConfig={currentInferredParams}
           legendConfig={resolvedLegendConfig}
+          rawLegendConfig={rawLegendConfig}
           values={paramValues}
           onChange={handleParamChange}
         />
