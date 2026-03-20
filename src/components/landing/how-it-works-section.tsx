@@ -49,7 +49,7 @@ function AnimatedParticle({
   readonly color: string
 }) {
   return (
-    <circle r="3" fill={color} filter="url(#particle-glow)">
+    <circle r="2" fill={color} filter="url(#particle-glow)">
       <animateMotion
         dur={`${duration}s`}
         begin={`${delay}s`}
@@ -149,13 +149,6 @@ function HubDiagram() {
         </filter>
       </defs>
 
-      {/* Radial glow behind hub */}
-      <circle
-        cx={HUB.x + HUB.width / 2}
-        cy={HUB.y + HUB.height / 2}
-        r={130}
-        fill="url(#hub-glow)"
-      />
 
       {/* Input paths + particles */}
       {INPUTS.map((input, i) => {
@@ -225,7 +218,6 @@ function HubDiagram() {
         fill="#14532d"
         stroke="#22c55e"
         strokeWidth={2}
-        filter="url(#particle-glow)"
       />
       <text
         x={HUB.x + HUB.width / 2}
