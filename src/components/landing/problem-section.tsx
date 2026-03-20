@@ -21,7 +21,7 @@ const PAIN_POINTS = [
 
 export function ProblemSection() {
   return (
-    <section className="w-full landing-bg-muted py-20">
+    <section className="w-full py-20">
       <div className="mx-auto max-w-5xl px-6">
         <Badge variant="secondary" className="mb-3">
           The Problem

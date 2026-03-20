@@ -36,7 +36,7 @@ const PREFIXES = [
 
 export function PrefixFamilySection() {
   return (
-    <section className="w-full landing-bg py-20">
+    <section className="w-full py-20">
       <div className="mx-auto max-w-5xl px-6">
         <Badge variant="secondary" className="mb-3">
           The @@ Prefix Family

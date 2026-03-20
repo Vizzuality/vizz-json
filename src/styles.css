@@ -154,60 +154,58 @@ pre code {
   }
 }
 
-/* Landing section gradient backgrounds — Floating Orbs */
-.landing-bg {
-  background:
-    radial-gradient(
-      circle 300px at 20% 30%,
-      oklch(0.897 0.196 126.665 / 18%) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      circle 250px at 80% 70%,
-      oklch(0.768 0.233 130.85 / 12%) 0%,
-      transparent 70%
-    ),
-    var(--background);
+/* Landing page continuous background — Floating Orbs */
+.landing-page-bg {
+  position: relative;
+  background: var(--background);
 }
-.landing-bg-muted {
+
+/* Orbs layer: above separators, below section content */
+.landing-page-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
   background:
-    radial-gradient(
-      circle 280px at 75% 20%,
-      oklch(0.648 0.2 131.684 / 14%) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      circle 220px at 15% 80%,
-      oklch(0.532 0.157 131.589 / 10%) 0%,
-      transparent 70%
-    ),
-    var(--muted);
+    radial-gradient(circle 300px at 20% 6%, oklch(0.897 0.196 126.665 / 18%) 0%, transparent 70%),
+    radial-gradient(circle 250px at 80% 12%, oklch(0.768 0.233 130.85 / 12%) 0%, transparent 70%),
+    radial-gradient(circle 280px at 75% 26%, oklch(0.648 0.2 131.684 / 14%) 0%, transparent 70%),
+    radial-gradient(circle 220px at 15% 34%, oklch(0.532 0.157 131.589 / 10%) 0%, transparent 70%),
+    radial-gradient(circle 300px at 25% 48%, oklch(0.897 0.196 126.665 / 16%) 0%, transparent 70%),
+    radial-gradient(circle 250px at 85% 54%, oklch(0.768 0.233 130.85 / 11%) 0%, transparent 70%),
+    radial-gradient(circle 280px at 70% 68%, oklch(0.648 0.2 131.684 / 14%) 0%, transparent 70%),
+    radial-gradient(circle 220px at 10% 76%, oklch(0.532 0.157 131.589 / 10%) 0%, transparent 70%),
+    radial-gradient(circle 300px at 20% 88%, oklch(0.897 0.196 126.665 / 16%) 0%, transparent 70%),
+    radial-gradient(circle 250px at 80% 94%, oklch(0.768 0.233 130.85 / 12%) 0%, transparent 70%);
 }
-.dark .landing-bg {
+
+.dark .landing-page-bg::after {
   background:
-    radial-gradient(
-      circle 300px at 20% 30%,
-      oklch(0.453 0.124 130.933 / 25%) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      circle 250px at 80% 70%,
-      oklch(0.532 0.157 131.589 / 18%) 0%,
-      transparent 70%
-    ),
-    var(--background);
+    radial-gradient(circle 300px at 20% 6%, oklch(0.453 0.124 130.933 / 25%) 0%, transparent 70%),
+    radial-gradient(circle 250px at 80% 12%, oklch(0.532 0.157 131.589 / 18%) 0%, transparent 70%),
+    radial-gradient(circle 280px at 75% 26%, oklch(0.648 0.2 131.684 / 16%) 0%, transparent 70%),
+    radial-gradient(circle 220px at 15% 34%, oklch(0.453 0.124 130.933 / 12%) 0%, transparent 70%),
+    radial-gradient(circle 300px at 25% 48%, oklch(0.453 0.124 130.933 / 22%) 0%, transparent 70%),
+    radial-gradient(circle 250px at 85% 54%, oklch(0.532 0.157 131.589 / 16%) 0%, transparent 70%),
+    radial-gradient(circle 280px at 70% 68%, oklch(0.648 0.2 131.684 / 15%) 0%, transparent 70%),
+    radial-gradient(circle 220px at 10% 76%, oklch(0.453 0.124 130.933 / 12%) 0%, transparent 70%),
+    radial-gradient(circle 300px at 20% 88%, oklch(0.453 0.124 130.933 / 22%) 0%, transparent 70%),
+    radial-gradient(circle 250px at 80% 94%, oklch(0.532 0.157 131.589 / 16%) 0%, transparent 70%);
 }
-.dark .landing-bg-muted {
-  background:
-    radial-gradient(
-      circle 280px at 75% 20%,
-      oklch(0.648 0.2 131.684 / 16%) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      circle 220px at 15% 80%,
-      oklch(0.453 0.124 130.933 / 12%) 0%,
-      transparent 70%
-    ),
-    var(--muted);
+
+/* Sections sit above the orbs layer */
+.landing-page-bg > section {
+  position: relative;
+  z-index: 2;
+}
+
+/* Subtle separator between landing sections — below orbs */
+.landing-separator {
+  height: 1px;
+  background: radial-gradient(
+    ellipse 50% 100% at 50% 50%,
+    var(--border) 0%,
+    transparent 100%
+  );
 }

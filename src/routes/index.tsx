@@ -10,11 +10,15 @@ export const Route = createFileRoute('/')({
 
 function LandingPage() {
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen landing-page-bg">
       <HeroSection />
+      <div className="landing-separator" />
       <ProblemSection />
+      <div className="landing-separator" />
       <PrefixFamilySection />
+      <div className="landing-separator" />
       <HowItWorksSection />
+      <div className="landing-separator" />
       <ShowcaseSection />
     </main>
   )
