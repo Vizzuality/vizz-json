@@ -35,6 +35,12 @@
   --chart-3: oklch(0.648 0.2 131.684);
   --chart-4: oklch(0.532 0.157 131.589);
   --chart-5: oklch(0.453 0.124 130.933);
+  --diagram-node-bg: oklch(0.96 0.003 325.6);
+  --diagram-node-border: oklch(0.85 0.05 145);
+  --diagram-hub: oklch(0.95 0.04 145);
+  --diagram-stroke: oklch(0.4 0.14 145);
+  --diagram-input: oklch(0.35 0.12 145);
+  --diagram-output: oklch(0.4 0.14 145);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0.008 326);
@@ -89,6 +95,12 @@ pre code {
   --chart-3: oklch(0.648 0.2 131.684);
   --chart-4: oklch(0.532 0.157 131.589);
   --chart-5: oklch(0.453 0.124 130.933);
+  --diagram-node-bg: #111;
+  --diagram-node-border: #1a3a1a;
+  --diagram-hub: #14532d;
+  --diagram-stroke: #22c55e;
+  --diagram-input: #4ade80;
+  --diagram-output: #86efac;
   --sidebar: oklch(0.212 0.019 322.12);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.768 0.233 130.85);
