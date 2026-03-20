@@ -8,7 +8,7 @@ export function CtaSection() {
       <div className="mx-auto flex max-w-5xl flex-col items-center px-6 text-center">
         <Link
           to="/playground"
-          className={cn(buttonVariants({ size: 'lg' }), 'no-underline')}
+          className={cn(buttonVariants({ size: 'xl' }), 'no-underline')}
         >
           Open the Playground
         </Link>

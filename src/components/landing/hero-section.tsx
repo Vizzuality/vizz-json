@@ -163,7 +163,7 @@ export function HeroSection() {
         </p>
         <Link
           to="/playground"
-          className={cn(buttonVariants({ size: 'lg' }), 'no-underline')}
+          className={cn(buttonVariants({ size: 'xl' }), 'no-underline')}
         >
           Try the Playground
         </Link>
