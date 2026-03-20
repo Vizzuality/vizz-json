@@ -17,23 +17,30 @@
             "interpolate",
             ["linear"],
             ["get", "pop_est"],
-            "@@#params.stop_low", "@@#params.color_low",
-            "@@#params.stop_mid", "@@#params.color_mid",
-            "@@#params.stop_high", "@@#params.color_high"
+            "@@#params.stop_low",
+            "@@#params.color_low",
+            "@@#params.stop_mid",
+            "@@#params.color_mid",
+            "@@#params.stop_high",
+            "@@#params.color_high"
           ],
           "fill-opacity": "@@#params.opacity"
+        },
+        "layout": {
+          "visibility": "@@#params.visibility"
         }
       }
     ]
   },
   "params_config": [
-    { "key": "stop_low", "default": 0 },
-    { "key": "stop_mid", "default": 50000000 },
-    { "key": "stop_high", "default": 500000000 },
-    { "key": "color_low", "default": "#eff6ff" },
-    { "key": "color_mid", "default": "#3b82f6" },
-    { "key": "color_high", "default": "#1e3a8a" },
-    { "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 }
+    { "key": "stop_low", "default": 0, "min": 0, "max": 500000000, "step": 1000000, "group": "legend" },
+    { "key": "stop_mid", "default": 50000000, "min": 0, "max": 1000000000, "step": 1000000, "group": "legend" },
+    { "key": "stop_high", "default": 500000000, "min": 0, "max": 2000000000, "step": 10000000, "group": "legend" },
+    { "key": "color_low", "default": "#eff6ff", "group": "legend" },
+    { "key": "color_mid", "default": "#3b82f6", "group": "legend" },
+    { "key": "color_high", "default": "#1e3a8a", "group": "legend" },
+    { "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 },
+    { "key": "visibility", "default": "visible", "options": ["visible", "none"] }
   ],
   "legend_config": {
     "type": "gradient",

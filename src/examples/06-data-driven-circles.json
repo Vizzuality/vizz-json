@@ -17,11 +17,16 @@
             "interpolate",
             ["linear"],
             ["zoom"],
-            2, ["*", ["get", "pop_est"], "@@#params.scale_low"],
-            8, ["*", ["get", "pop_est"], "@@#params.scale_high"]
+            2,
+            ["*", ["get", "pop_est"], "@@#params.scale_low"],
+            8,
+            ["*", ["get", "pop_est"], "@@#params.scale_high"]
           ],
           "circle-color": "@@#params.color",
           "circle-opacity": "@@#params.opacity"
+        },
+        "layout": {
+          "visibility": "@@#params.visibility"
         }
       }
     ]
@@ -29,8 +34,9 @@
   "params_config": [
     { "key": "scale_low", "default": 0.000001 },
     { "key": "scale_high", "default": 0.00001 },
-    { "key": "color", "default": "#3b82f6" },
-    { "key": "opacity", "default": 0.7, "min": 0, "max": 1, "step": 0.05 }
+    { "key": "color", "default": "#3b82f6", "group": "legend" },
+    { "key": "opacity", "default": 0.7, "min": 0, "max": 1, "step": 0.05 },
+    { "key": "visibility", "default": "visible", "options": ["visible", "none"] }
   ],
   "legend_config": {
     "type": "gradient",

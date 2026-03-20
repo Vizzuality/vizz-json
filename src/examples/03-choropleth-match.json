@@ -16,32 +16,44 @@
           "fill-color": [
             "match",
             ["get", "income_grp"],
-            "1. High income: OECD", "@@#params.high_oecd_color",
-            "2. High income: nonOECD", "@@#params.high_non_oecd_color",
-            "3. Upper middle income", "@@#params.upper_middle_color",
-            "4. Lower middle income", "@@#params.lower_middle_color",
-            "5. Low income", "@@#params.low_income_color",
+            "1. High income: OECD",
+            "@@#params.high_oecd_color",
+            "2. High income: nonOECD",
+            "@@#params.high_non_oecd_color",
+            "3. Upper middle income",
+            "@@#params.upper_middle_color",
+            "4. Lower middle income",
+            "@@#params.lower_middle_color",
+            "5. Low income",
+            "@@#params.low_income_color",
             "@@#params.default_color"
           ],
           "fill-opacity": "@@#params.opacity"
+        },
+        "layout": {
+          "visibility": "@@#params.visibility"
         }
       }
     ]
   },
   "params_config": [
-    { "key": "high_oecd_color", "default": "#2563eb" },
-    { "key": "high_non_oecd_color", "default": "#60a5fa" },
-    { "key": "upper_middle_color", "default": "#fbbf24" },
-    { "key": "lower_middle_color", "default": "#f97316" },
-    { "key": "low_income_color", "default": "#dc2626" },
-    { "key": "default_color", "default": "#6b7280" },
-    { "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 }
+    { "key": "high_oecd_color", "default": "#2563eb", "group": "legend" },
+    { "key": "high_non_oecd_color", "default": "#60a5fa", "group": "legend" },
+    { "key": "upper_middle_color", "default": "#fbbf24", "group": "legend" },
+    { "key": "lower_middle_color", "default": "#f97316", "group": "legend" },
+    { "key": "low_income_color", "default": "#dc2626", "group": "legend" },
+    { "key": "default_color", "default": "#6b7280", "group": "legend" },
+    { "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 },
+    { "key": "visibility", "default": "visible", "options": ["visible", "none"] }
   ],
   "legend_config": {
     "type": "choropleth",
     "items": [
       { "label": "High income: OECD", "value": "@@#params.high_oecd_color" },
-      { "label": "High income: non-OECD", "value": "@@#params.high_non_oecd_color" },
+      {
+        "label": "High income: non-OECD",
+        "value": "@@#params.high_non_oecd_color"
+      },
       { "label": "Upper middle", "value": "@@#params.upper_middle_color" },
       { "label": "Lower middle", "value": "@@#params.lower_middle_color" },
       { "label": "Low income", "value": "@@#params.low_income_color" }
