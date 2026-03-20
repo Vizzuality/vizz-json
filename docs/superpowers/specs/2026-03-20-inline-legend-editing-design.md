@@ -23,12 +23,17 @@ type ItemParamMapping = {
   readonly labelParamKey?: string
 }
 
+/** Raw legend config before @@#params resolution — items may contain param references as string values */
+type RawLegendConfig = LegendConfig
+
 function extractLegendParamKeys(
-  rawLegendConfig: LegendConfig | null,
+  rawLegendConfig: RawLegendConfig | null,
 ): ReadonlyMap<number, ItemParamMapping>
 ```
 
 Logic: iterate `rawLegendConfig.items`, check if `value` or `label` is a string matching `@@#params.<key>` pattern, extract the key. Returns a map from item index to its param keys.
+
+**Intentional simplification:** This only checks direct string references on the `value` and `label` fields of each `LegendItem`. The current `LegendItem` type constrains both fields to `string | number`, so nested/array patterns are not possible. If the type evolves to allow nested structures, this function would need to be updated.
 
 A second helper computes orphan params — legend params not referenced by any item:
 
@@ -64,7 +69,7 @@ When `paramMapping` is provided, the component enters edit mode.
 - Clicking a row opens a `Popover` anchored to that row containing:
   - Color picker (HTML5 `<input type="color">`) for the `valueParamKey`, if present
   - Text input for the `labelParamKey`, if present
-  - If this is the last row and orphan params exist, they appear below a separator labeled "Additional"
+  - Orphan params do NOT appear inside row popovers (see below)
 - Changes apply immediately via `onChange` (no save/cancel)
 - Popover closes on click outside or Escape
 
@@ -75,6 +80,12 @@ When `paramMapping` is provided, the component enters edit mode.
   - Orphan params (e.g., `color_mid`, numeric stop values) appear below a separator labeled "Additional", rendered using `ParamControl`
 - Changes apply immediately via `onChange`
 
+**Orphan params (all legend types):**
+
+Orphan params (legend-group params not referenced by any item, e.g., `default_color` in example 03, `color_mid` in example 04) render in a dedicated section **below the legend component** inside the `LegendCard` container — not inside any item's popover. This avoids confusing UX where unrelated controls appear inside a specific item's popover. Each orphan param renders using `ParamControl` with its label, separated from the legend by a thin divider.
+
+This is a V1 simplification. In the gradient case, orphan params like `color_mid` are arguably integral to the gradient and could be promoted into the gradient popover in a future iteration.
+
 When `paramMapping` is not provided, components behave exactly as today — read-only, no hover effects, no popovers.
 
 ### LegendCard Changes
@@ -84,7 +95,7 @@ New props shape:
 ```typescript
 type LegendCardProps = {
   readonly legendConfig: LegendConfig | null
-  readonly rawLegendConfig: LegendConfig | null
+  readonly rawLegendConfig: RawLegendConfig | null
   readonly legendParams: readonly InferredParam[]
   readonly values: Record<string, unknown>
   readonly onChange: (key: string, value: unknown) => void
@@ -99,21 +110,24 @@ LegendCard:
 
 ### Plumbing the Raw Config
 
-`PlaygroundLayout` holds the parsed raw JSON before resolution. It extracts `rawLegendConfig` from the raw JSON's `legend_config` field and passes it through `ParamsPanel` → `LegendCard`.
+`PlaygroundPage` (the route component at `src/routes/playground.tsx`) already parses the raw JSON in a `useMemo` that extracts `legend_config` for resolution. A similar `useMemo` extracts the raw `legend_config` **before** resolution and passes it as `rawLegendConfig` through `ParamsPanel` → `LegendCard`.
+
+`PlaygroundLayout` is a pure layout shell (slots only) and does not change.
 
 No changes to the resolution pipeline — this is an additional read-only value threaded alongside the existing resolved config.
 
-### Export ColorPickerControl
+### Color Picker Inside Popovers
 
-`ColorPickerControl` in `param-control.tsx` is currently not exported. It needs to be exported so legend components can use it inline within popovers. Alternatively, legend components can use the raw HTML5 `<input type="color">` directly (simpler, fewer cross-file dependencies). The implementation should prefer whichever keeps the legend components lighter.
+Legend row popovers already live inside a `Popover`. The existing `ColorPickerControl` in `param-control.tsx` itself wraps a `Popover`, which would create nested popovers. Instead, legend popovers should use a raw HTML5 `<input type="color">` directly for color editing. This is simpler, avoids nested-popover complexity, and keeps the legend components lighter.
 
 ### Popover UX
 
 - **Trigger:** Click anywhere on row (basic/choropleth) or gradient area
 - **Affordance:** Subtle hover highlight (`bg-muted/50`), `cursor-pointer`
-- **Content:** Color picker + text input for the item's params; orphan params via `ParamControl` below a separator
+- **Content:** Inline `<input type="color">` + text input for the item's params (no nested popovers)
 - **Behavior:** Opens on click, closes on click outside or Escape. Changes apply immediately.
-- **Accessibility:** Rows focusable with `tabIndex={0}`, Enter/Space triggers popover
+- **Accessibility:** Rows focusable with `tabIndex={0}`, Enter/Space triggers popover. V1 relies on browser default tab order within popovers; arrow key navigation between rows is out of scope.
+- **Popover width:** Matches the legend card width for visual consistency (`w-full` relative to trigger)
 
 ## Edge Cases
 
@@ -136,7 +150,7 @@ No changes to the resolution pipeline — this is an additional read-only value 
 | `src/components/legends/gradient-legend.tsx` | Add optional edit props, hover highlight, single popover |
 | `src/components/playground/legend-card.tsx` | Add `rawLegendConfig` prop, compute mapping, remove flat control list |
 | `src/components/playground/params-panel.tsx` | Thread `rawLegendConfig` to `LegendCard` |
-| `src/components/playground/playground-layout.tsx` | Extract and pass `rawLegendConfig` from raw JSON |
+| `src/routes/playground.tsx` | Extract `rawLegendConfig` from raw JSON, pass through `ParamsPanel` |
 | `tests/lib/legend-param-mapping.test.ts` | **New** — Tests for extraction utility |
 
 ## Out of Scope
