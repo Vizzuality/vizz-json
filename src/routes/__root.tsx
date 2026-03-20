@@ -1,5 +1,6 @@
 import {
   HeadContent,
+  Link,
   Scripts,
   createRootRouteWithContext,
   useRouterState,
@@ -14,6 +15,8 @@ import TanStackQueryProvider from '../integrations/tanstack-query/root-provider'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 
 import { getLocale } from '#/paraglide/runtime'
+import { m } from '#/paraglide/messages'
+import { buttonVariants } from '#/components/ui/button'
 
 import appCss from '../styles.css?url'
 
@@ -54,8 +57,24 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
+  notFoundComponent: NotFound,
   shellComponent: RootDocument,
 })
+
+function NotFound() {
+  return (
+    <main className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-6 text-center">
+      <span className="font-mono text-6xl text-muted-foreground">404</span>
+      <h1 className="text-2xl font-semibold">{m.not_found_title()}</h1>
+      <p className="max-w-md text-muted-foreground">
+        {m.not_found_description()}
+      </p>
+      <Link to="/" className={buttonVariants({ variant: 'default' })}>
+        {m.not_found_go_home()}
+      </Link>
+    </main>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const location = useRouterState({ select: (s) => s.location })

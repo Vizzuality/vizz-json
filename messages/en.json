@@ -5,5 +5,8 @@
   "example_message": "Welcome to your i18n app.",
   "language_label": "Language",
   "current_locale": "Current locale: {locale}",
-  "learn_router": "Learn Paraglide JS"
+  "learn_router": "Learn Paraglide JS",
+  "not_found_title": "Page not found",
+  "not_found_description": "The page you're looking for doesn't exist or has been moved.",
+  "not_found_go_home": "Go home"
 }
