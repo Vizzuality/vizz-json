@@ -1,109 +1,77 @@
-import { Map, useControl  } from "react-map-gl/maplibre";
-import type {MapRef} from "react-map-gl/maplibre";
-import { MapboxOverlay } from "@deck.gl/mapbox";
-import type { MapboxOverlayProps } from "@deck.gl/mapbox";
-import { useEffect, useRef, useCallback } from "react";
-import { LegendPanel } from "./legend-panel";
-import type { LegendConfig } from "#/lib/types";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { useMemo } from 'react'
+import {
+  Map,
+  Source,
+  Layer,
+  useControl,
+} from 'react-map-gl/maplibre'
+import type { SourceProps, LayerProps } from 'react-map-gl/maplibre'
+import { MapboxOverlay } from '@deck.gl/mapbox'
+import type { MapboxOverlayProps } from '@deck.gl/mapbox'
+import { LegendPanel } from './legend-panel'
+import type { LegendConfig } from '#/lib/types'
+import 'maplibre-gl/dist/maplibre-gl.css'
 
-const SOURCE_ID = "playground-source";
-const BASEMAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
-const INITIAL_VIEW = { longitude: 0, latitude: 20, zoom: 2 };
+const SOURCE_ID = 'playground-source'
+const BASEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
+const INITIAL_VIEW = { longitude: 0, latitude: 20, zoom: 2 }
+
+/**
+ * Derive a stable key that changes only when the source identity changes
+ * (type, url, tiles) — forcing React to remount the Source component.
+ */
+function useSourceKey(source: SourceProps | undefined): string {
+  return useMemo(() => {
+    if (!source) return ''
+    const s = source as Record<string, unknown>
+    return [s.type, s.url, s.tiles, s.data ? 'data' : '']
+      .filter(Boolean)
+      .join('|')
+  }, [source])
+}
 
 function DeckGlOverlay(props: MapboxOverlayProps) {
   const overlay = useControl(
-    () => new MapboxOverlay({ ...props, interleaved: true })
-  );
-  overlay.setProps({ ...props, interleaved: true });
-  return null;
+    () => new MapboxOverlay({ ...props, interleaved: true }),
+  )
+  overlay.setProps({ ...props, interleaved: true })
+  return null
 }
 
 type MapRendererProps = {
-  readonly resolvedConfig: Record<string, unknown> | null;
-  readonly error: string | null;
-  readonly legendConfig: LegendConfig | null;
-};
+  readonly resolvedConfig: Record<string, unknown> | null
+  readonly error: string | null
+  readonly legendConfig: LegendConfig | null
+}
 
 export function MapRenderer({
   resolvedConfig,
   error,
   legendConfig,
 }: MapRendererProps) {
-  const mapRef = useRef<MapRef>(null);
-  const layerIdsRef = useRef<readonly string[]>([]);
-
-  const clearLayers = useCallback(() => {
-    const map = mapRef.current?.getMap();
-    if (!map) return;
-
-    const idsToRemove = [...layerIdsRef.current].reverse();
-    for (const id of idsToRemove) {
-      if (map.getLayer(id)) {
-        map.removeLayer(id);
-      }
-    }
-    layerIdsRef.current = [];
-
-    if (map.getSource(SOURCE_ID)) {
-      map.removeSource(SOURCE_ID);
-    }
-  }, []);
-
-  useEffect(() => {
-    const map = mapRef.current?.getMap();
-    if (!map || !resolvedConfig) return;
-
-    const source = resolvedConfig.source as
-      | Record<string, unknown>
-      | undefined;
-    const styles = resolvedConfig.styles as
-      | readonly Record<string, unknown>[]
-      | undefined;
-
-    if (!source || !styles) return;
-
-    const apply = () => {
-      clearLayers();
-      try {
-        map.addSource(SOURCE_ID, source as maplibregl.SourceSpecification);
-
-        const newLayerIds: string[] = [];
-        styles.forEach((style, i) => {
-          const layerId = `playground-layer-${i}`;
-          map.addLayer({
-            id: layerId,
-            source: SOURCE_ID,
-            ...style,
-          } as maplibregl.LayerSpecification);
-          newLayerIds.push(layerId);
-        });
-        layerIdsRef.current = newLayerIds;
-      } catch (err) {
-        console.error("Failed to apply layer config:", err);
-      }
-    };
-
-    if (map.isStyleLoaded()) {
-      apply();
-    } else {
-      map.once("styledata", apply);
-    }
-
-    return () => {
-      clearLayers();
-    };
-  }, [resolvedConfig, clearLayers]);
+  const source = resolvedConfig?.source as SourceProps | undefined
+  const styles = resolvedConfig?.styles as LayerProps[] | undefined
+  const sourceKey = useSourceKey(source)
 
   return (
     <div className="h-full w-full relative">
       <Map
-        ref={mapRef}
         initialViewState={INITIAL_VIEW}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: '100%', height: '100%' }}
         mapStyle={BASEMAP_STYLE}
       >
         <DeckGlOverlay layers={[]} />
+        {source && styles && (
+          <Source key={sourceKey} {...source} id={SOURCE_ID}>
+            {styles.map((style, i) => (
+              <Layer
+                {...style}
+                key={`${SOURCE_ID}-${i}`}
+                id={`${SOURCE_ID}-${i}`}
+              />
+            ))}
+          </Source>
+        )}
       </Map>
       <LegendPanel config={legendConfig} />
       {error && (
@@ -112,5 +80,5 @@ export function MapRenderer({
         </div>
       )}
     </div>
-  );
+  )
 }

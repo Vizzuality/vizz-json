@@ -11,7 +11,12 @@ import { nitro } from 'nitro/vite'
 
 const config = defineConfig({
   plugins: [
-    devtools(),
+    devtools({
+      injectSource: {
+        enabled: true,
+        ignore: { components: [/^Source$/, /^Layer$/] },
+      },
+    }),
     paraglideVitePlugin({
       project: './project.inlang',
       outdir: './src/paraglide',
