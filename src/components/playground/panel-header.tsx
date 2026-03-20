@@ -12,10 +12,10 @@ type PanelHeaderProps = {
   readonly onChange: (key: string, value: unknown) => void
 }
 
-const TIER_VARIANT = {
-  basic: 'secondary',
-  intermediate: 'outline',
-  advanced: 'default',
+const TIER_CLASSES = {
+  basic: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',
+  intermediate: 'bg-amber-500/15 text-amber-700 dark:text-amber-400',
+  advanced: 'bg-red-500/15 text-red-700 dark:text-red-400',
 } as const
 
 export function PanelHeader({
@@ -29,11 +29,11 @@ export function PanelHeader({
   const isVisible = visibilityValue === 'visible'
 
   return (
-    <div className="flex items-center gap-2 border-b px-3 py-2">
+    <div className="flex items-center gap-3 border-b px-4 py-3">
       {metadata && (
         <>
           <span className="truncate text-sm font-medium">{metadata.title}</span>
-          <Badge variant={TIER_VARIANT[metadata.tier]}>{metadata.tier}</Badge>
+          <Badge className={TIER_CLASSES[metadata.tier]}>{metadata.tier}</Badge>
         </>
       )}
       <div className="ml-auto flex items-center gap-3">
@@ -46,7 +46,7 @@ export function PanelHeader({
           />
         )}
         {opacityParam && (
-          <div className="flex items-center gap-2">
+          <div className="flex w-[180px] shrink-0 items-center gap-2">
             <Slider
               value={[typeof opacityValue === 'number' ? opacityValue : 1]}
               min={opacityParam.min ?? 0}
@@ -55,7 +55,7 @@ export function PanelHeader({
               onValueChange={(v) =>
                 onChange('opacity', Array.isArray(v) ? v[0] : v)
               }
-              className="w-[100px]"
+              className="flex-1"
             />
             <span className="w-8 shrink-0 text-right font-mono text-xs text-muted-foreground">
               {(typeof opacityValue === 'number' ? opacityValue : 1).toFixed(2)}
