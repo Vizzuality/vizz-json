@@ -8,6 +8,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 const SOURCE_ID = 'playground-source'
 const BASEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 const INITIAL_VIEW = { longitude: 0, latitude: 20, zoom: 2 }
+const BEFORE_LAYER_ID = 'waterway_line_label'
 
 /**
  * Derive a stable key from the source + style structure so React remounts
@@ -68,6 +69,7 @@ export function MapRenderer({ resolvedConfig, error }: MapRendererProps) {
                 {...style}
                 key={`${SOURCE_ID}-${i}`}
                 id={`${SOURCE_ID}-${i}`}
+                beforeId={BEFORE_LAYER_ID}
               />
             ))}
           </Source>

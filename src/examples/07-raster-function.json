@@ -10,7 +10,7 @@
       "tiles": [
         {
           "@@function": "setQueryParams",
-          "url": "https://s2downloads.eox.at/demo/Sentinel-2/3857/{z}/{x}/{y}.png",
+          "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg",
           "query": {
             "colormap": "@@#params.colormap",
             "rescale": "@@#params.rescale"
