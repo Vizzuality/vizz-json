@@ -40,7 +40,7 @@ A single row containing:
 - **Visibility**: rendered as a Switch toggle in the header, recognized by key `visibility` in `params_config`. MapLibre expects string values `"visible"/"none"`, so the Switch maps `checked=true` to `"visible"` and `checked=false` to `"none"` before writing to `paramValues`.
 - **Opacity**: compact slider (~120px) with value badge, recognized by key `opacity` in `params_config`
 
-Opacity and visibility remain in `params_config` in the JSON (the JSON config is the product). The panel recognizes them by key and renders them in the header instead of the grid. They still feed into `paramValues` identically.
+Opacity and visibility remain in `params_config` in the JSON (the JSON config is the product). The panel recognizes them by key and renders them in the header instead of the grid — **bypassing the standard inference pipeline**. They still feed into `paramValues` identically.
 
 **Header always renders** even if there are no params — it shows metadata (title + tier). If opacity/visibility are absent from `params_config`, their controls simply don't appear in the header.
 
@@ -108,7 +108,7 @@ type InferredParam = {
 
 No `"general"` value needed — absence of `group` means general. Only `"legend"` is explicit for now; more group values may be added if natural patterns emerge.
 
-**`legend_config` optionality:** `LayerSchema.legend_config` is currently required in the type. Since the playground already handles it as potentially absent (runtime safety for user-edited JSON), the type should be updated to `legend_config?: LegendConfig` to match reality.
+**`legend_config` optionality:** `LayerSchema.legend_config` is currently required in the type. Since the playground already handles it as potentially absent (runtime safety for user-edited JSON), the type should be updated to `legend_config?: LegendConfig` to match reality. This ripples into `ExampleConfig` (which extends `LayerSchema`) — all code accessing `example.legend_config` without a null check will need updating. The convention for representing absence is `null` (not `undefined`), matching the existing playground code.
 
 ### Component Props Contract
 
