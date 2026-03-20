@@ -193,11 +193,8 @@ pre code {
   height: 600px;
   top: -5%;
   left: -5%;
-  filter: blur(120px);
-  background: linear-gradient(
-    oklch(0.897 0.196 126.665),
-    oklch(0.648 0.2 150)
-  );
+  background: oklch(0.773 0.198 138);
+  box-shadow: 0 0 120px 120px oklch(0.773 0.198 138);
   animation: landing-blob-rotate 40s cubic-bezier(0.8, 0.2, 0.2, 0.8) alternate infinite;
 }
 
@@ -206,11 +203,8 @@ pre code {
   height: 500px;
   top: 25%;
   right: -8%;
-  filter: blur(100px);
-  background: linear-gradient(
-    oklch(0.768 0.233 130.85),
-    oklch(0.532 0.157 131.589)
-  );
+  background: oklch(0.65 0.195 131.2);
+  box-shadow: 0 0 100px 100px oklch(0.65 0.195 131.2);
   animation: landing-blob-rotate 50s cubic-bezier(0.8, 0.2, 0.2, 0.8) alternate-reverse infinite;
 }
 
@@ -219,11 +213,8 @@ pre code {
   height: 550px;
   top: 55%;
   left: -10%;
-  filter: blur(110px);
-  background: linear-gradient(
-    oklch(0.648 0.2 131.684),
-    oklch(0.897 0.196 126.665)
-  );
+  background: oklch(0.773 0.198 129);
+  box-shadow: 0 0 110px 110px oklch(0.773 0.198 129);
   animation: landing-blob-rotate 45s cubic-bezier(0.8, 0.2, 0.2, 0.8) alternate infinite;
 }
 
@@ -232,11 +223,8 @@ pre code {
   height: 450px;
   top: 80%;
   right: -5%;
-  filter: blur(90px);
-  background: linear-gradient(
-    oklch(0.532 0.157 150),
-    oklch(0.768 0.233 135)
-  );
+  background: oklch(0.65 0.195 142.5);
+  box-shadow: 0 0 90px 90px oklch(0.65 0.195 142.5);
   animation: landing-blob-rotate 55s cubic-bezier(0.8, 0.2, 0.2, 0.8) alternate-reverse infinite;
 }
 
