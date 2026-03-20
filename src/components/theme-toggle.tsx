@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Sun, Moon, Monitor } from 'lucide-react'
 import { buttonVariants } from '#/components/ui/button'
 import { cn } from '#/lib/utils'
 
@@ -75,9 +76,15 @@ export default function ThemeToggle() {
       onClick={toggleMode}
       aria-label={label}
       title={label}
-      className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+      className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
     >
-      {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
+      {mode === 'auto' ? (
+        <Monitor className="size-4" />
+      ) : mode === 'dark' ? (
+        <Moon className="size-4" />
+      ) : (
+        <Sun className="size-4" />
+      )}
     </button>
   )
 }

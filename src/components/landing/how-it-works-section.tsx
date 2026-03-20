@@ -11,7 +11,7 @@ const STEPS = [
 
 export function HowItWorksSection() {
   return (
-    <section className="w-full bg-muted py-20">
+    <section className="w-full landing-bg-muted py-20">
       <div className="mx-auto max-w-5xl px-6">
         <Badge variant="secondary" className="mb-3">
           How It Works

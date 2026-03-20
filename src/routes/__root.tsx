@@ -6,8 +6,8 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import Footer from '../components/Footer'
-import Header from '../components/Header'
+import Footer from '../components/footer'
+import Header from '../components/header'
 
 import TanStackQueryProvider from '../integrations/tanstack-query/root-provider'
 
@@ -69,7 +69,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-primary/20">
         <TanStackQueryProvider>
-          {!isPlayground && <Header />}
+          <Header />
           {children}
           {!isPlayground && <Footer />}
           <TanStackDevtools

@@ -4,7 +4,7 @@ import { cn } from '#/lib/utils'
 
 export function CtaSection() {
   return (
-    <section className="w-full bg-background py-20">
+    <section className="w-full landing-bg py-20">
       <div className="mx-auto flex max-w-5xl flex-col items-center px-6 text-center">
         <Link
           to="/playground"

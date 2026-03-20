@@ -5,7 +5,7 @@ import { cn } from '#/lib/utils'
 
 export function HeroSection() {
   return (
-    <section className="w-full bg-background py-24 sm:py-32">
+    <section className="w-full landing-bg py-24 sm:py-32">
       <div className="mx-auto flex max-w-3xl flex-col items-center px-6 text-center">
         <Badge variant="secondary" className="mb-4">
           Vizzuality — Frontend Team

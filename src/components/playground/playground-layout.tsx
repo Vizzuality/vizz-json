@@ -18,7 +18,7 @@ export function PlaygroundLayout({
   params,
 }: PlaygroundLayoutProps) {
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-background">
       {topBar}
       <ResizablePanelGroup orientation="horizontal" className="flex-1">
         <ResizablePanel defaultSize={40} minSize={25}>

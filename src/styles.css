@@ -153,3 +153,29 @@ pre code {
     @apply font-sans;
   }
 }
+
+/* Landing section gradient backgrounds — Floating Orbs */
+.landing-bg {
+  background:
+    radial-gradient(circle 300px at 20% 30%, oklch(0.897 0.196 126.665 / 18%) 0%, transparent 70%),
+    radial-gradient(circle 250px at 80% 70%, oklch(0.768 0.233 130.85 / 12%) 0%, transparent 70%),
+    var(--background);
+}
+.landing-bg-muted {
+  background:
+    radial-gradient(circle 280px at 75% 20%, oklch(0.648 0.2 131.684 / 14%) 0%, transparent 70%),
+    radial-gradient(circle 220px at 15% 80%, oklch(0.532 0.157 131.589 / 10%) 0%, transparent 70%),
+    var(--muted);
+}
+.dark .landing-bg {
+  background:
+    radial-gradient(circle 300px at 20% 30%, oklch(0.453 0.124 130.933 / 25%) 0%, transparent 70%),
+    radial-gradient(circle 250px at 80% 70%, oklch(0.532 0.157 131.589 / 18%) 0%, transparent 70%),
+    var(--background);
+}
+.dark .landing-bg-muted {
+  background:
+    radial-gradient(circle 280px at 75% 20%, oklch(0.648 0.2 131.684 / 16%) 0%, transparent 70%),
+    radial-gradient(circle 220px at 15% 80%, oklch(0.453 0.124 130.933 / 12%) 0%, transparent 70%),
+    var(--muted);
+}
