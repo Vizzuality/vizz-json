@@ -62,9 +62,9 @@ Change line 28 from `readonly legend_config: LegendConfig` to:
 readonly legend_config?: LegendConfig
 ```
 
-- [ ] **Step 4: Run type check**
+- [ ] **Step 4: Run type check and format**
 
-Run: `pnpm exec tsc --noEmit`
+Run: `pnpm check && pnpm exec tsc --noEmit`
 Expected: PASS (additive changes only, existing code still compiles)
 
 - [ ] **Step 5: Commit**
@@ -128,7 +128,7 @@ export function inferParamControl(param: ParamConfig): InferredParam {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `pnpm test -- tests/lib/param-inference.test.ts`
+Run: `pnpm check && pnpm test -- tests/lib/param-inference.test.ts`
 Expected: PASS — all tests green
 
 - [ ] **Step 5: Commit**
@@ -427,9 +427,9 @@ export function PanelHeader({
 }
 ```
 
-- [ ] **Step 2: Verify it compiles**
+- [ ] **Step 2: Verify it compiles and formats**
 
-Run: `pnpm exec tsc --noEmit`
+Run: `pnpm check && pnpm exec tsc --noEmit`
 Expected: PASS
 
 - [ ] **Step 3: Commit**
@@ -459,6 +459,8 @@ The file should contain:
 - `ColorPickerControl` (internal, not exported)
 - `ParamControl` (exported)
 - The `ParamControlProps` type (exported)
+
+**Important:** Do NOT remove the original functions from `params-panel.tsx` yet — they are still used by the current `ParamsPanel`. Task 6 will replace the entire file.
 
 - [ ] **Step 2: Create `LegendCard` component**
 
@@ -531,9 +533,9 @@ export function LegendCard({
 }
 ```
 
-- [ ] **Step 3: Verify it compiles**
+- [ ] **Step 3: Verify it compiles and formats**
 
-Run: `pnpm exec tsc --noEmit`
+Run: `pnpm check && pnpm exec tsc --noEmit`
 Expected: PASS
 
 - [ ] **Step 4: Commit**
@@ -730,9 +732,9 @@ In `src/routes/playground.tsx`, remove the `legendConfig` prop from the `<MapRen
 
 Delete `src/components/playground/legend-panel.tsx`.
 
-- [ ] **Step 4: Verify it compiles and tests pass**
+- [ ] **Step 4: Verify it compiles, formats, and tests pass**
 
-Run: `pnpm exec tsc --noEmit && pnpm test`
+Run: `pnpm check && pnpm exec tsc --noEmit && pnpm test`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
