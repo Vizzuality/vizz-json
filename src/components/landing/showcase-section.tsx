@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from '#/components/ui/badge'
+import { buttonVariants } from '#/components/ui/button'
+import { cn } from '#/lib/utils'
 
 const EXAMPLES = [
   {
@@ -175,6 +177,19 @@ export function ShowcaseSection() {
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-16 flex flex-col items-center text-center">
+          <Link
+            to="/playground"
+            className={cn(buttonVariants({ size: 'xl' }), 'no-underline')}
+          >
+            Open the Playground
+          </Link>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Edit JSON. Tweak params. See it resolve live.
+          </p>
         </div>
       </div>
     </section>
