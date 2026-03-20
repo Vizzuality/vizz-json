@@ -30,11 +30,15 @@ export function ExampleSelector({ selectedIndex, onSelect }: ExampleSelectorProp
         onValueChange={(v: number | null) => { if (v !== null) onSelect(v); }}
       >
         <SelectTrigger className="h-8 w-[280px] text-xs">
-          <SelectValue />
+          <SelectValue>
+            {(value: number | null) =>
+              value !== null ? examples[value]?.metadata.title : 'Select example'
+            }
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {examples.map((ex, i) => (
-            <SelectItem key={i} value={i} className="text-xs">
+            <SelectItem key={i} value={i} label={ex.metadata.title} className="text-xs">
               <div className="flex items-center gap-2">
                 <Badge
                   variant="outline"
