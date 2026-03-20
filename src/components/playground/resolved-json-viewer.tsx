@@ -1,15 +1,15 @@
-import Editor from "@monaco-editor/react";
+import Editor from '@monaco-editor/react'
 
 type ResolvedJsonViewerProps = {
-  readonly resolved: Record<string, unknown> | null;
-  readonly visible: boolean;
-};
+  readonly resolved: Record<string, unknown> | null
+  readonly visible: boolean
+}
 
 export function ResolvedJsonViewer({
   resolved,
   visible,
 }: ResolvedJsonViewerProps) {
-  if (!visible || !resolved) return null;
+  if (!visible || !resolved) return null
 
   return (
     <div className="absolute inset-0 z-10 bg-background/95 backdrop-blur">
@@ -27,11 +27,11 @@ export function ResolvedJsonViewer({
           readOnly: true,
           minimap: { enabled: false },
           fontSize: 12,
-          lineNumbers: "on",
+          lineNumbers: 'on',
           scrollBeyondLastLine: false,
           automaticLayout: true,
         }}
       />
     </div>
-  );
+  )
 }

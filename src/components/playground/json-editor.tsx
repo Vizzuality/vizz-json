@@ -1,27 +1,27 @@
-import Editor from "@monaco-editor/react";
-import type {OnMount} from "@monaco-editor/react";
-import { useCallback, useRef } from "react";
+import Editor from '@monaco-editor/react'
+import type { OnMount } from '@monaco-editor/react'
+import { useCallback, useRef } from 'react'
 
 type JsonEditorProps = {
-  readonly value: string;
-  readonly onChange: (value: string) => void;
-};
+  readonly value: string
+  readonly onChange: (value: string) => void
+}
 
 export function JsonEditor({ value, onChange }: JsonEditorProps) {
-  const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
+  const editorRef = useRef<Parameters<OnMount>[0] | null>(null)
 
   const handleMount: OnMount = useCallback((editor) => {
-    editorRef.current = editor;
-  }, []);
+    editorRef.current = editor
+  }, [])
 
   const handleChange = useCallback(
     (newValue: string | undefined) => {
       if (newValue !== undefined) {
-        onChange(newValue);
+        onChange(newValue)
       }
     },
-    [onChange]
-  );
+    [onChange],
+  )
 
   return (
     <div className="h-full flex flex-col">
@@ -29,7 +29,9 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
         <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
           @@ Config JSON
         </span>
-        <span className="text-[11px] text-muted-foreground/50">config.json</span>
+        <span className="text-[11px] text-muted-foreground/50">
+          config.json
+        </span>
       </div>
       <div className="flex-1">
         <Editor
@@ -41,14 +43,14 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
           options={{
             minimap: { enabled: false },
             fontSize: 13,
-            lineNumbers: "on",
+            lineNumbers: 'on',
             scrollBeyondLastLine: false,
             automaticLayout: true,
             tabSize: 2,
-            wordWrap: "on",
+            wordWrap: 'on',
           }}
         />
       </div>
     </div>
-  );
+  )
 }

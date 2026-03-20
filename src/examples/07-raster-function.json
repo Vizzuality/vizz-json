@@ -32,10 +32,18 @@
     ]
   },
   "params_config": [
-    { "key": "colormap", "default": "viridis", "options": ["viridis", "plasma", "inferno", "magma", "cividis"] },
+    {
+      "key": "colormap",
+      "default": "viridis",
+      "options": ["viridis", "plasma", "inferno", "magma", "cividis"]
+    },
     { "key": "rescale", "default": "0,3000" },
     { "key": "opacity", "default": 1.0, "min": 0, "max": 1, "step": 0.05 },
-    { "key": "visibility", "default": "visible", "options": ["visible", "none"] }
+    {
+      "key": "visibility",
+      "default": "visible",
+      "options": ["visible", "none"]
+    }
   ],
   "legend_config": {
     "type": "gradient",

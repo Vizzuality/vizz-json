@@ -1,8 +1,8 @@
-import { Badge } from "#/components/ui/badge";
+import { Badge } from '#/components/ui/badge'
 
 type StatusIndicatorProps = {
-  readonly error: string | null;
-};
+  readonly error: string | null
+}
 
 export function StatusIndicator({ error }: StatusIndicatorProps) {
   if (error) {
@@ -11,13 +11,16 @@ export function StatusIndicator({ error }: StatusIndicatorProps) {
         <span className="h-2 w-2 rounded-full bg-red-400 animate-pulse" />
         ERROR
       </Badge>
-    );
+    )
   }
 
   return (
-    <Badge variant="secondary" className="gap-1.5 bg-green-950 text-green-400 border-green-800">
+    <Badge
+      variant="secondary"
+      className="gap-1.5 bg-green-950 text-green-400 border-green-800"
+    >
       <span className="h-2 w-2 rounded-full bg-green-400" />
       RESOLVED
     </Badge>
-  );
+  )
 }

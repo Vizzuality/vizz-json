@@ -35,10 +35,28 @@
     { "key": "color1", "default": "#22c55e", "group": "legend" },
     { "key": "color2", "default": "#eab308", "group": "legend" },
     { "key": "color3", "default": "#ef4444", "group": "legend" },
-    { "key": "break1", "default": 3, "min": 0, "max": 10, "step": 0.5, "group": "legend" },
-    { "key": "break2", "default": 5, "min": 0, "max": 10, "step": 0.5, "group": "legend" },
+    {
+      "key": "break1",
+      "default": 3,
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "group": "legend"
+    },
+    {
+      "key": "break2",
+      "default": 5,
+      "min": 0,
+      "max": 10,
+      "step": 0.5,
+      "group": "legend"
+    },
     { "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 },
-    { "key": "visibility", "default": "visible", "options": ["visible", "none"] }
+    {
+      "key": "visibility",
+      "default": "visible",
+      "options": ["visible", "none"]
+    }
   ],
   "legend_config": {
     "type": "choropleth",

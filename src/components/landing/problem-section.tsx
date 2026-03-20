@@ -1,10 +1,5 @@
 import { Badge } from '#/components/ui/badge'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '#/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import rasterOpacity from '#/examples/01-raster-opacity.json'
 
 const beforeSnippet = JSON.stringify(
@@ -21,11 +16,7 @@ const beforeSnippet = JSON.stringify(
   2,
 )
 
-const afterSnippet = JSON.stringify(
-  rasterOpacity.config.styles[0],
-  null,
-  2,
-)
+const afterSnippet = JSON.stringify(rasterOpacity.config.styles[0], null, 2)
 
 export function ProblemSection() {
   return (

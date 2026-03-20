@@ -7,10 +7,7 @@ export default function ParaglideLocaleSwitcher() {
   const currentLocale = getLocale()
 
   return (
-    <div
-      className="flex items-center gap-1.5"
-      aria-label={m.language_label()}
-    >
+    <div className="flex items-center gap-1.5" aria-label={m.language_label()}>
       {locales.map((locale) => (
         <button
           key={locale}

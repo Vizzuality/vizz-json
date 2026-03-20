@@ -19,6 +19,7 @@
 ### Task 1: Type changes — add `group` to ParamConfig and InferredParam, make legend_config optional
 
 **Files:**
+
 - Modify: `src/lib/types.ts:1-8` (ParamConfig) and `src/lib/types.ts:49-57` (InferredParam) and `src/lib/types.ts:25-29` (LayerSchema)
 
 - [ ] **Step 1: Add `group` field to `ParamConfig`**
@@ -79,6 +80,7 @@ git commit -m "feat: add group field to ParamConfig/InferredParam, make legend_c
 ### Task 2: Propagate `group` through inference
 
 **Files:**
+
 - Modify: `src/lib/param-inference.ts:18-28`
 - Modify: `tests/lib/param-inference.test.ts`
 
@@ -87,17 +89,17 @@ git commit -m "feat: add group field to ParamConfig/InferredParam, make legend_c
 Add to `tests/lib/param-inference.test.ts`:
 
 ```typescript
-it("propagates group field from ParamConfig", () => {
+it('propagates group field from ParamConfig', () => {
   const result = inferParamControl({
-    key: "fill_color",
-    default: "#3b82f6",
-    group: "legend",
+    key: 'fill_color',
+    default: '#3b82f6',
+    group: 'legend',
   })
-  expect(result.group).toBe("legend")
+  expect(result.group).toBe('legend')
 })
 
-it("leaves group undefined when not set", () => {
-  const result = inferParamControl({ key: "opacity", default: 0.8 })
+it('leaves group undefined when not set', () => {
+  const result = inferParamControl({ key: 'opacity', default: 0.8 })
   expect(result.group).toBeUndefined()
 })
 ```
@@ -143,9 +145,11 @@ git commit -m "feat: propagate group field through param inference"
 ### Task 3: Update all 10 example JSON files
 
 **Files:**
+
 - Modify: All files in `src/examples/*.json`
 
 Each example needs:
+
 1. `visibility` param added (with `"options": ["visible", "none"]` and corresponding `@@#params.visibility` in the style layout)
 2. Color and breakpoint/threshold params tagged with `"group": "legend"`
 
@@ -187,13 +191,15 @@ Add visibility param + layout to styles. Tag `fill_color` and `outline_color` wi
     { "key": "fill_color", "default": "#3b82f6", "group": "legend" },
     { "key": "outline_color", "default": "#1e3a5f", "group": "legend" },
     { "key": "opacity", "default": 0.7, "min": 0, "max": 1, "step": 0.05 },
-    { "key": "visibility", "default": "visible", "options": ["visible", "none"] }
+    {
+      "key": "visibility",
+      "default": "visible",
+      "options": ["visible", "none"]
+    }
   ],
   "legend_config": {
     "type": "basic",
-    "items": [
-      { "label": "Countries", "value": "@@#params.fill_color" }
-    ]
+    "items": [{ "label": "Countries", "value": "@@#params.fill_color" }]
   }
 }
 ```
@@ -203,6 +209,7 @@ Add visibility param + layout to styles. Tag `fill_color` and `outline_color` wi
 Add visibility. Tag all 6 color params with `group: "legend"`:
 
 Replace `params_config` with:
+
 ```json
 "params_config": [
   { "key": "high_oecd_color", "default": "#2563eb", "group": "legend" },
@@ -354,6 +361,7 @@ git commit -m "feat: add visibility param and legend group tags to all examples"
 ### Task 4: Build the `PanelHeader` component
 
 **Files:**
+
 - Create: `src/components/playground/panel-header.tsx`
 
 - [ ] **Step 1: Create `PanelHeader` component**
@@ -444,6 +452,7 @@ git commit -m "feat: add PanelHeader component with title, tier, visibility, opa
 ### Task 5: Build the `LegendCard` component
 
 **Files:**
+
 - Create: `src/components/playground/legend-card.tsx`
 
 This component renders the legend preview + grouped controls, with layout adapting to legend type.
@@ -455,7 +464,8 @@ The `LegendCard` and the remaining params section both need `ParamControl`. Extr
 Create `src/components/playground/param-control.tsx` containing the `ColorPickerControl` (lines 46-72 of params-panel.tsx) and `ParamControl` (lines 78-192 of params-panel.tsx) components. Export `ParamControl`.
 
 The file should contain:
-- All the imports needed (Slider, Switch, Input, Select/*, Popover/*, InferredParam type)
+
+- All the imports needed (Slider, Switch, Input, Select/_, Popover/_, InferredParam type)
 - `ColorPickerControl` (internal, not exported)
 - `ParamControl` (exported)
 - The `ParamControlProps` type (exported)
@@ -552,12 +562,14 @@ git commit -m "feat: add LegendCard component and extract ParamControl"
 These must be done together so the build compiles after the commit.
 
 **Files:**
+
 - Modify: `src/components/playground/params-panel.tsx`
 - Modify: `src/routes/playground.tsx`
 
 - [ ] **Step 1: Rewrite `ParamsPanel`**
 
 Replace the entire `params-panel.tsx` content. The new component:
+
 - Receives the expanded props (metadata, legendConfig, inferred params, values, onChange)
 - Partitions params into: opacity, visibility, legend group, and remaining
 - Renders `PanelHeader` + `LegendCard` + remaining params list
@@ -706,6 +718,7 @@ git commit -m "feat: rewrite ParamsPanel with sections and wire playground props
 ### Task 7: Remove floating legend from map renderer
 
 **Files:**
+
 - Modify: `src/components/playground/map-renderer.tsx`
 - Delete: `src/components/playground/legend-panel.tsx`
 
@@ -722,10 +735,7 @@ git commit -m "feat: rewrite ParamsPanel with sections and wire playground props
 In `src/routes/playground.tsx`, remove the `legendConfig` prop from the `<MapRenderer>` JSX:
 
 ```tsx
-<MapRenderer
-  resolvedConfig={resolved}
-  error={error}
-/>
+<MapRenderer resolvedConfig={resolved} error={error} />
 ```
 
 - [ ] **Step 3: Delete `legend-panel.tsx`**
@@ -750,6 +760,7 @@ git commit -m "refactor: remove floating legend panel from map renderer"
 ### Task 8: Visual verification and polish
 
 **Files:**
+
 - Potentially modify: any of the new components for visual tweaks
 
 - [ ] **Step 1: Run dev server**
@@ -759,6 +770,7 @@ Run: `pnpm dev`
 - [ ] **Step 2: Verify each example in the playground**
 
 Open `http://localhost:3000/playground` and test:
+
 1. Example 01 (raster): header shows title + "basic" badge + visibility switch + opacity slider
 2. Example 02 (vector fill): legend card shows basic swatches with color pickers
 3. Example 03 (choropleth): legend card shows choropleth strips with 6 color pickers
@@ -771,6 +783,7 @@ Open `http://localhost:3000/playground` and test:
 10. Example 10 (react components): legend card with 3 colors; legend_title/show_legend below
 
 Verify:
+
 - Header row always shows title + tier
 - Visibility toggle works (layer appears/disappears)
 - Opacity slider works (layer opacity changes)

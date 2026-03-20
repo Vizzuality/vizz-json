@@ -35,6 +35,7 @@ Scrollable if content overflows. Color card only renders when `group: "legend"` 
 ### Section 1: Header Row
 
 A single row containing:
+
 - **Title**: from `metadata.title`, truncated with ellipsis if too long
 - **Tier badge**: small shadcn badge (basic/intermediate/advanced) with subtle color coding
 - **Visibility**: rendered as a Switch toggle in the header, recognized by key `visibility` in `params_config`. MapLibre expects string values `"visible"/"none"`, so the Switch maps `checked=true` to `"visible"` and `checked=false` to `"none"` before writing to `paramValues`.
@@ -60,12 +61,12 @@ Legend preview updates live as the user changes colors/breakpoints — same `res
 
 **Edge cases:**
 
-| `legend_config` present | `group:"legend"` params exist | Behavior |
-|---|---|---|
-| Yes | Yes | Full card (preview + controls) |
-| Yes | No | Preview-only card (no controls below) |
-| No | Yes | Controls-only card (no preview) |
-| No | No | No card rendered |
+| `legend_config` present | `group:"legend"` params exist | Behavior                              |
+| ----------------------- | ----------------------------- | ------------------------------------- |
+| Yes                     | Yes                           | Full card (preview + controls)        |
+| Yes                     | No                            | Preview-only card (no controls below) |
+| No                      | Yes                           | Controls-only card (no preview)       |
+| No                      | No                            | No card rendered                      |
 
 ### Section 3: Remaining Params
 
@@ -82,26 +83,26 @@ If natural groupings are found during implementation (e.g., `scale_factor_low` +
 
 ```typescript
 type ParamConfig = {
-  readonly key: string;
-  readonly default: unknown;
-  readonly min?: number;
-  readonly max?: number;
-  readonly step?: number;
-  readonly options?: readonly string[];
-  readonly group?: "legend";  // omitted = general
-};
+  readonly key: string
+  readonly default: unknown
+  readonly min?: number
+  readonly max?: number
+  readonly step?: number
+  readonly options?: readonly string[]
+  readonly group?: 'legend' // omitted = general
+}
 
 // InferredParam (existing flat structure) gains the group field
 type InferredParam = {
-  readonly key: string;
-  readonly value: unknown;
-  readonly control_type: ParamControlType;
-  readonly min?: number;
-  readonly max?: number;
-  readonly step?: number;
-  readonly options?: readonly string[];
-  readonly group?: "legend";  // passed through from ParamConfig
-};
+  readonly key: string
+  readonly value: unknown
+  readonly control_type: ParamControlType
+  readonly min?: number
+  readonly max?: number
+  readonly step?: number
+  readonly options?: readonly string[]
+  readonly group?: 'legend' // passed through from ParamConfig
+}
 ```
 
 `inferParamControl()` in `param-inference.ts` must propagate `group` from the input `ParamConfig` to the output `InferredParam`.
@@ -116,12 +117,12 @@ The redesigned `ParamsPanel` needs additional props beyond the current `paramsCo
 
 ```typescript
 type ParamsPanelProps = {
-  readonly metadata: Pick<ExampleMetadata, 'title' | 'tier'> | null;
-  readonly paramsConfig: readonly InferredParam[];
-  readonly legendConfig: LegendConfig | null;
-  readonly values: Record<string, unknown>;
-  readonly onChange: (key: string, value: unknown) => void;
-};
+  readonly metadata: Pick<ExampleMetadata, 'title' | 'tier'> | null
+  readonly paramsConfig: readonly InferredParam[]
+  readonly legendConfig: LegendConfig | null
+  readonly values: Record<string, unknown>
+  readonly onChange: (key: string, value: unknown) => void
+}
 ```
 
 Inference currently happens inline inside `ParamsPanel`. Since the panel now receives `InferredParam[]`, inference moves upstream — likely a `useMemo` in `playground.tsx` that calls `inferParamControl()` on each `ParamConfig`.
@@ -129,6 +130,7 @@ Inference currently happens inline inside `ParamsPanel`. Since the panel now rec
 ### Example Updates
 
 All 10 examples updated:
+
 - Add `opacity` and `visibility` params to every example (currently only example 01 has visibility)
 - Tag color pickers and breakpoint/threshold params with `group: "legend"`
 - Other params found to share natural groups get tagged accordingly

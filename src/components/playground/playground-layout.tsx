@@ -2,14 +2,14 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "#/components/ui/resizable";
+} from '#/components/ui/resizable'
 
 type PlaygroundLayoutProps = {
-  readonly topBar: React.ReactNode;
-  readonly editor: React.ReactNode;
-  readonly map: React.ReactNode;
-  readonly params: React.ReactNode;
-};
+  readonly topBar: React.ReactNode
+  readonly editor: React.ReactNode
+  readonly map: React.ReactNode
+  readonly params: React.ReactNode
+}
 
 export function PlaygroundLayout({
   topBar,
@@ -38,5 +38,5 @@ export function PlaygroundLayout({
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
-  );
+  )
 }
