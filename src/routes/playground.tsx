@@ -138,13 +138,7 @@ function PlaygroundPage() {
           <ResolvedJsonViewer resolved={resolved} visible={showResolved} />
         </div>
       }
-      map={
-        <MapRenderer
-          resolvedConfig={resolved}
-          error={error}
-          legendConfig={resolvedLegendConfig}
-        />
-      }
+      map={<MapRenderer resolvedConfig={resolved} error={error} />}
       params={
         <ParamsPanel
           metadata={currentMetadata}

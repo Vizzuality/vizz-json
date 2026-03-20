@@ -1,15 +1,8 @@
 import { useMemo } from 'react'
-import {
-  Map,
-  Source,
-  Layer,
-  useControl,
-} from 'react-map-gl/maplibre'
+import { Map, Source, Layer, useControl } from 'react-map-gl/maplibre'
 import type { SourceProps, LayerProps } from 'react-map-gl/maplibre'
 import { MapboxOverlay } from '@deck.gl/mapbox'
 import type { MapboxOverlayProps } from '@deck.gl/mapbox'
-import { LegendPanel } from './legend-panel'
-import type { LegendConfig } from '#/lib/types'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const SOURCE_ID = 'playground-source'
@@ -53,14 +46,9 @@ function DeckGlOverlay(props: MapboxOverlayProps) {
 type MapRendererProps = {
   readonly resolvedConfig: Record<string, unknown> | null
   readonly error: string | null
-  readonly legendConfig: LegendConfig | null
 }
 
-export function MapRenderer({
-  resolvedConfig,
-  error,
-  legendConfig,
-}: MapRendererProps) {
+export function MapRenderer({ resolvedConfig, error }: MapRendererProps) {
   const source = resolvedConfig?.source as SourceProps | undefined
   const styles = resolvedConfig?.styles as LayerProps[] | undefined
   const configKey = useConfigKey(source, styles)
@@ -85,7 +73,6 @@ export function MapRenderer({
           </Source>
         )}
       </Map>
-      <LegendPanel config={legendConfig} />
       {error && (
         <div className="absolute top-2 left-2 right-2 bg-destructive/90 text-destructive-foreground px-3 py-2 rounded text-xs font-mono">
           {error}
