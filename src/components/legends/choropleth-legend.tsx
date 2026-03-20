@@ -35,20 +35,18 @@ function EditableRow({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="flex w-full items-center gap-2 rounded-md px-1.5 py-1 -mx-1.5 transition-colors hover:bg-muted/50 cursor-pointer"
-        >
-          <div
-            className="w-6 h-4 rounded-sm shrink-0"
-            style={{
-              backgroundColor:
-                typeof item.value === 'string' ? item.value : undefined,
-            }}
-          />
-          <span className="text-xs text-muted-foreground">{item.label}</span>
-        </button>
+      <PopoverTrigger
+        type="button"
+        className="flex w-full items-center gap-2 rounded-md px-1.5 py-1 -mx-1.5 transition-colors hover:bg-muted/50 cursor-pointer"
+      >
+        <div
+          className="w-6 h-4 rounded-sm shrink-0"
+          style={{
+            backgroundColor:
+              typeof item.value === 'string' ? item.value : undefined,
+          }}
+        />
+        <span className="text-xs text-muted-foreground">{item.label}</span>
       </PopoverTrigger>
       <PopoverContent className="w-56 p-3" side="bottom" align="start">
         <div className="flex flex-col gap-3">

@@ -50,13 +50,11 @@ function EditableGradient({
 }) {
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className="w-full rounded-md px-1.5 py-1 -mx-1.5 transition-colors hover:bg-muted/50 cursor-pointer"
-        >
-          <GradientBar items={items} />
-        </button>
+      <PopoverTrigger
+        type="button"
+        className="w-full rounded-md px-1.5 py-1 -mx-1.5 transition-colors hover:bg-muted/50 cursor-pointer"
+      >
+        <GradientBar items={items} />
       </PopoverTrigger>
       <PopoverContent className="w-64 p-3" side="bottom" align="start">
         <div className="flex flex-col gap-3">
