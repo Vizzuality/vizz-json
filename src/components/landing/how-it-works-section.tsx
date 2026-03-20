@@ -2,21 +2,21 @@ import { Badge } from '#/components/ui/badge'
 
 const INPUTS = [
   { label: '@@#params.*', sublabel: 'runtime values', y: 30 },
-  { label: '@@type:*', sublabel: 'layer classes', y: 95 },
-  { label: '@@function:*', sublabel: 'registered fns', y: 160 },
-  { label: '@@=[expr]', sublabel: 'JS expressions', y: 225 },
+  { label: '@@type:*', sublabel: 'layer classes', y: 100 },
+  { label: '@@function:*', sublabel: 'registered fns', y: 170 },
+  { label: '@@=[expr]', sublabel: 'JS expressions', y: 240 },
 ]
 
 const OUTPUTS = [
   { label: 'deck.gl Layers', sublabel: 'native JS objects', y: 50 },
-  { label: 'MapLibre Style', sublabel: 'map configuration', y: 130 },
-  { label: 'Legend Config', sublabel: 'React components', y: 210 },
+  { label: 'MapLibre Style', sublabel: 'map configuration', y: 140 },
+  { label: 'Legend Config', sublabel: 'React components', y: 230 },
 ]
 
-const HUB = { x: 225, y: 105, width: 110, height: 70, rx: 14 }
+const HUB = { x: 240, y: 105, width: 130, height: 85, rx: 16 }
 const INPUT_X = 8
 const INPUT_W = 105
-const OUTPUT_X = 402
+const OUTPUT_X = 460
 const OUTPUT_W = 115
 
 function inputPath(inputY: number) {
@@ -55,10 +55,16 @@ function AnimatedParticle({
         begin={`${delay}s`}
         repeatCount="indefinite"
         path={path}
+        calcMode="spline"
+        keyTimes="0;1"
+        keySplines="0.4 0 0.2 1"
       />
       <animate
         attributeName="opacity"
-        values="0;1;0"
+        values="0;0.9;1;0.9;0"
+        keyTimes="0;0.2;0.5;0.8;1"
+        calcMode="spline"
+        keySplines="0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1;0.4 0 0.6 1"
         dur={`${duration}s`}
         begin={`${delay}s`}
         repeatCount="indefinite"
@@ -124,7 +130,7 @@ function NodeRect({
 function HubDiagram() {
   return (
     <svg
-      viewBox="0 0 525 270"
+      viewBox="0 0 585 290"
       className="mx-auto w-full max-w-2xl"
       role="img"
       aria-label="Diagram showing how resolveConfig processes @@ prefixes into deck.gl layers, MapLibre styles, and legend configs in a single recursive pass"
@@ -223,23 +229,13 @@ function HubDiagram() {
       />
       <text
         x={HUB.x + HUB.width / 2}
-        y={HUB.y + 30}
+        y={HUB.y + HUB.height / 2 + 6}
         fill="#86efac"
-        fontSize={14}
+        fontSize={16}
         fontWeight={700}
         textAnchor="middle"
       >
-        resolveConfig()
-      </text>
-      <text
-        x={HUB.x + HUB.width / 2}
-        y={HUB.y + 52}
-        fill="#4ade80"
-        fillOpacity={0.5}
-        fontSize={8.5}
-        textAnchor="middle"
-      >
-        recursive pass
+        @@ Resolver
       </text>
 
       {/* Output nodes */}
