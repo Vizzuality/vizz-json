@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { extractLegendParamKeys } from '#/lib/legend-param-mapping'
+import { extractLegendParamKeys, getOrphanLegendParams } from '#/lib/legend-param-mapping'
+import type { InferredParam } from '#/lib/types'
 
 describe('extractLegendParamKeys', () => {
   it('returns empty map for null config', () => {
@@ -58,5 +59,52 @@ describe('extractLegendParamKeys', () => {
     const raw = { type: 'basic' as const, items: [] }
     const result = extractLegendParamKeys(raw)
     expect(result.size).toBe(0)
+  })
+})
+
+describe('getOrphanLegendParams', () => {
+  const legendParams: readonly InferredParam[] = [
+    { key: 'high_color', value: '#2563eb', control_type: 'color_picker', group: 'legend' },
+    { key: 'low_color', value: '#dc2626', control_type: 'color_picker', group: 'legend' },
+    { key: 'default_color', value: '#6b7280', control_type: 'color_picker', group: 'legend' },
+  ]
+
+  it('returns params not referenced in any item mapping', () => {
+    const mapping = new Map([
+      [0, { valueParamKey: 'high_color' }],
+      [1, { valueParamKey: 'low_color' }],
+    ])
+    const orphans = getOrphanLegendParams(legendParams, mapping)
+    expect(orphans).toEqual([
+      { key: 'default_color', value: '#6b7280', control_type: 'color_picker', group: 'legend' },
+    ])
+  })
+
+  it('returns empty array when all params are referenced', () => {
+    const mapping = new Map([
+      [0, { valueParamKey: 'high_color' }],
+      [1, { valueParamKey: 'low_color' }],
+      [2, { valueParamKey: 'default_color' }],
+    ])
+    const orphans = getOrphanLegendParams(legendParams, mapping)
+    expect(orphans).toEqual([])
+  })
+
+  it('returns all params when mapping is empty', () => {
+    const orphans = getOrphanLegendParams(legendParams, new Map())
+    expect(orphans).toEqual(legendParams)
+  })
+
+  it('considers both valueParamKey and labelParamKey references', () => {
+    const params: readonly InferredParam[] = [
+      { key: 'color_1', value: '#ff0000', control_type: 'color_picker', group: 'legend' },
+      { key: 'label_1', value: 'Label', control_type: 'text_input', group: 'legend' },
+      { key: 'orphan', value: '#000', control_type: 'color_picker', group: 'legend' },
+    ]
+    const mapping = new Map([[0, { valueParamKey: 'color_1', labelParamKey: 'label_1' }]])
+    const orphans = getOrphanLegendParams(params, mapping)
+    expect(orphans).toEqual([
+      { key: 'orphan', value: '#000', control_type: 'color_picker', group: 'legend' },
+    ])
   })
 })
