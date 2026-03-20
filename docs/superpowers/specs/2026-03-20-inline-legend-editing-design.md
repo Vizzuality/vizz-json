@@ -77,8 +77,8 @@ When `paramMapping` is provided, the component enters edit mode.
 - The gradient bar + labels area gains the hover highlight
 - Clicking anywhere opens a single `Popover` containing:
   - A vertical list of all color stops, each with a color swatch + color picker + label input
-  - Orphan params (e.g., `color_mid`, numeric stop values) appear below a separator labeled "Additional", rendered using `ParamControl`
 - Changes apply immediately via `onChange`
+- Orphan params do NOT appear inside the gradient popover (see below)
 
 **Orphan params (all legend types):**
 
