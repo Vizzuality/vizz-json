@@ -3,6 +3,7 @@ import { HeroSection } from '#/components/landing/hero-section'
 import { ProblemSection } from '#/components/landing/problem-section'
 import { PrefixFamilySection } from '#/components/landing/prefix-family-section'
 import { HowItWorksSection } from '#/components/landing/how-it-works-section'
+import { ShowcaseSection } from '#/components/landing/showcase-section'
 import { CtaSection } from '#/components/landing/cta-section'
 
 export const Route = createFileRoute('/')({
@@ -16,6 +17,7 @@ function LandingPage() {
       <ProblemSection />
       <PrefixFamilySection />
       <HowItWorksSection />
+      <ShowcaseSection />
       <CtaSection />
     </main>
   )

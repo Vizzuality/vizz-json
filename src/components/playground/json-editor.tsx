@@ -25,14 +25,6 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="px-3 py-1.5 border-b bg-background flex justify-between items-center">
-        <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-          @@ Config JSON
-        </span>
-        <span className="text-[11px] text-muted-foreground/50">
-          config.json
-        </span>
-      </div>
       <div className="flex-1">
         <Editor
           defaultLanguage="json"
