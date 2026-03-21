@@ -15,6 +15,15 @@ export default function Header() {
 
         <div className="ml-auto flex items-center gap-1">
           <Link
+            to="/guidelines"
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              'no-underline',
+            )}
+          >
+            Guidelines
+          </Link>
+          <Link
             to="/playground"
             className={cn(
               buttonVariants({ variant: 'ghost', size: 'sm' }),
