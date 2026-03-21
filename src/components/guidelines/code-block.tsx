@@ -27,9 +27,8 @@ const HIGHLIGHT_STYLES: Record<HighlightType, string> = {
 
 function classifyPrefix(value: string): HighlightType | undefined {
   if (value.startsWith('@@#params.')) return 'param-ref'
-  if (value.startsWith('@@function') || value === '@@function')
-    return 'function-ref'
-  if (value.startsWith('@@type') || value === '@@type') return 'type-ref'
+  if (value.startsWith('@@function')) return 'function-ref'
+  if (value.startsWith('@@type')) return 'type-ref'
   if (value.startsWith('@@=')) return 'expr-ref'
   if (value.startsWith('@@#GL.')) return 'gl-ref'
   return undefined
@@ -39,7 +38,7 @@ function classifyPrefix(value: string): HighlightType | undefined {
 function segmentJsonLine(line: string): TextSegment[] {
   const segments: TextSegment[] = []
   const regex =
-    /"(@@#params\.[^"]*|@@function:[^"]*|@@function|@@type|@@=[^"]*|@@#GL\.[^"]*)"/g
+    /"(@@#params\.[^"]*|@@function:[^"]*|@@function|@@type:[^"]*|@@type|@@=[^"]*|@@#GL\.[^"]*)"/g
   let lastIndex = 0
   let match: RegExpExecArray | null
 
