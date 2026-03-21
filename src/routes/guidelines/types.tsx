@@ -109,9 +109,7 @@ function GuidelinesTypes() {
       </section>
 
       <section className="mb-12">
-        <h2 className="mb-4 text-xl font-semibold text-foreground">
-          Examples
-        </h2>
+        <h2 className="mb-4 text-xl font-semibold text-foreground">Examples</h2>
 
         <InteractiveExample
           title="ScatterplotLayer"
@@ -146,9 +144,9 @@ function GuidelinesTypes() {
             converter maps the string name to the actual class.
           </li>
           <li>
-            You can combine <code>@@type</code> with <code>@@#params</code>{' '}
-            and <code>@@=</code> in the same object — params resolve first,
-            then the converter instantiates the class with resolved values.
+            You can combine <code>@@type</code> with <code>@@#params</code> and{' '}
+            <code>@@=</code> in the same object — params resolve first, then the
+            converter instantiates the class with resolved values.
           </li>
         </ul>
       </Callout>

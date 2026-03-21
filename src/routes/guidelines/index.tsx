@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
 import { SectionHeader } from '#/components/guidelines/section-header'
-import { CodeBlock } from '#/components/guidelines/code-block'
 import { InteractiveExample } from '#/components/guidelines/interactive-example'
 
 export const Route = createFileRoute('/guidelines/')({
@@ -75,7 +74,8 @@ function GuidelinesOverview() {
           </code>{' '}
           prefixes to reference parameters, call functions, instantiate layers,
           and evaluate expressions — all from JSON. At runtime, these references
-          are resolved into concrete values that MapLibre and deck.gl can render.
+          are resolved into concrete values that MapLibre and deck.gl can
+          render.
         </p>
       </section>
 

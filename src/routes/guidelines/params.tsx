@@ -116,9 +116,7 @@ function GuidelinesParams() {
 
       {/* Interactive examples */}
       <section className="mb-12">
-        <h2 className="mb-4 text-xl font-semibold text-foreground">
-          Examples
-        </h2>
+        <h2 className="mb-4 text-xl font-semibold text-foreground">Examples</h2>
 
         <InteractiveExample
           title="Opacity slider"

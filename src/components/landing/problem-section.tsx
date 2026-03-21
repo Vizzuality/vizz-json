@@ -3,19 +3,19 @@ import { Badge } from '#/components/ui/badge'
 const PAIN_POINTS = [
   {
     heading: 'Static JSON has no feedback loop',
-    body: 'Map configs are opaque until rendered. Changing an opacity or a color means editing raw JSON and refreshing — you can\'t see the effect until the whole cycle completes.',
+    body: "Map configs are opaque until rendered. Changing an opacity or a color means editing raw JSON and refreshing — you can't see the effect until the whole cycle completes.",
   },
   {
     heading: 'Tunable values are buried in config',
-    body: 'Opacity, colors, radii — scattered across deeply nested JSON objects. There\'s no inventory of what\'s adjustable, no defined ranges, and no way to surface them as controls.',
+    body: "Opacity, colors, radii — scattered across deeply nested JSON objects. There's no inventory of what's adjustable, no defined ranges, and no way to surface them as controls.",
   },
   {
-    heading: 'Designers can\'t experiment without developers',
+    heading: "Designers can't experiment without developers",
     body: 'Trying a different palette or adjusting a radius requires someone comfortable editing raw JSON. Non-technical teammates are locked out of the exploration loop.',
   },
   {
     heading: 'No clear boundary between template and state',
-    body: 'When everything is hardcoded, there\'s no way to know what\'s configurable. With explicit parameters, you know exactly what to persist in a URL, save to a database, or sync across sessions.',
+    body: "When everything is hardcoded, there's no way to know what's configurable. With explicit parameters, you know exactly what to persist in a URL, save to a database, or sync across sessions.",
   },
 ]
 

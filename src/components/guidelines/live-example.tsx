@@ -25,10 +25,7 @@ export function LiveExample({
     >
       {(resolved) => (
         <div className="h-64">
-          <MapRenderer
-            resolvedConfig={resolved.value}
-            error={resolved.error}
-          />
+          <MapRenderer resolvedConfig={resolved.value} error={resolved.error} />
         </div>
       )}
     </InteractiveExample>

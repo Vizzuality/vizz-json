@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { SectionHeader } from '#/components/guidelines/section-header'
 import { CodeBlock } from '#/components/guidelines/code-block'
+import { InteractiveExample } from '#/components/guidelines/interactive-example'
 import { Callout } from '#/components/guidelines/callout'
 
 export const Route = createFileRoute('/guidelines/gl-constants')({
@@ -81,6 +82,28 @@ function GuidelinesGLConstants() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section className="mb-12">
+        <h2 className="mb-4 text-xl font-semibold text-foreground">
+          Example
+        </h2>
+        <InteractiveExample
+          title="GL constants in a deck.gl layer"
+          description="GL constants are resolved to their numeric values. Adjust the opacity to see how it combines with the blend parameters."
+          config={{
+            '@@type': 'ScatterplotLayer',
+            id: 'points',
+            opacity: '@@#params.opacity',
+            parameters: {
+              blend: true,
+              blendFunc: ['@@#GL.SRC_ALPHA', '@@#GL.ONE_MINUS_SRC_ALPHA'],
+            },
+          }}
+          paramsConfig={[
+            { key: 'opacity', default: 0.8, min: 0, max: 1, step: 0.05 },
+          ]}
+        />
       </section>
 
       <Callout title="Tips & Gotchas">

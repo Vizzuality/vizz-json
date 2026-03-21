@@ -32,8 +32,9 @@ function GuidelinesExpressions() {
         </p>
         <p className="leading-relaxed text-muted-foreground">
           This is commonly used for <strong>accessor functions</strong> in
-          deck.gl layers (e.g., extracting coordinates from GeoJSON features) and
-          for <strong>data-driven styling</strong> with MapLibre expressions.
+          deck.gl layers (e.g., extracting coordinates from GeoJSON features)
+          and for <strong>data-driven styling</strong> with MapLibre
+          expressions.
         </p>
       </section>
 
@@ -58,9 +59,7 @@ function GuidelinesExpressions() {
       </section>
 
       <section className="mb-12">
-        <h2 className="mb-4 text-xl font-semibold text-foreground">
-          Examples
-        </h2>
+        <h2 className="mb-4 text-xl font-semibold text-foreground">Examples</h2>
 
         <InteractiveExample
           title="Data accessor"
@@ -108,9 +107,8 @@ function GuidelinesExpressions() {
       <Callout title="Tips & Gotchas">
         <ul className="ml-4 list-disc space-y-1">
           <li>
-            Expressions follow{' '}
-            <strong>MapLibre expression syntax</strong> — the same format used
-            in MapLibre style specs.
+            Expressions follow <strong>MapLibre expression syntax</strong> — the
+            same format used in MapLibre style specs.
           </li>
           <li>
             <code>@@=</code> is resolved in <strong>Stage 2</strong> by the

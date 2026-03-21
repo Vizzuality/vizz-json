@@ -14,7 +14,7 @@ function GuidelinesFunctions() {
       <SectionHeader
         title="@@function: — Function Dispatch"
         description="Call registered functions from your JSON config to transform values at resolution time."
-        syntax='@@function:functionName'
+        syntax="@@function:functionName"
       />
 
       <section className="mb-12">
@@ -133,17 +133,16 @@ function GuidelinesFunctions() {
       <Callout title="Tips & Gotchas">
         <ul className="ml-4 list-disc space-y-1">
           <li>
-            Functions must be registered in{' '}
-            <code>converter-config.ts</code> before they can be called.
+            Functions must be registered in <code>converter-config.ts</code>{' '}
+            before they can be called.
           </li>
           <li>
-            The entire object containing{' '}
-            <code>@@function</code> is replaced by the
-            function's return value.
+            The entire object containing <code>@@function</code> is replaced by
+            the function's return value.
           </li>
           <li>
-            Arguments can use <code>@@#params</code> references — params
-            resolve first (Stage 1) before functions are called (Stage 2).
+            Arguments can use <code>@@#params</code> references — params resolve
+            first (Stage 1) before functions are called (Stage 2).
           </li>
         </ul>
       </Callout>

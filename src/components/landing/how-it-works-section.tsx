@@ -80,13 +80,9 @@ function AnimatedParticle({
   // into-hub: visible → gone before outer hex border
   // from-hub: invisible at hub → fades in after outer hex border
   const opacityValues =
-    direction === 'into-hub'
-      ? '1;0.8;0.2;0;0'
-      : '0;0;0.2;0.8;1'
+    direction === 'into-hub' ? '1;0.8;0.2;0;0' : '0;0;0.2;0.8;1'
   const keyTimes =
-    direction === 'into-hub'
-      ? '0;0.2;0.55;0.7;1'
-      : '0;0.3;0.45;0.8;1'
+    direction === 'into-hub' ? '0;0.2;0.55;0.7;1' : '0;0.3;0.45;0.8;1'
 
   return (
     <circle r="1.5" fill={color} filter="url(#particle-glow)">
@@ -341,10 +337,8 @@ export function HowItWorksSection() {
         <HubDiagram />
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
-          Every{' '}
-          <code className="text-primary">@@</code>{' '}
-          prefix is resolved in a single pass — no multi-stage builds, no
-          compilation step.
+          Every <code className="text-primary">@@</code> prefix is resolved in a
+          single pass — no multi-stage builds, no compilation step.
         </p>
       </div>
     </section>

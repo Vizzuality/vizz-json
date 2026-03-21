@@ -10,8 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PlaygroundRouteImport } from './routes/playground'
+import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuidelinesIndexRouteImport } from './routes/guidelines/index'
+import { Route as GuidelinesTypesRouteImport } from './routes/guidelines/types'
+import { Route as GuidelinesParamsRouteImport } from './routes/guidelines/params'
+import { Route as GuidelinesLegendsRouteImport } from './routes/guidelines/legends'
+import { Route as GuidelinesGlConstantsRouteImport } from './routes/guidelines/gl-constants'
+import { Route as GuidelinesFunctionsRouteImport } from './routes/guidelines/functions'
+import { Route as GuidelinesExpressionsRouteImport } from './routes/guidelines/expressions'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as DemoTableRouteImport } from './routes/demo/table'
 import { Route as DemoOrpcTodoRouteImport } from './routes/demo/orpc-todo'
@@ -24,6 +32,11 @@ const PlaygroundRoute = PlaygroundRouteImport.update({
   path: '/playground',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidelinesRoute = GuidelinesRouteImport.update({
+  id: '/guidelines',
+  path: '/guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -33,6 +46,41 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GuidelinesIndexRoute = GuidelinesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GuidelinesRoute,
+} as any)
+const GuidelinesTypesRoute = GuidelinesTypesRouteImport.update({
+  id: '/types',
+  path: '/types',
+  getParentRoute: () => GuidelinesRoute,
+} as any)
+const GuidelinesParamsRoute = GuidelinesParamsRouteImport.update({
+  id: '/params',
+  path: '/params',
+  getParentRoute: () => GuidelinesRoute,
+} as any)
+const GuidelinesLegendsRoute = GuidelinesLegendsRouteImport.update({
+  id: '/legends',
+  path: '/legends',
+  getParentRoute: () => GuidelinesRoute,
+} as any)
+const GuidelinesGlConstantsRoute = GuidelinesGlConstantsRouteImport.update({
+  id: '/gl-constants',
+  path: '/gl-constants',
+  getParentRoute: () => GuidelinesRoute,
+} as any)
+const GuidelinesFunctionsRoute = GuidelinesFunctionsRouteImport.update({
+  id: '/functions',
+  path: '/functions',
+  getParentRoute: () => GuidelinesRoute,
+} as any)
+const GuidelinesExpressionsRoute = GuidelinesExpressionsRouteImport.update({
+  id: '/expressions',
+  path: '/expressions',
+  getParentRoute: () => GuidelinesRoute,
 } as any)
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
@@ -68,12 +116,20 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
   '/api/$': typeof ApiSplatRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/guidelines/expressions': typeof GuidelinesExpressionsRoute
+  '/guidelines/functions': typeof GuidelinesFunctionsRoute
+  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
+  '/guidelines/legends': typeof GuidelinesLegendsRoute
+  '/guidelines/params': typeof GuidelinesParamsRoute
+  '/guidelines/types': typeof GuidelinesTypesRoute
+  '/guidelines/': typeof GuidelinesIndexRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesByTo {
@@ -85,18 +141,33 @@ export interface FileRoutesByTo {
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/guidelines/expressions': typeof GuidelinesExpressionsRoute
+  '/guidelines/functions': typeof GuidelinesFunctionsRoute
+  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
+  '/guidelines/legends': typeof GuidelinesLegendsRoute
+  '/guidelines/params': typeof GuidelinesParamsRoute
+  '/guidelines/types': typeof GuidelinesTypesRoute
+  '/guidelines': typeof GuidelinesIndexRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
   '/api/$': typeof ApiSplatRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
   '/demo/table': typeof DemoTableRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/guidelines/expressions': typeof GuidelinesExpressionsRoute
+  '/guidelines/functions': typeof GuidelinesFunctionsRoute
+  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
+  '/guidelines/legends': typeof GuidelinesLegendsRoute
+  '/guidelines/params': typeof GuidelinesParamsRoute
+  '/guidelines/types': typeof GuidelinesTypesRoute
+  '/guidelines/': typeof GuidelinesIndexRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRouteTypes {
@@ -104,12 +175,20 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/guidelines'
     | '/playground'
     | '/api/$'
     | '/demo/i18n'
     | '/demo/orpc-todo'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/guidelines/expressions'
+    | '/guidelines/functions'
+    | '/guidelines/gl-constants'
+    | '/guidelines/legends'
+    | '/guidelines/params'
+    | '/guidelines/types'
+    | '/guidelines/'
     | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,23 +200,39 @@ export interface FileRouteTypes {
     | '/demo/orpc-todo'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/guidelines/expressions'
+    | '/guidelines/functions'
+    | '/guidelines/gl-constants'
+    | '/guidelines/legends'
+    | '/guidelines/params'
+    | '/guidelines/types'
+    | '/guidelines'
     | '/api/rpc/$'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/guidelines'
     | '/playground'
     | '/api/$'
     | '/demo/i18n'
     | '/demo/orpc-todo'
     | '/demo/table'
     | '/demo/tanstack-query'
+    | '/guidelines/expressions'
+    | '/guidelines/functions'
+    | '/guidelines/gl-constants'
+    | '/guidelines/legends'
+    | '/guidelines/params'
+    | '/guidelines/types'
+    | '/guidelines/'
     | '/api/rpc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  GuidelinesRoute: typeof GuidelinesRouteWithChildren
   PlaygroundRoute: typeof PlaygroundRoute
   ApiSplatRoute: typeof ApiSplatRoute
   DemoI18nRoute: typeof DemoI18nRoute
@@ -156,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaygroundRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guidelines': {
+      id: '/guidelines'
+      path: '/guidelines'
+      fullPath: '/guidelines'
+      preLoaderRoute: typeof GuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -169,6 +271,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/guidelines/': {
+      id: '/guidelines/'
+      path: '/'
+      fullPath: '/guidelines/'
+      preLoaderRoute: typeof GuidelinesIndexRouteImport
+      parentRoute: typeof GuidelinesRoute
+    }
+    '/guidelines/types': {
+      id: '/guidelines/types'
+      path: '/types'
+      fullPath: '/guidelines/types'
+      preLoaderRoute: typeof GuidelinesTypesRouteImport
+      parentRoute: typeof GuidelinesRoute
+    }
+    '/guidelines/params': {
+      id: '/guidelines/params'
+      path: '/params'
+      fullPath: '/guidelines/params'
+      preLoaderRoute: typeof GuidelinesParamsRouteImport
+      parentRoute: typeof GuidelinesRoute
+    }
+    '/guidelines/legends': {
+      id: '/guidelines/legends'
+      path: '/legends'
+      fullPath: '/guidelines/legends'
+      preLoaderRoute: typeof GuidelinesLegendsRouteImport
+      parentRoute: typeof GuidelinesRoute
+    }
+    '/guidelines/gl-constants': {
+      id: '/guidelines/gl-constants'
+      path: '/gl-constants'
+      fullPath: '/guidelines/gl-constants'
+      preLoaderRoute: typeof GuidelinesGlConstantsRouteImport
+      parentRoute: typeof GuidelinesRoute
+    }
+    '/guidelines/functions': {
+      id: '/guidelines/functions'
+      path: '/functions'
+      fullPath: '/guidelines/functions'
+      preLoaderRoute: typeof GuidelinesFunctionsRouteImport
+      parentRoute: typeof GuidelinesRoute
+    }
+    '/guidelines/expressions': {
+      id: '/guidelines/expressions'
+      path: '/expressions'
+      fullPath: '/guidelines/expressions'
+      preLoaderRoute: typeof GuidelinesExpressionsRouteImport
+      parentRoute: typeof GuidelinesRoute
     }
     '/demo/tanstack-query': {
       id: '/demo/tanstack-query'
@@ -215,9 +366,34 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface GuidelinesRouteChildren {
+  GuidelinesExpressionsRoute: typeof GuidelinesExpressionsRoute
+  GuidelinesFunctionsRoute: typeof GuidelinesFunctionsRoute
+  GuidelinesGlConstantsRoute: typeof GuidelinesGlConstantsRoute
+  GuidelinesLegendsRoute: typeof GuidelinesLegendsRoute
+  GuidelinesParamsRoute: typeof GuidelinesParamsRoute
+  GuidelinesTypesRoute: typeof GuidelinesTypesRoute
+  GuidelinesIndexRoute: typeof GuidelinesIndexRoute
+}
+
+const GuidelinesRouteChildren: GuidelinesRouteChildren = {
+  GuidelinesExpressionsRoute: GuidelinesExpressionsRoute,
+  GuidelinesFunctionsRoute: GuidelinesFunctionsRoute,
+  GuidelinesGlConstantsRoute: GuidelinesGlConstantsRoute,
+  GuidelinesLegendsRoute: GuidelinesLegendsRoute,
+  GuidelinesParamsRoute: GuidelinesParamsRoute,
+  GuidelinesTypesRoute: GuidelinesTypesRoute,
+  GuidelinesIndexRoute: GuidelinesIndexRoute,
+}
+
+const GuidelinesRouteWithChildren = GuidelinesRoute._addFileChildren(
+  GuidelinesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  GuidelinesRoute: GuidelinesRouteWithChildren,
   PlaygroundRoute: PlaygroundRoute,
   ApiSplatRoute: ApiSplatRoute,
   DemoI18nRoute: DemoI18nRoute,
