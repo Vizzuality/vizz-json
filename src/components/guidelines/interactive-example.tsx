@@ -80,7 +80,7 @@ export function InteractiveExample({
 
       {/* Three-column layout */}
       <div
-        className={`grid grid-cols-3 divide-x divide-border ${children ? 'border-b border-border' : ''}`}
+        className={`grid grid-cols-[2fr_1fr_2fr] divide-x divide-border ${children ? 'border-b border-border' : ''}`}
       >
         {/* Input pane */}
         <div className="p-4">
