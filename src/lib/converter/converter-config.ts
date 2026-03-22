@@ -1,30 +1,24 @@
-import { JSONConfiguration, JSONConverter } from '@deck.gl/json'
+import { createSuperJSON, type SuperJSON } from 'super-json'
 import { ScatterplotLayer, ColumnLayer, GeoJsonLayer } from '@deck.gl/layers'
 import { GradientLegend } from '#/components/legends/gradient-legend'
 import { ChoroplethLegend } from '#/components/legends/choropleth-legend'
 import { BasicLegend } from '#/components/legends/basic-legend'
 import { registeredFunctions } from './functions'
 
-export function createConverterConfig() {
-  return new JSONConfiguration({
+export function createConverter(): SuperJSON {
+  return createSuperJSON({
     classes: {
       ScatterplotLayer,
       // HexagonLayer is in @deck.gl/aggregation-layers (not installed); ColumnLayer used instead
       ColumnLayer,
       GeoJsonLayer,
     },
-    functions: { ...registeredFunctions },
-    enumerations: {},
-    constants: {},
-    reactComponents: {
+    components: {
       GradientLegend,
       ChoroplethLegend,
       BasicLegend,
     },
+    functions: { ...registeredFunctions },
+    enumerations: {},
   })
-}
-
-export function createConverter() {
-  const configuration = createConverterConfig()
-  return new JSONConverter({ configuration })
 }

@@ -1,14 +1,15 @@
+import type { SuperJSON } from 'super-json'
 import { resolveParams } from './params-resolver'
 import { createConverter } from './converter-config'
 import type { ResolvedParams } from '../types'
 
 export { resolveParams } from './params-resolver'
-export { createConverter, createConverterConfig } from './converter-config'
+export { createConverter } from './converter-config'
 export { registeredFunctions } from './functions'
 
-let converterInstance: ReturnType<typeof createConverter> | null = null
+let converterInstance: SuperJSON | null = null
 
-function getConverter() {
+function getConverter(): SuperJSON {
   if (!converterInstance) {
     converterInstance = createConverter()
   }
@@ -37,7 +38,7 @@ export function resolveConfig(
   const paramsResolved = resolveParams(config, params)
 
   if (hasRemainingPrefixes(paramsResolved)) {
-    return getConverter().convert(paramsResolved) as Record<string, unknown>
+    return getConverter().resolve(paramsResolved)
   }
 
   return paramsResolved

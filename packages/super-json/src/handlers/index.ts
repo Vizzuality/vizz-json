@@ -1,0 +1,6 @@
+export { typeHandler } from './type'
+export { functionHandler } from './function'
+export { expressionHandler } from './expression'
+export { constantHandler } from './constant'
+export { isComponentDescriptor, COMPONENT_DESCRIPTOR } from './type'
+export type { ComponentDescriptor } from './type'
