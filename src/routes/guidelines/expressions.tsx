@@ -13,7 +13,7 @@ function GuidelinesExpressions() {
     <div>
       <SectionHeader
         title="@@=[...] — Inline Expressions"
-        description="Evaluate MapLibre/deck.gl expressions for data-driven styling and dynamic accessors."
+        description="Evaluate MapLibre expressions for data-driven styling and dynamic accessors."
         syntax="@@=[expression]"
       />
 
@@ -27,21 +27,20 @@ function GuidelinesExpressions() {
             @@=
           </code>{' '}
           are treated as inline expressions. The converter strips the prefix and
-          converts the value into a function or expression that deck.gl /
-          MapLibre evaluates at render time.
+          converts the value into a function or expression that MapLibre
+          evaluates at render time.
         </p>
         <p className="leading-relaxed text-muted-foreground">
-          This is commonly used for <strong>accessor functions</strong> in
-          deck.gl layers (e.g., extracting coordinates from GeoJSON features)
-          and for <strong>data-driven styling</strong> with MapLibre
-          expressions.
+          This is commonly used for <strong>accessor functions</strong> (e.g.,
+          extracting coordinates from GeoJSON features) and for{' '}
+          <strong>data-driven styling</strong> with MapLibre expressions.
         </p>
       </section>
 
       <section className="mb-12">
         <h2 className="mb-4 text-xl font-semibold text-foreground">Syntax</h2>
         <CodeBlock
-          title="deck.gl accessor"
+          title="Property accessor"
           value={{ getPosition: '@@=geometry.coordinates' }}
         />
         <div className="mt-4" />
@@ -60,20 +59,6 @@ function GuidelinesExpressions() {
 
       <section className="mb-12">
         <h2 className="mb-4 text-xl font-semibold text-foreground">Examples</h2>
-
-        <InteractiveExample
-          title="Data accessor"
-          description="@@= converts a property path into an accessor function for deck.gl."
-          config={{
-            '@@type': 'ScatterplotLayer',
-            id: 'points',
-            getPosition: '@@=geometry.coordinates',
-            getRadius: '@@#params.radius',
-          }}
-          paramsConfig={[
-            { key: 'radius', default: 5000, min: 1000, max: 20000, step: 500 },
-          ]}
-        />
 
         <InteractiveExample
           title="Conditional styling with case expression"
@@ -115,8 +100,8 @@ function GuidelinesExpressions() {
             JSONConverter.
           </li>
           <li>
-            For deck.gl accessors, the expression after <code>@@=</code> is
-            converted into a function that receives each data feature.
+            For accessors, the expression after <code>@@=</code> is converted
+            into a function that receives each data feature.
           </li>
         </ul>
       </Callout>

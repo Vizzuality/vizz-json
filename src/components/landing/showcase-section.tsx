@@ -17,12 +17,6 @@ const EXAMPLES = [
     pattern: 'choropleth',
   },
   {
-    title: 'Scatterplot Layer',
-    description: 'deck.gl points with dynamic radius & color',
-    gradient: 'from-amber-800/60 via-orange-600/40 to-red-700/50',
-    pattern: 'scatter',
-  },
-  {
     title: 'Earthquake Heatmap',
     description: 'Real-time data-driven density visualization',
     gradient: 'from-rose-800/60 via-pink-600/40 to-fuchsia-700/50',
@@ -92,25 +86,6 @@ function PatternSvg({ pattern }: { readonly pattern: string }) {
             fill="currentColor"
             opacity="0.3"
           />
-        </svg>
-      )
-    case 'scatter':
-      return (
-        <svg
-          className="absolute inset-0 w-full h-full opacity-30"
-          viewBox="0 0 200 120"
-        >
-          {/* Scattered circles representing data points */}
-          <circle cx="30" cy="40" r="8" fill="currentColor" opacity="0.5" />
-          <circle cx="70" cy="25" r="5" fill="currentColor" opacity="0.35" />
-          <circle cx="120" cy="60" r="10" fill="currentColor" opacity="0.45" />
-          <circle cx="160" cy="30" r="6" fill="currentColor" opacity="0.4" />
-          <circle cx="45" cy="80" r="7" fill="currentColor" opacity="0.3" />
-          <circle cx="100" cy="90" r="9" fill="currentColor" opacity="0.5" />
-          <circle cx="150" cy="85" r="5" fill="currentColor" opacity="0.35" />
-          <circle cx="85" cy="45" r="4" fill="currentColor" opacity="0.25" />
-          <circle cx="175" cy="70" r="7" fill="currentColor" opacity="0.4" />
-          <circle cx="55" cy="55" r="6" fill="currentColor" opacity="0.45" />
         </svg>
       )
     case 'heatmap':

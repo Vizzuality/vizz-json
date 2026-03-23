@@ -22,9 +22,9 @@ function GuidelinesGLConstants() {
           How it works
         </h2>
         <p className="mb-4 leading-relaxed text-muted-foreground">
-          Some deck.gl layer properties expect raw WebGL constant values
-          (integers). Instead of using magic numbers, you can reference them by
-          name using the{' '}
+          Some layer properties expect raw WebGL constant values (integers).
+          Instead of using magic numbers, you can reference them by name using
+          the{' '}
           <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm">
             @@#GL.
           </code>{' '}
@@ -38,7 +38,6 @@ function GuidelinesGLConstants() {
         <CodeBlock
           title="GL constant reference"
           value={{
-            '@@type': 'ScatterplotLayer',
             parameters: {
               depthTest: false,
               blend: true,
@@ -87,11 +86,9 @@ function GuidelinesGLConstants() {
       <section className="mb-12">
         <h2 className="mb-4 text-xl font-semibold text-foreground">Example</h2>
         <InteractiveExample
-          title="GL constants in a deck.gl layer"
+          title="GL constants in blend parameters"
           description="GL constants are resolved to their numeric values. Adjust the opacity to see how it combines with the blend parameters."
           config={{
-            '@@type': 'ScatterplotLayer',
-            id: 'points',
             opacity: '@@#params.opacity',
             parameters: {
               blend: true,
@@ -107,8 +104,8 @@ function GuidelinesGLConstants() {
       <Callout title="Tips & Gotchas">
         <ul className="ml-4 list-disc space-y-1">
           <li>
-            Only needed for deck.gl layers that require raw GL constants.
-            MapLibre styles don't use this prefix.
+            Useful for layers that require raw GL constants. MapLibre styles
+            don't typically use this prefix.
           </li>
           <li>
             Constants are resolved in <strong>Stage 2</strong> by the
