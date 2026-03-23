@@ -5,36 +5,35 @@ import {
 } from '#/components/ui/resizable'
 
 type PlaygroundLayoutProps = {
-  readonly topBar: React.ReactNode
+  readonly sidebarHeader: React.ReactNode
   readonly editor: React.ReactNode
   readonly map: React.ReactNode
   readonly params: React.ReactNode
 }
 
 export function PlaygroundLayout({
-  topBar,
+  sidebarHeader,
   editor,
   map,
   params,
 }: PlaygroundLayoutProps) {
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-background">
-      {topBar}
-      <ResizablePanelGroup orientation="horizontal" className="flex-1">
+    <div className="flex h-[calc(100vh-3.5rem)] bg-background">
+      <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel defaultSize={40} minSize={25}>
-          {editor}
+          <div className="flex h-full flex-col">
+            {sidebarHeader}
+            <div className="relative min-h-0 flex-1">{editor}</div>
+          </div>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={60} minSize={30}>
-          <ResizablePanelGroup orientation="vertical">
-            <ResizablePanel defaultSize={70} minSize={30}>
-              {map}
-            </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel defaultSize={30} minSize={15}>
+          <div className="relative h-full">
+            {map}
+            <div className="absolute bottom-4 left-4 z-10 max-h-[60%] w-80 overflow-y-auto rounded-lg border bg-background/95 shadow-lg backdrop-blur">
               {params}
-            </ResizablePanel>
-          </ResizablePanelGroup>
+            </div>
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

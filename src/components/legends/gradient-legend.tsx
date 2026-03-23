@@ -1,11 +1,5 @@
 import type { LegendItem } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
-import { ColorInput } from '#/components/legends/color-input'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '#/components/ui/popover'
 import { Input } from '#/components/ui/input'
 
 type GradientLegendProps = {
@@ -49,53 +43,50 @@ function EditableGradient({
   readonly onChange: (key: string, value: unknown) => void
 }) {
   return (
-    <Popover>
-      <PopoverTrigger
-        type="button"
-        className="w-full rounded-md px-1.5 py-1 -mx-1.5 transition-colors hover:bg-muted/50 cursor-pointer"
-      >
-        <GradientBar items={items} />
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-3" side="bottom" align="start">
-        <div className="flex flex-col gap-3">
-          {items.map((item, i) => {
-            const mapping = paramMapping.get(i)
-            if (!mapping) return null
+    <div className="flex flex-col gap-3">
+      <GradientBar items={items} />
+      {items.map((item, i) => {
+        const mapping = paramMapping.get(i)
+        if (!mapping) return null
 
-            const colorValue = mapping.valueParamKey
-              ? String(values[mapping.valueParamKey] ?? item.value)
-              : undefined
-            const labelValue = mapping.labelParamKey
-              ? String(values[mapping.labelParamKey] ?? item.label)
-              : undefined
+        const colorValue = mapping.valueParamKey
+          ? String(values[mapping.valueParamKey] ?? item.value)
+          : undefined
+        const labelValue = mapping.labelParamKey
+          ? String(values[mapping.labelParamKey] ?? item.label)
+          : undefined
 
-            return (
-              <div key={i} className="flex flex-col gap-2">
-                <span className="text-xs font-medium text-muted-foreground">
-                  {item.label}
-                </span>
-                {colorValue !== undefined && mapping.valueParamKey && (
-                  <ColorInput
-                    value={colorValue}
-                    onChange={(v) => onChange(mapping.valueParamKey!, v)}
-                  />
-                )}
-                {labelValue !== undefined && mapping.labelParamKey && (
-                  <Input
-                    type="text"
-                    value={labelValue}
-                    onChange={(e) =>
-                      onChange(mapping.labelParamKey!, e.target.value)
-                    }
-                    className="h-8 text-xs"
-                  />
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </PopoverContent>
-    </Popover>
+        return (
+          <div key={i} className="flex items-center gap-2">
+            {colorValue !== undefined && mapping.valueParamKey && (
+              <label
+                className="w-6 h-4 rounded-sm shrink-0 cursor-pointer"
+                style={{ backgroundColor: colorValue }}
+              >
+                <input
+                  type="color"
+                  value={colorValue}
+                  onChange={(e) =>
+                    onChange(mapping.valueParamKey!, e.target.value)
+                  }
+                  className="sr-only"
+                />
+              </label>
+            )}
+            {labelValue !== undefined && mapping.labelParamKey && (
+              <Input
+                type="text"
+                value={labelValue}
+                onChange={(e) =>
+                  onChange(mapping.labelParamKey!, e.target.value)
+                }
+                className="h-7 flex-1 text-xs"
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
   )
 }
 

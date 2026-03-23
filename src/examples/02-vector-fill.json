@@ -25,7 +25,7 @@
   },
   "params_config": [
     { "key": "fill_color", "default": "#3b82f6", "group": "legend" },
-    { "key": "outline_color", "default": "#1e3a5f", "group": "legend" },
+    { "key": "outline_color", "default": "#ffffff", "group": "legend" },
     { "key": "opacity", "default": 0.7, "min": 0, "max": 1, "step": 0.05 },
     {
       "key": "visibility",

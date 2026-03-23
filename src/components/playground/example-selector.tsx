@@ -24,46 +24,51 @@ export function ExampleSelector({
   onSelect,
 }: ExampleSelectorProps) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
-        Example:
-      </span>
-      <Select
-        value={selectedIndex}
-        onValueChange={(v: number | null) => {
-          if (v !== null) onSelect(v)
-        }}
-      >
-        <SelectTrigger className="h-8 w-[280px] text-xs">
-          <SelectValue>
-            {(value: number | null) =>
-              value !== null
-                ? examples[value]?.metadata.title
-                : 'Select example'
-            }
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {examples.map((ex, i) => (
-            <SelectItem
-              key={i}
-              value={i}
-              label={ex.metadata.title}
-              className="text-xs"
-            >
+    <Select
+      value={selectedIndex}
+      onValueChange={(v: number | null) => {
+        if (v !== null) onSelect(v)
+      }}
+    >
+      <SelectTrigger size="lg" className="w-full px-3 text-sm font-medium">
+        <SelectValue>
+          {(value: number | null) =>
+            value !== null ? (
               <div className="flex items-center gap-2">
                 <Badge
                   variant="outline"
-                  className={`text-[10px] px-1.5 py-0 ${TIER_COLORS[ex.metadata.tier]}`}
+                  className={`text-[10px] px-1.5 py-0 ${TIER_COLORS[examples[value]?.metadata.tier ?? 'basic']}`}
                 >
-                  {ex.metadata.tier}
+                  {examples[value]?.metadata.tier}
                 </Badge>
-                {ex.metadata.title}
+                {examples[value]?.metadata.title}
               </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+            ) : (
+              'Select example'
+            )
+          }
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {examples.map((ex, i) => (
+          <SelectItem
+            key={i}
+            value={i}
+            label={ex.metadata.title}
+            className="text-sm py-2"
+          >
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="outline"
+                className={`text-[10px] px-1.5 py-0 ${TIER_COLORS[ex.metadata.tier]}`}
+              >
+                {ex.metadata.tier}
+              </Badge>
+              {ex.metadata.title}
+            </div>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }

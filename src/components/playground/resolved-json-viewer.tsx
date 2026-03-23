@@ -12,13 +12,7 @@ export function ResolvedJsonViewer({
   if (!visible || !resolved) return null
 
   return (
-    <div className="absolute inset-0 z-10 bg-background/95 backdrop-blur">
-      <div className="px-3 py-1.5 border-b flex justify-between items-center">
-        <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-          Resolved Output
-        </span>
-        <span className="text-[11px] text-muted-foreground/50">read-only</span>
-      </div>
+    <div className="absolute inset-0 z-10">
       <Editor
         defaultLanguage="json"
         theme="vs-dark"
@@ -26,7 +20,7 @@ export function ResolvedJsonViewer({
         options={{
           readOnly: true,
           minimap: { enabled: false },
-          fontSize: 12,
+          fontSize: 13,
           lineNumbers: 'on',
           scrollBeyondLastLine: false,
           automaticLayout: true,

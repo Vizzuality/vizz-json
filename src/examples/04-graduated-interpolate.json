@@ -71,6 +71,7 @@
     "type": "gradient",
     "items": [
       { "label": "Low population", "value": "@@#params.color_low" },
+      { "label": "Mid population", "value": "@@#params.color_mid" },
       { "label": "High population", "value": "@@#params.color_high" }
     ]
   }

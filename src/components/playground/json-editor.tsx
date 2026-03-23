@@ -25,7 +25,7 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-1">
+      <div className="relative flex-1 overflow-hidden">
         <Editor
           defaultLanguage="json"
           theme="vs-dark"
