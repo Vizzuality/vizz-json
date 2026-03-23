@@ -24,6 +24,14 @@ const EXAMPLES = [
   },
 ] as const
 
+// Deterministic pseudo-random opacity based on grid position (avoids hydration mismatch)
+const RASTER_OPACITIES = Array.from({ length: 5 }, (_, row) =>
+  Array.from({ length: 7 }, (_, col) => {
+    const hash = ((row * 7 + col) * 2654435761) >>> 0
+    return 0.15 + ((hash % 1000) / 1000) * 0.35
+  }),
+)
+
 function PatternSvg({ pattern }: { readonly pattern: string }) {
   switch (pattern) {
     case 'raster':
@@ -33,8 +41,8 @@ function PatternSvg({ pattern }: { readonly pattern: string }) {
           viewBox="0 0 200 120"
         >
           {/* Grid pattern representing raster tiles */}
-          {Array.from({ length: 5 }, (_, row) =>
-            Array.from({ length: 7 }, (_, col) => (
+          {RASTER_OPACITIES.map((rowOpacities, row) =>
+            rowOpacities.map((opacity, col) => (
               <rect
                 key={`${row}-${col}`}
                 x={col * 30 + 2}
@@ -43,7 +51,7 @@ function PatternSvg({ pattern }: { readonly pattern: string }) {
                 height="21"
                 rx="2"
                 fill="currentColor"
-                opacity={0.15 + Math.random() * 0.35}
+                opacity={opacity}
               />
             )),
           )}
