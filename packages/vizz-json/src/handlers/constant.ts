@@ -1,4 +1,4 @@
-import type { ValueHandler, ResolverConfig } from '../index'
+import type { ValueHandler, ResolverConfig } from '../types'
 
 const CONSTANT_PREFIX = '@@#'
 

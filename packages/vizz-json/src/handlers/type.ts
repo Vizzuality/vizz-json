@@ -1,4 +1,4 @@
-import type { KeyHandler, ResolverConfig } from '../index'
+import type { KeyHandler, ResolverConfig } from '../types'
 
 export const COMPONENT_DESCRIPTOR = '$$component' as const
 

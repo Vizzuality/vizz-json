@@ -1,4 +1,4 @@
-import type { ValueHandler } from '../index'
+import type { ValueHandler } from '../types'
 import { getNestedValue } from '../resolver'
 
 const EXPRESSION_PREFIX = '@@='

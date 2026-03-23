@@ -1,4 +1,4 @@
-import type { Handler, KeyHandler, ResolverConfig } from './index'
+import type { Handler, KeyHandler, ResolverConfig } from './types'
 
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   const parts = path.split('.')

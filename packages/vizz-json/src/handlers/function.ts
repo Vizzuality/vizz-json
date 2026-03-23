@@ -1,4 +1,4 @@
-import type { KeyHandler, ResolverConfig } from '../index'
+import type { KeyHandler, ResolverConfig } from '../types'
 
 export const functionHandler: KeyHandler = {
   name: 'function',
