@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "description": "A JSON templating system for geospatial visualization using the @@ prefix convention",
+  "license": "MIT",
   "sideEffects": false,
   "engines": { "node": ">=18" },
   "exports": {
