@@ -9,6 +9,5 @@
     "paths": {},
     "types": []
   },
-  "include": ["src"],
-  "exclude": ["src/__tests__"]
+  "include": ["src"]
 }
