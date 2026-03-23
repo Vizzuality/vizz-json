@@ -54,7 +54,7 @@
             ["linear"],
             ["zoom"],
             "@@#params.transition_start",
-            1,
+            "@@#params.opacity",
             "@@#params.transition_end",
             0
           ]
