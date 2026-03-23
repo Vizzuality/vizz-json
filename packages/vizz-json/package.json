@@ -1,11 +1,13 @@
 {
   "name": "@vizzuality/vizz-json",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "A JSON templating system for geospatial visualization using the @@ prefix convention",
   "license": "MIT",
   "sideEffects": false,
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./react": "./src/react.ts"
@@ -22,7 +24,12 @@
       }
     }
   },
-  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
@@ -33,7 +40,9 @@
     "react": ">=18"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true }
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
