@@ -1,4 +1,5 @@
-import { createVizzJson, type VizzJson } from 'vizz-json'
+import { createVizzJson  } from 'vizz-json'
+import type {VizzJson} from 'vizz-json';
 import { ScatterplotLayer, ColumnLayer, GeoJsonLayer } from '@deck.gl/layers'
 import { GradientLegend } from '#/components/legends/gradient-legend'
 import { ChoroplethLegend } from '#/components/legends/choropleth-legend'

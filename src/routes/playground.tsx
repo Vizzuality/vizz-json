@@ -48,8 +48,6 @@ function PlaygroundPage() {
   // -------------------------------------------------------------------------
   const handleExampleSelect = useCallback((index: number) => {
     const example = examples[index]
-    if (!example) return
-
     setSelectedExampleIndex(index)
     setJsonString(JSON.stringify(example, null, 2))
     setParamValues(buildDefaultParams(example.params_config))
@@ -84,7 +82,7 @@ function PlaygroundPage() {
   // Derive metadata from selected example
   const currentMetadata = useMemo(() => {
     const example = examples[selectedExampleIndex]
-    return example?.metadata ?? null
+    return example.metadata
   }, [selectedExampleIndex])
 
   // Resolve legend_config through params so @@#params references update live

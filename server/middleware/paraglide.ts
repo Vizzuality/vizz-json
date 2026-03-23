@@ -1,8 +1,8 @@
+import type { AsyncLocalStorage } from 'node:async_hooks'
 import { defineEventHandler, toWebRequest } from 'h3'
 import {
   serverAsyncLocalStorage,
   overwriteServerAsyncLocalStorage,
-  disableAsyncLocalStorage,
   extractLocaleFromUrl,
   baseLocale,
 } from '../../src/paraglide/runtime.js'
@@ -19,8 +19,8 @@ import {
  * handlers in this request see the correct locale store.
  */
 export default defineEventHandler(async (event) => {
-  if (!disableAsyncLocalStorage && !serverAsyncLocalStorage) {
-    const { AsyncLocalStorage } = await import('async_hooks')
+  if (!serverAsyncLocalStorage) {
+    const { AsyncLocalStorage } = await import('node:async_hooks')
     overwriteServerAsyncLocalStorage(new AsyncLocalStorage())
   }
 
@@ -29,10 +29,9 @@ export default defineEventHandler(async (event) => {
   const origin = new URL(request.url).origin
 
   // enterWith() is available on the real Node.js AsyncLocalStorage
-  // (not on paraglide's mock, but disableAsyncLocalStorage is false
-  // so the real one is always used)
+  // (not on paraglide's mock)
   const store = serverAsyncLocalStorage as
-    | import('async_hooks').AsyncLocalStorage<{
+    | AsyncLocalStorage<{
         locale: string
         origin: string
         messageCalls: Set<string>
