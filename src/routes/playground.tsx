@@ -7,7 +7,7 @@ import { ParamsPanel } from '#/components/playground/params-panel'
 import { ExampleSelector } from '#/components/playground/example-selector'
 import { StatusIndicator } from '#/components/playground/status-indicator'
 import { ResolvedJsonViewer } from '#/components/playground/resolved-json-viewer'
-import { Button } from '#/components/ui/button'
+import { Switch } from '#/components/ui/switch'
 import { useConverter } from '#/hooks/use-converter'
 import { useDebouncedValue } from '#/hooks/use-debounced-value'
 import { resolveParams } from '#/lib/converter'
@@ -125,28 +125,34 @@ function PlaygroundPage() {
   // -------------------------------------------------------------------------
   return (
     <PlaygroundLayout
-      topBar={
-        <div className="h-12 border-b bg-background px-4 flex items-center gap-4">
-          <ExampleSelector
-            selectedIndex={selectedExampleIndex}
-            onSelect={handleExampleSelect}
-          />
-          <StatusIndicator error={error} />
-          <div className="ml-auto">
-            <Button
-              variant={showResolved ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={handleToggleResolved}
-            >
-              {showResolved ? 'Hide Resolved' : 'Show Resolved'}
-            </Button>
+      sidebarHeader={
+        <div className="flex items-center gap-3 border-b px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <ExampleSelector
+              selectedIndex={selectedExampleIndex}
+              onSelect={handleExampleSelect}
+            />
           </div>
+          <StatusIndicator error={error} />
         </div>
       }
       editor={
-        <div className="h-full relative">
+        <div className="relative isolate h-full overflow-hidden">
           <JsonEditor value={jsonString} onChange={setJsonString} />
           <ResolvedJsonViewer resolved={resolved} visible={showResolved} />
+          <div className="absolute bottom-3 right-3 z-50 flex items-center gap-2 rounded-md border bg-background/90 px-3 py-1.5 shadow-sm backdrop-blur">
+            <label
+              htmlFor="show-resolved"
+              className="text-xs text-muted-foreground"
+            >
+              Resolved
+            </label>
+            <Switch
+              id="show-resolved"
+              checked={showResolved}
+              onCheckedChange={handleToggleResolved}
+            />
+          </div>
         </div>
       }
       map={<MapRenderer resolvedConfig={resolved} error={error} />}
