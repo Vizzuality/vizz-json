@@ -26,7 +26,9 @@ function useConfigKey(
       .join('|')
     const styleId = styles
       ?.map((st) => {
-        const paint = st.paint as Record<string, unknown> | undefined
+        const paint = (st as Record<string, unknown>).paint as
+          | Record<string, unknown>
+          | undefined
         return [st.type, paint ? Object.keys(paint).sort().join(',') : ''].join(
           ':',
         )

@@ -30,7 +30,7 @@ function ifParam({
 }
 
 export const registeredFunctions: Readonly<
-  Record<string, (props: never) => unknown>
+  Record<string, (props: any) => unknown>
 > = {
   setQueryParams,
   ifParam,

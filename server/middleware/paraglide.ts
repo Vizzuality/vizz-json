@@ -1,5 +1,5 @@
 import type { AsyncLocalStorage } from 'node:async_hooks'
-import { defineEventHandler, toWebRequest } from 'h3'
+import { defineEventHandler, getRequestURL } from 'h3'
 import {
   serverAsyncLocalStorage,
   overwriteServerAsyncLocalStorage,
@@ -24,9 +24,9 @@ export default defineEventHandler(async (event) => {
     overwriteServerAsyncLocalStorage(new AsyncLocalStorage())
   }
 
-  const request = toWebRequest(event)
-  const locale = extractLocaleFromUrl(request.url) ?? baseLocale
-  const origin = new URL(request.url).origin
+  const url = getRequestURL(event)
+  const locale = extractLocaleFromUrl(url.href) ?? baseLocale
+  const origin = url.origin
 
   // enterWith() is available on the real Node.js AsyncLocalStorage
   // (not on paraglide's mock)
