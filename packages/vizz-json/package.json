@@ -4,6 +4,12 @@
   "type": "module",
   "description": "A JSON templating system for geospatial visualization using the @@ prefix convention",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vizzuality/vizz-json.git",
+    "directory": "packages/vizz-json"
+  },
+  "keywords": ["json", "templating", "geospatial", "deck.gl", "maplibre", "visualization"],
   "sideEffects": false,
   "engines": {
     "node": ">=18"
