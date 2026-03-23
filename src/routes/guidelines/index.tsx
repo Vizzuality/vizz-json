@@ -58,7 +58,7 @@ function GuidelinesOverview() {
   return (
     <div>
       <SectionHeader
-        title="JSON with Superpowers"
+        title="VizzJson"
         description="Transform static JSON into dynamic, parameterized map configurations using the @@ prefix convention."
       />
 

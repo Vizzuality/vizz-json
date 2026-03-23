@@ -2,7 +2,7 @@ import { createElement, type ComponentType, type ReactNode } from 'react'
 import { isComponentDescriptor } from './handlers/type'
 
 /**
- * Recursively renders resolved super-json output.
+ * Recursively renders resolved vizz-json output.
  * Finds `$$component` descriptors and renders them via React.createElement.
  * Non-descriptor values are returned as-is (strings, numbers, null).
  */

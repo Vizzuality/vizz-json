@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { createSuperJSON } from '../index'
+import { createVizzJson } from '../index'
 
 describe('resolver — recursive walker', () => {
-  const superJSON = createSuperJSON({})
+  const vizzJson = createVizzJson({})
 
   it('passes through primitives unchanged', () => {
-    expect(superJSON.resolve({ a: 1, b: 'hello', c: true, d: null })).toEqual({
+    expect(vizzJson.resolve({ a: 1, b: 'hello', c: true, d: null })).toEqual({
       a: 1,
       b: 'hello',
       c: true,
@@ -15,23 +15,23 @@ describe('resolver — recursive walker', () => {
 
   it('recurses into nested objects', () => {
     const input = { outer: { inner: { value: 42 } } }
-    expect(superJSON.resolve(input)).toEqual({ outer: { inner: { value: 42 } } })
+    expect(vizzJson.resolve(input)).toEqual({ outer: { inner: { value: 42 } } })
   })
 
   it('recurses into arrays', () => {
     const input = { items: [1, 'two', { nested: true }] }
-    expect(superJSON.resolve(input)).toEqual({ items: [1, 'two', { nested: true }] })
+    expect(vizzJson.resolve(input)).toEqual({ items: [1, 'two', { nested: true }] })
   })
 
   it('does not mutate the input', () => {
     const input = { a: { b: 1 } }
-    const result = superJSON.resolve(input)
+    const result = vizzJson.resolve(input)
     expect(result).not.toBe(input)
     expect(result.a).not.toBe(input.a)
   })
 
   it('handles empty objects and arrays', () => {
-    expect(superJSON.resolve({})).toEqual({})
-    expect(superJSON.resolve({ arr: [], obj: {} })).toEqual({ arr: [], obj: {} })
+    expect(vizzJson.resolve({})).toEqual({})
+    expect(vizzJson.resolve({ arr: [], obj: {} })).toEqual({ arr: [], obj: {} })
   })
 })

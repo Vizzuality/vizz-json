@@ -139,7 +139,7 @@ export function HeroSection() {
           Vizzuality — Frontend Team
         </Badge>
         <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
-          JSON with <span className="text-primary">Superpowers</span>
+          Vizz<span className="text-primary">Json</span>
         </h1>
         <p className="mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground">
           The <code className="font-mono text-primary">@@</code> convention for

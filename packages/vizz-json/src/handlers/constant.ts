@@ -19,7 +19,7 @@ export const constantHandler: ValueHandler = {
     }
 
     throw new Error(
-      `[super-json] Unknown constant: "${value}". Register it in enumerations.`,
+      `[vizz-json] Unknown constant: "${value}". Register it in enumerations.`,
     )
   },
 }

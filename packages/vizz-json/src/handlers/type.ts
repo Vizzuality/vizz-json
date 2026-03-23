@@ -30,6 +30,6 @@ export const typeHandler: KeyHandler = {
       return { [COMPONENT_DESCRIPTOR]: Component, props }
     }
 
-    throw new Error(`[super-json] Unknown type: "${typeName}". Register it in classes or components.`)
+    throw new Error(`[vizz-json] Unknown type: "${typeName}". Register it in classes or components.`)
   },
 }

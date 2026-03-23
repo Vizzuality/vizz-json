@@ -1,4 +1,4 @@
-import type { SuperJSON } from 'super-json'
+import type { VizzJson } from 'vizz-json'
 import { resolveParams } from './params-resolver'
 import { createConverter } from './converter-config'
 import type { ResolvedParams } from '../types'
@@ -7,9 +7,9 @@ export { resolveParams } from './params-resolver'
 export { createConverter } from './converter-config'
 export { registeredFunctions } from './functions'
 
-let converterInstance: SuperJSON | null = null
+let converterInstance: VizzJson | null = null
 
-function getConverter(): SuperJSON {
+function getConverter(): VizzJson {
   if (!converterInstance) {
     converterInstance = createConverter()
   }

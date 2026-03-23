@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createSuperJSON } from '../index'
+import { createVizzJson } from '../index'
 
 // ── @@type handler ─────────────────────────────────────────────────
 
@@ -11,22 +11,22 @@ describe('@@type handler — classes', () => {
     }
   }
 
-  const superJSON = createSuperJSON({ classes: { FakeLayer } })
+  const vizzJson = createVizzJson({ classes: { FakeLayer } })
 
   it('instantiates a registered class with resolved props', () => {
     const input = { '@@type': 'FakeLayer', id: 'test', opacity: 0.8 }
-    const result = superJSON.resolve(input) as FakeLayer
+    const result = vizzJson.resolve(input) as FakeLayer
     expect(result).toBeInstanceOf(FakeLayer)
     expect(result.props).toEqual({ id: 'test', opacity: 0.8 })
   })
 
   it('throws for an unregistered type', () => {
     const input = { '@@type': 'UnknownLayer', id: 'test' }
-    expect(() => superJSON.resolve(input)).toThrow('Unknown type: "UnknownLayer"')
+    expect(() => vizzJson.resolve(input)).toThrow('Unknown type: "UnknownLayer"')
   })
 
   it('recursively resolves props before instantiating', () => {
-    const superJSONWithFns = createSuperJSON({
+    const vizzJsonWithFns = createVizzJson({
       classes: { FakeLayer },
       functions: { buildUrl: (props: any) => `${props.base}/api` },
     })
@@ -35,7 +35,7 @@ describe('@@type handler — classes', () => {
       '@@type': 'FakeLayer',
       url: { '@@function': 'buildUrl', base: 'https://example.com' },
     }
-    const result = superJSONWithFns.resolve(input) as FakeLayer
+    const result = vizzJsonWithFns.resolve(input) as FakeLayer
     expect(result.props.url).toBe('https://example.com/api')
   })
 })
@@ -45,7 +45,7 @@ describe('@@type handler — components', () => {
     return null
   }
 
-  const superJSON = createSuperJSON({ components: { GradientLegend } })
+  const vizzJson = createVizzJson({ components: { GradientLegend } })
 
   it('returns a $$component descriptor for registered components', () => {
     const input = {
@@ -53,7 +53,7 @@ describe('@@type handler — components', () => {
       title: 'Population',
       colors: ['#eff6ff', '#1e3a8a'],
     }
-    const result = superJSON.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input) as Record<string, unknown>
     expect(result).toHaveProperty('$$component', GradientLegend)
     expect(result).toHaveProperty('props', {
       title: 'Population',
@@ -69,7 +69,7 @@ describe('@@type handler — components', () => {
       }
     }
 
-    const sj = createSuperJSON({
+    const sj = createVizzJson({
       classes: { GradientLegend: GradientLegendClass as any },
       components: { GradientLegend },
     })
@@ -90,7 +90,7 @@ describe('@@function handler', () => {
     return condition ? t : e
   }
 
-  const superJSON = createSuperJSON({ functions: { setQueryParams, ifParam } })
+  const vizzJson = createVizzJson({ functions: { setQueryParams, ifParam } })
 
   it('calls a registered function with props', () => {
     const input = {
@@ -98,7 +98,7 @@ describe('@@function handler', () => {
       url: 'https://api.example.com/tiles',
       query: { format: 'mvt', zoom: '5' },
     }
-    expect(superJSON.resolve(input)).toBe(
+    expect(vizzJson.resolve(input)).toBe(
       'https://api.example.com/tiles?format=mvt&zoom=5',
     )
   })
@@ -110,23 +110,23 @@ describe('@@function handler', () => {
       then: 'yes',
       else: 'no',
     }
-    expect(superJSON.resolve(input)).toBe('yes')
+    expect(vizzJson.resolve(input)).toBe('yes')
   })
 
   it('throws for an unregistered function', () => {
     const input = { '@@function': 'unknown' }
-    expect(() => superJSON.resolve(input)).toThrow('Unknown function: "unknown"')
+    expect(() => vizzJson.resolve(input)).toThrow('Unknown function: "unknown"')
   })
 })
 
 // ── @@= expression handler ─────────────────────────────────────────
 
 describe('@@= expression handler', () => {
-  const superJSON = createSuperJSON({})
+  const vizzJson = createVizzJson({})
 
   it('creates an accessor function for dot-path expressions', () => {
     const input = { getPosition: '@@=geometry.coordinates' }
-    const result = superJSON.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input) as Record<string, unknown>
     const accessor = result.getPosition as (d: Record<string, unknown>) => unknown
 
     expect(typeof accessor).toBe('function')
@@ -135,7 +135,7 @@ describe('@@= expression handler', () => {
 
   it('handles single-level paths', () => {
     const input = { getValue: '@@=value' }
-    const result = superJSON.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input) as Record<string, unknown>
     const accessor = result.getValue as (d: Record<string, unknown>) => unknown
 
     expect(accessor({ value: 42 })).toBe(42)
@@ -143,7 +143,7 @@ describe('@@= expression handler', () => {
 
   it('returns undefined for missing paths', () => {
     const input = { getValue: '@@=deep.missing.path' }
-    const result = superJSON.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input) as Record<string, unknown>
     const accessor = result.getValue as (d: Record<string, unknown>) => unknown
 
     expect(accessor({ other: 'value' })).toBeUndefined()
@@ -153,7 +153,7 @@ describe('@@= expression handler', () => {
 // ── @@# constant handler ───────────────────────────────────────────
 
 describe('@@# constant handler', () => {
-  const superJSON = createSuperJSON({
+  const vizzJson = createVizzJson({
     enumerations: {
       GL: {
         SRC_ALPHA: 0x0302,
@@ -165,7 +165,7 @@ describe('@@# constant handler', () => {
 
   it('resolves GL constants from enumerations', () => {
     const input = { blendSrc: '@@#GL.SRC_ALPHA' }
-    expect(superJSON.resolve(input)).toEqual({ blendSrc: 0x0302 })
+    expect(vizzJson.resolve(input)).toEqual({ blendSrc: 0x0302 })
   })
 
   it('resolves multiple constants', () => {
@@ -175,7 +175,7 @@ describe('@@# constant handler', () => {
         blendDst: '@@#GL.ONE_MINUS_SRC_ALPHA',
       },
     }
-    expect(superJSON.resolve(input)).toEqual({
+    expect(vizzJson.resolve(input)).toEqual({
       parameters: {
         blendSrc: 0x0302,
         blendDst: 0x0303,
@@ -185,7 +185,7 @@ describe('@@# constant handler', () => {
 
   it('throws for an unregistered constant', () => {
     const input = { value: '@@#GL.UNKNOWN' }
-    expect(() => superJSON.resolve(input)).toThrow('Unknown constant')
+    expect(() => vizzJson.resolve(input)).toThrow('Unknown constant')
   })
 })
 
@@ -199,7 +199,7 @@ describe('mixed handlers in a single spec', () => {
     }
   }
 
-  const superJSON = createSuperJSON({
+  const vizzJson = createVizzJson({
     classes: { ScatterplotLayer },
     enumerations: { GL: { SRC_ALPHA: 0x0302 } },
   })
@@ -211,7 +211,7 @@ describe('mixed handlers in a single spec', () => {
       getPosition: '@@=geometry.coordinates',
       opacity: 0.8,
     }
-    const result = superJSON.resolve(input) as ScatterplotLayer
+    const result = vizzJson.resolve(input) as ScatterplotLayer
     expect(result).toBeInstanceOf(ScatterplotLayer)
     expect(typeof result.props.getPosition).toBe('function')
     expect(result.props.id).toBe('earthquakes')

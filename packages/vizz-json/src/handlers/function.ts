@@ -7,7 +7,7 @@ export const functionHandler: KeyHandler = {
   resolve(fnName: string, props: Record<string, unknown>, config: ResolverConfig): unknown {
     const fn = config.functions?.[fnName]
     if (!fn) {
-      throw new Error(`[super-json] Unknown function: "${fnName}". Register it in functions.`)
+      throw new Error(`[vizz-json] Unknown function: "${fnName}". Register it in functions.`)
     }
     return fn(props as never)
   },

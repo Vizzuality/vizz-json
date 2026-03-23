@@ -10,7 +10,7 @@ export default function Header() {
       <nav aria-label="Main navigation" className="flex h-14 items-center px-6">
         <Link to="/" className="flex items-center gap-1.5 no-underline">
           <span className="font-mono text-sm text-primary">{'{ @@ }'}</span>
-          <span className="font-semibold text-foreground">Superpowers</span>
+          <span className="font-semibold text-foreground">VizzJson</span>
         </Link>
 
         <div className="ml-auto flex items-center gap-1">

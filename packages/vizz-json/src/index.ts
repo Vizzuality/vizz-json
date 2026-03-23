@@ -36,7 +36,7 @@ export type ResolverConfig = {
   readonly enumerations?: Record<string, Record<string, unknown>>
 }
 
-export type SuperJSON = {
+export type VizzJson = {
   readonly resolve: (json: Record<string, unknown>) => Record<string, unknown>
 }
 
@@ -51,10 +51,10 @@ const builtinHandlers: readonly Handler[] = [
 
 // ── Factory ────────────────────────────────────────────────────────
 
-export function createSuperJSON(
+export function createVizzJson(
   config: ResolverConfig,
   extraHandlers: readonly Handler[] = [],
-): SuperJSON {
+): VizzJson {
   const handlers = [...extraHandlers, ...builtinHandlers]
 
   return {

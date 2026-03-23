@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createSuperJSON } from '../index'
+import { createVizzJson } from '../index'
 
 describe('integration — deck.gl scatterplot spec', () => {
   class ScatterplotLayer {
@@ -9,7 +9,7 @@ describe('integration — deck.gl scatterplot spec', () => {
     }
   }
 
-  const superJSON = createSuperJSON({
+  const vizzJson = createVizzJson({
     classes: { ScatterplotLayer },
   })
 
@@ -28,7 +28,7 @@ describe('integration — deck.gl scatterplot spec', () => {
       pickable: true,
     }
 
-    const result = superJSON.resolve(input) as ScatterplotLayer
+    const result = vizzJson.resolve(input) as ScatterplotLayer
     expect(result).toBeInstanceOf(ScatterplotLayer)
     expect(result.props.id).toBe('earthquakes-scatter')
     expect(typeof result.props.getPosition).toBe('function')
@@ -42,7 +42,7 @@ describe('integration — deck.gl scatterplot spec', () => {
 })
 
 describe('integration — MapLibre config passthrough', () => {
-  const superJSON = createSuperJSON({})
+  const vizzJson = createVizzJson({})
 
   it('passes through a MapLibre config unchanged (no @@ prefixes)', () => {
     const input = {
@@ -64,7 +64,7 @@ describe('integration — MapLibre config passthrough', () => {
       ],
     }
 
-    expect(superJSON.resolve(input)).toEqual(input)
+    expect(vizzJson.resolve(input)).toEqual(input)
   })
 })
 
@@ -77,7 +77,7 @@ describe('integration — function in nested config', () => {
     return `${url}?${params.toString()}`
   }
 
-  const superJSON = createSuperJSON({ functions: { setQueryParams } })
+  const vizzJson = createVizzJson({ functions: { setQueryParams } })
 
   it('resolves @@function nested within a config object', () => {
     const input = {
@@ -93,7 +93,7 @@ describe('integration — function in nested config', () => {
       },
     }
 
-    const result = superJSON.resolve(input) as Record<string, any>
+    const result = vizzJson.resolve(input) as Record<string, any>
     expect(result.source.tiles[0]).toBe(
       'https://tiles.example.com/{z}/{x}/{y}.png?token=abc123',
     )
@@ -108,7 +108,7 @@ describe('integration — component descriptors', () => {
     return null
   }
 
-  const superJSON = createSuperJSON({
+  const vizzJson = createVizzJson({
     components: { GradientLegend, BasicLegend },
   })
 
@@ -118,7 +118,7 @@ describe('integration — component descriptors', () => {
       title: 'Population',
       colors: ['#eff6ff', '#1e3a8a'],
     }
-    const result = superJSON.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input) as Record<string, unknown>
     expect(result).toHaveProperty('$$component', GradientLegend)
     expect(result).toHaveProperty('props.title', 'Population')
   })
@@ -126,7 +126,7 @@ describe('integration — component descriptors', () => {
 
 describe('integration — custom handler', () => {
   it('supports extra handlers registered at creation', () => {
-    const superJSON = createSuperJSON({}, [
+    const vizzJson = createVizzJson({}, [
       {
         name: 'custom-prefix',
         type: 'value' as const,
@@ -136,11 +136,11 @@ describe('integration — custom handler', () => {
     ])
 
     const input = { value: '@@custom:hello' }
-    expect(superJSON.resolve(input)).toEqual({ value: 'resolved:hello' })
+    expect(vizzJson.resolve(input)).toEqual({ value: 'resolved:hello' })
   })
 
   it('extra handlers take priority over built-in handlers', () => {
-    const superJSON = createSuperJSON({}, [
+    const vizzJson = createVizzJson({}, [
       {
         name: 'override-expression',
         type: 'value' as const,
@@ -150,6 +150,6 @@ describe('integration — custom handler', () => {
     ])
 
     const input = { accessor: '@@=geometry.coordinates' }
-    expect(superJSON.resolve(input)).toEqual({ accessor: 'custom:@@=geometry.coordinates' })
+    expect(vizzJson.resolve(input)).toEqual({ accessor: 'custom:@@=geometry.coordinates' })
   })
 })
