@@ -1,6 +1,6 @@
 {
   "name": "@vizzuality/vizz-json",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "A JSON templating system for geospatial visualization using the @@ prefix convention",
   "license": "MIT",

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.3.0...@vizzuality/vizz-json-v0.3.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* **vizz-json:** add homepage and bugs URLs to package.json ([9beacfc](https://github.com/Vizzuality/vizz-json/commit/9beacfc0a407b3e7a3ebd537533c43da263762f7))
+
 ## [0.3.0](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.2.0...@vizzuality/vizz-json-v0.3.0) (2026-03-23)
 
 
