@@ -51,6 +51,7 @@
     "build": "tsup",
     "test": "vitest run",
     "lint": "eslint",
+    "check": "prettier --write . && eslint --fix",
     "typecheck": "tsc --noEmit"
   },
   "peerDependencies": {

@@ -1,0 +1,18 @@
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id = "lint-fix",
+    name = "lint & format (auto-fix)",
+    language = "system",
+    entry = "pnpm -r check",
+    pass_filenames = false,
+  },
+  {
+    id = "typecheck",
+    name = "typecheck",
+    language = "system",
+    entry = "pnpm -r typecheck",
+    pass_filenames = false,
+  },
+]
