@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.3.1...@vizzuality/vizz-json-v0.3.2) (2026-03-23)
+
+
+### Bug Fixes
+
+* **vizz-json:** use standard bugs object format in package.json ([c1bab20](https://github.com/Vizzuality/vizz-json/commit/c1bab20a20eac58b080108b60d62baa8ec6076ac))
+
 ## [0.3.1](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.3.0...@vizzuality/vizz-json-v0.3.1) (2026-03-23)
 
 
