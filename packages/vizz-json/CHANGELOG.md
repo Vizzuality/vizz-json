@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.2.0...@vizzuality/vizz-json-v0.3.0) (2026-03-23)
+
+
+### Features
+
+* **vizz-json:** add repository and keywords to package.json ([65edf4f](https://github.com/Vizzuality/vizz-json/commit/65edf4f6c4116ec21c7cb0746ebe88f115ddf4a3))
+
 ## [0.2.0](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.1.0...@vizzuality/vizz-json-v0.2.0) (2026-03-23)
 
 
