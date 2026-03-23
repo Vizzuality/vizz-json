@@ -28,12 +28,12 @@ const resolved = vizzJson.resolve({
 
 ### Prefix Convention
 
-| Prefix | Purpose | Example |
-|--------|---------|---------|
-| `@@type` | Instantiate a class or component | `{ "@@type": "ScatterplotLayer", "opacity": 0.8 }` |
-| `@@function` | Call a registered function | `{ "@@function": "setQueryParams", "url": "..." }` |
-| `@@=` | Create an accessor function | `"@@=geometry.coordinates"` |
-| `@@#` | Resolve an enumeration constant | `"@@#GL.SRC_ALPHA"` |
+| Prefix       | Purpose                          | Example                                            |
+| ------------ | -------------------------------- | -------------------------------------------------- |
+| `@@type`     | Instantiate a class or component | `{ "@@type": "ScatterplotLayer", "opacity": 0.8 }` |
+| `@@function` | Call a registered function       | `{ "@@function": "setQueryParams", "url": "..." }` |
+| `@@=`        | Create an accessor function      | `"@@=geometry.coordinates"`                        |
+| `@@#`        | Resolve an enumeration constant  | `"@@#GL.SRC_ALPHA"`                                |
 
 ### React Components
 

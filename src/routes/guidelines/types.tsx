@@ -13,7 +13,7 @@ function GuidelinesTypes() {
     <div>
       <SectionHeader
         title="@@type: — Class Instantiation"
-        description="Instantiate deck.gl layers and React components directly from JSON."
+        description="Instantiate registered classes and React components directly from JSON."
         syntax='"@@type": "ClassName"'
       />
 
@@ -34,14 +34,13 @@ function GuidelinesTypes() {
       <section className="mb-12">
         <h2 className="mb-4 text-xl font-semibold text-foreground">Syntax</h2>
         <CodeBlock
-          title="Layer instantiation"
+          title="Component instantiation"
           value={{
-            '@@type': 'ScatterplotLayer',
-            id: 'earthquakes',
-            data: 'https://example.com/data.geojson',
-            getPosition: '@@=geometry.coordinates',
-            getRadius: 5000,
-            getFillColor: [239, 68, 68],
+            '@@type': 'BasicLegend',
+            items: [
+              { label: 'Forest', value: '#22c55e' },
+              { label: 'Water', value: '#3b82f6' },
+            ],
           }}
         />
       </section>
@@ -52,34 +51,6 @@ function GuidelinesTypes() {
         </h2>
 
         <h3 className="mb-2 mt-4 text-lg font-semibold text-foreground">
-          deck.gl Layers
-        </h3>
-        <div className="overflow-hidden rounded-lg border border-border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="px-4 py-2 text-left font-medium">Class</th>
-                <th className="px-4 py-2 text-left font-medium">Package</th>
-              </tr>
-            </thead>
-            <tbody className="text-muted-foreground">
-              <tr className="border-b border-border">
-                <td className="px-4 py-2 font-mono">ScatterplotLayer</td>
-                <td className="px-4 py-2">@deck.gl/layers</td>
-              </tr>
-              <tr className="border-b border-border">
-                <td className="px-4 py-2 font-mono">ColumnLayer</td>
-                <td className="px-4 py-2">@deck.gl/layers</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-mono">GeoJsonLayer</td>
-                <td className="px-4 py-2">@deck.gl/layers</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3 className="mb-2 mt-6 text-lg font-semibold text-foreground">
           React Components
         </h3>
         <div className="overflow-hidden rounded-lg border border-border">
@@ -112,23 +83,18 @@ function GuidelinesTypes() {
         <h2 className="mb-4 text-xl font-semibold text-foreground">Examples</h2>
 
         <InteractiveExample
-          title="ScatterplotLayer"
-          description="A deck.gl scatterplot with parameterized radius and color."
+          title="BasicLegend"
+          description="A legend component with parameterized colors."
           config={{
-            '@@type': 'ScatterplotLayer',
-            id: 'earthquakes',
-            data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson',
-            getPosition: '@@=geometry.coordinates',
-            getRadius: '@@#params.radius',
-            getFillColor: '@@#params.point_color',
-            opacity: '@@#params.opacity',
-            radiusMinPixels: 2,
-            radiusMaxPixels: 20,
+            '@@type': 'BasicLegend',
+            items: [
+              { label: 'Category A', value: '@@#params.color_a' },
+              { label: 'Category B', value: '@@#params.color_b' },
+            ],
           }}
           paramsConfig={[
-            { key: 'radius', default: 5000, min: 1000, max: 50000, step: 1000 },
-            { key: 'point_color', default: '#ef4444' },
-            { key: 'opacity', default: 0.8, min: 0, max: 1, step: 0.05 },
+            { key: 'color_a', default: '#22c55e' },
+            { key: 'color_b', default: '#3b82f6' },
           ]}
         />
       </section>

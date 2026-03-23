@@ -22,7 +22,7 @@ const PREFIXES = [
   {
     prefix: '@@type: ClassName',
     description: 'Instantiate a class or React component',
-    example: '"@@type": "ScatterplotLayer"',
+    example: '"@@type": "BasicLegend"',
     link: '/guidelines/types',
   },
   {
@@ -73,8 +73,7 @@ function GuidelinesOverview() {
           </code>{' '}
           prefixes to reference parameters, call functions, instantiate layers,
           and evaluate expressions — all from JSON. At runtime, these references
-          are resolved into concrete values that MapLibre and deck.gl can
-          render.
+          are resolved into concrete values that MapLibre can render.
         </p>
       </section>
 

@@ -1,8 +1,6 @@
 import { useMemo } from 'react'
-import { Map, Source, Layer, useControl } from 'react-map-gl/maplibre'
+import { Map, Source, Layer } from 'react-map-gl/maplibre'
 import type { SourceProps, LayerProps } from 'react-map-gl/maplibre'
-import { MapboxOverlay } from '@deck.gl/mapbox'
-import type { MapboxOverlayProps } from '@deck.gl/mapbox'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const SOURCE_ID = 'playground-source'
@@ -38,14 +36,6 @@ function useConfigKey(
   }, [source, styles])
 }
 
-function DeckGlOverlay(props: MapboxOverlayProps) {
-  const overlay = useControl(
-    () => new MapboxOverlay({ ...props, interleaved: true }),
-  )
-  overlay.setProps({ ...props, interleaved: true })
-  return null
-}
-
 type MapRendererProps = {
   readonly resolvedConfig: Record<string, unknown> | null
   readonly error: string | null
@@ -63,7 +53,6 @@ export function MapRenderer({ resolvedConfig, error }: MapRendererProps) {
         style={{ width: '100%', height: '100%' }}
         mapStyle={BASEMAP_STYLE}
       >
-        <DeckGlOverlay layers={[]} />
         {source && styles && (
           <Source key={configKey} {...source} id={SOURCE_ID}>
             {styles.map((style, i) => (

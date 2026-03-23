@@ -17,7 +17,7 @@ const PREFIXES = [
   {
     prefix: '@@type:',
     description: 'Class or React component instantiation',
-    example: '"@@type": "ScatterplotLayer"',
+    example: '"@@type": "BasicLegend"',
     colorClass: 'text-chart-3',
   },
   {

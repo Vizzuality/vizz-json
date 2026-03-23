@@ -8,7 +8,7 @@ const INPUTS = [
 ]
 
 const OUTPUTS = [
-  { label: 'deck.gl Layers', sublabel: 'native JS objects', y: 70 },
+  { label: 'Layer Instances', sublabel: 'native JS objects', y: 70 },
   { label: 'MapLibre Style', sublabel: 'map configuration', y: 180 },
   { label: 'Legend Config', sublabel: 'React components', y: 290 },
 ]
@@ -233,7 +233,7 @@ function HubDiagram() {
       viewBox="0 0 700 400"
       className="mx-auto w-full max-w-3xl"
       role="img"
-      aria-label="Diagram showing how resolveConfig processes @@ prefixes into deck.gl layers, MapLibre styles, and legend configs in a single recursive pass"
+      aria-label="Diagram showing how resolveConfig processes @@ prefixes into layer instances, MapLibre styles, and legend configs in a single recursive pass"
     >
       <defs>
         <filter id="particle-glow">

@@ -9,8 +9,7 @@ vi.mock('#/components/playground/param-control', () => ({
   ),
 }))
 
-// Mock the converter module to avoid deck.gl/WebGL issues in jsdom
-// (deck.gl bundles its own React which causes duplicate-React hook errors)
+// Mock the converter module to avoid WebGL issues in jsdom
 vi.mock('#/lib/converter', () => ({
   resolveConfig: (
     config: Record<string, unknown>,

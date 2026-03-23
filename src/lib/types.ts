@@ -24,7 +24,7 @@ export type LayerConfig = {
 }
 
 export type LayerSchema = {
-  readonly config: LayerConfig | Record<string, unknown> // Record for deck.gl configs
+  readonly config: LayerConfig | Record<string, unknown>
   readonly params_config: readonly ParamConfig[]
   readonly legend_config?: LegendConfig
 }

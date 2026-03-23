@@ -28,7 +28,7 @@ describe('CodeBlock', () => {
   })
 
   it('highlights @@type prefixes', () => {
-    const json = { '@@type': 'ScatterplotLayer', id: 'test' }
+    const json = { '@@type': 'BasicLegend', id: 'test' }
     const { container } = render(<CodeBlock value={json} />)
     const highlighted = container.querySelector('[data-highlight="type-ref"]')
     expect(highlighted).toBeInTheDocument()

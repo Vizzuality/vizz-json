@@ -1,6 +1,5 @@
 import { createVizzJson } from '@vizzuality/vizz-json'
 import type { VizzJson } from '@vizzuality/vizz-json'
-import { ScatterplotLayer, ColumnLayer, GeoJsonLayer } from '@deck.gl/layers'
 import { GradientLegend } from '#/components/legends/gradient-legend'
 import { ChoroplethLegend } from '#/components/legends/choropleth-legend'
 import { BasicLegend } from '#/components/legends/basic-legend'
@@ -8,12 +7,7 @@ import { registeredFunctions } from './functions'
 
 export function createConverter(): VizzJson {
   return createVizzJson({
-    classes: {
-      ScatterplotLayer,
-      // HexagonLayer is in @deck.gl/aggregation-layers (not installed); ColumnLayer used instead
-      ColumnLayer,
-      GeoJsonLayer,
-    },
+    classes: {},
     components: {
       GradientLegend,
       ChoroplethLegend,
