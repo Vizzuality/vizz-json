@@ -20,7 +20,9 @@ describe('resolver — recursive walker', () => {
 
   it('recurses into arrays', () => {
     const input = { items: [1, 'two', { nested: true }] }
-    expect(vizzJson.resolve(input)).toEqual({ items: [1, 'two', { nested: true }] })
+    expect(vizzJson.resolve(input)).toEqual({
+      items: [1, 'two', { nested: true }],
+    })
   })
 
   it('does not mutate the input', () => {

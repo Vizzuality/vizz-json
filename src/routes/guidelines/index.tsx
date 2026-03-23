@@ -1,4 +1,4 @@
-import { createFileRoute, Link  } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { SectionHeader } from '#/components/guidelines/section-header'
 import { InteractiveExample } from '#/components/guidelines/interactive-example'
 

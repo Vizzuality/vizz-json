@@ -7,7 +7,9 @@ export type ComponentDescriptor = {
   readonly props: Record<string, unknown>
 }
 
-export function isComponentDescriptor(value: unknown): value is ComponentDescriptor {
+export function isComponentDescriptor(
+  value: unknown,
+): value is ComponentDescriptor {
   return (
     value !== null &&
     typeof value === 'object' &&
@@ -19,7 +21,11 @@ export const typeHandler: KeyHandler = {
   name: 'type',
   type: 'key',
   key: '@@type',
-  resolve(typeName: string, props: Record<string, unknown>, config: ResolverConfig): unknown {
+  resolve(
+    typeName: string,
+    props: Record<string, unknown>,
+    config: ResolverConfig,
+  ): unknown {
     const Class = config.classes?.[typeName]
     if (Class) {
       return new Class(props)
@@ -30,6 +36,8 @@ export const typeHandler: KeyHandler = {
       return { [COMPONENT_DESCRIPTOR]: Component, props }
     }
 
-    throw new Error(`[vizz-json] Unknown type: "${typeName}". Register it in classes or components.`)
+    throw new Error(
+      `[vizz-json] Unknown type: "${typeName}". Register it in classes or components.`,
+    )
   },
 }

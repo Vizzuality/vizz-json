@@ -36,8 +36,12 @@ describe('integration — deck.gl scatterplot spec', () => {
     expect(result.props.opacity).toBe(0.8)
 
     // Verify the accessor function works
-    const accessor = result.props.getPosition as (d: Record<string, unknown>) => unknown
-    expect(accessor({ geometry: { coordinates: [-122.4, 37.8] } })).toEqual([-122.4, 37.8])
+    const accessor = result.props.getPosition as (
+      d: Record<string, unknown>,
+    ) => unknown
+    expect(accessor({ geometry: { coordinates: [-122.4, 37.8] } })).toEqual([
+      -122.4, 37.8,
+    ])
   })
 })
 
@@ -69,7 +73,13 @@ describe('integration — MapLibre config passthrough', () => {
 })
 
 describe('integration — function in nested config', () => {
-  function setQueryParams({ url, query }: { url: string; query: Record<string, unknown> }): string {
+  function setQueryParams({
+    url,
+    query,
+  }: {
+    url: string
+    query: Record<string, unknown>
+  }): string {
     const params = new URLSearchParams()
     for (const [key, value] of Object.entries(query)) {
       params.set(key, String(value))
@@ -150,6 +160,8 @@ describe('integration — custom handler', () => {
     ])
 
     const input = { accessor: '@@=geometry.coordinates' }
-    expect(vizzJson.resolve(input)).toEqual({ accessor: 'custom:@@=geometry.coordinates' })
+    expect(vizzJson.resolve(input)).toEqual({
+      accessor: 'custom:@@=geometry.coordinates',
+    })
   })
 })

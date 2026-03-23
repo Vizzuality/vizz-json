@@ -85,9 +85,7 @@ function GuidelinesGLConstants() {
       </section>
 
       <section className="mb-12">
-        <h2 className="mb-4 text-xl font-semibold text-foreground">
-          Example
-        </h2>
+        <h2 className="mb-4 text-xl font-semibold text-foreground">Example</h2>
         <InteractiveExample
           title="GL constants in a deck.gl layer"
           description="GL constants are resolved to their numeric values. Adjust the opacity to see how it combines with the blend parameters."

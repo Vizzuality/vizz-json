@@ -30,12 +30,10 @@ export default defineEventHandler(async (event) => {
 
   // enterWith() is available on the real Node.js AsyncLocalStorage
   // (not on paraglide's mock)
-  const store = serverAsyncLocalStorage as
-    | AsyncLocalStorage<{
-        locale: string
-        origin: string
-        messageCalls: Set<string>
-      }>
-    | null
+  const store = serverAsyncLocalStorage as AsyncLocalStorage<{
+    locale: string
+    origin: string
+    messageCalls: Set<string>
+  }> | null
   store?.enterWith({ locale, origin, messageCalls: new Set() })
 })

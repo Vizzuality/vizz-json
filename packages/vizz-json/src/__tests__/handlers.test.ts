@@ -22,7 +22,9 @@ describe('@@type handler — classes', () => {
 
   it('throws for an unregistered type', () => {
     const input = { '@@type': 'UnknownLayer', id: 'test' }
-    expect(() => vizzJson.resolve(input)).toThrow('Unknown type: "UnknownLayer"')
+    expect(() => vizzJson.resolve(input)).toThrow(
+      'Unknown type: "UnknownLayer"',
+    )
   })
 
   it('recursively resolves props before instantiating', () => {
@@ -81,12 +83,26 @@ describe('@@type handler — components', () => {
 // ── @@function handler ─────────────────────────────────────────────
 
 describe('@@function handler', () => {
-  function setQueryParams({ url, query }: { url: string; query: Record<string, string> }): string {
+  function setQueryParams({
+    url,
+    query,
+  }: {
+    url: string
+    query: Record<string, string>
+  }): string {
     const params = new URLSearchParams(query)
     return `${url}?${params.toString()}`
   }
 
-  function ifParam({ condition, then: t, else: e }: { condition: unknown; then: unknown; else: unknown }): unknown {
+  function ifParam({
+    condition,
+    then: t,
+    else: e,
+  }: {
+    condition: unknown
+    then: unknown
+    else: unknown
+  }): unknown {
     return condition ? t : e
   }
 
@@ -127,7 +143,9 @@ describe('@@= expression handler', () => {
   it('creates an accessor function for dot-path expressions', () => {
     const input = { getPosition: '@@=geometry.coordinates' }
     const result = vizzJson.resolve(input)
-    const accessor = result.getPosition as (d: Record<string, unknown>) => unknown
+    const accessor = result.getPosition as (
+      d: Record<string, unknown>,
+    ) => unknown
 
     expect(typeof accessor).toBe('function')
     expect(accessor({ geometry: { coordinates: [1, 2] } })).toEqual([1, 2])
