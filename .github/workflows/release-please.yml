@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -51,5 +52,3 @@ jobs:
           tar tzf /tmp/vizzuality-vizz-json-*.tgz
 
       - run: pnpm --filter @vizzuality/vizz-json publish --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
