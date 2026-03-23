@@ -6,6 +6,10 @@
     ".": "./src/index.ts",
     "./react": "./src/react.ts"
   },
+  "scripts": {
+    "test": "vitest run",
+    "lint": "eslint"
+  },
   "peerDependencies": {
     "react": ">=18"
   },
@@ -13,5 +17,8 @@
     "react": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "vitest": "^3.0.5"
   }
 }
