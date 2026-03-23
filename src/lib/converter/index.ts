@@ -1,4 +1,4 @@
-import type { VizzJson } from 'vizz-json'
+import type { VizzJson } from '@vizzuality/vizz-json'
 import { resolveParams } from './params-resolver'
 import { createConverter } from './converter-config'
 import type { ResolvedParams } from '../types'
