@@ -1,11 +1,5 @@
 import type { LegendItem } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
-import { ColorInput } from '#/components/legends/color-input'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '#/components/ui/popover'
 import { Input } from '#/components/ui/input'
 
 type ChoroplethLegendProps = {
@@ -34,11 +28,17 @@ function EditableRow({
     : undefined
 
   return (
-    <Popover>
-      <PopoverTrigger
-        type="button"
-        className="flex w-full items-center gap-2 rounded-md px-1.5 py-1 -mx-1.5 transition-colors hover:bg-muted/50 cursor-pointer"
-      >
+    <div className="flex items-center gap-2 px-1.5 py-1 -mx-1.5">
+      {colorValue !== undefined && mapping.valueParamKey ? (
+        <label className="w-6 h-4 rounded-sm shrink-0 cursor-pointer" style={{ backgroundColor: colorValue }}>
+          <input
+            type="color"
+            value={colorValue}
+            onChange={(e) => onChange(mapping.valueParamKey!, e.target.value)}
+            className="sr-only"
+          />
+        </label>
+      ) : (
         <div
           className="w-6 h-4 rounded-sm shrink-0"
           style={{
@@ -46,39 +46,18 @@ function EditableRow({
               typeof item.value === 'string' ? item.value : undefined,
           }}
         />
+      )}
+      {labelValue !== undefined && mapping.labelParamKey ? (
+        <Input
+          type="text"
+          value={labelValue}
+          onChange={(e) => onChange(mapping.labelParamKey!, e.target.value)}
+          className="h-7 flex-1 text-xs"
+        />
+      ) : (
         <span className="text-xs text-muted-foreground">{item.label}</span>
-      </PopoverTrigger>
-      <PopoverContent className="w-56 p-3" side="bottom" align="start">
-        <div className="flex flex-col gap-3">
-          {colorValue !== undefined && mapping.valueParamKey && (
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-muted-foreground">
-                Color
-              </label>
-              <ColorInput
-                value={colorValue}
-                onChange={(v) => onChange(mapping.valueParamKey!, v)}
-              />
-            </div>
-          )}
-          {labelValue !== undefined && mapping.labelParamKey && (
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-medium text-muted-foreground">
-                Label
-              </label>
-              <Input
-                type="text"
-                value={labelValue}
-                onChange={(e) =>
-                  onChange(mapping.labelParamKey!, e.target.value)
-                }
-                className="h-8 text-xs"
-              />
-            </div>
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+      )}
+    </div>
   )
 }
 

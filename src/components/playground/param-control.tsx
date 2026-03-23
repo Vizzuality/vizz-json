@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { formatCompact } from '#/lib/utils'
 import { Slider } from '#/components/ui/slider'
 import { Switch } from '#/components/ui/switch'
 import { Input } from '#/components/ui/input'
@@ -9,11 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '#/components/ui/select'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '#/components/ui/popover'
 import type { InferredParam } from '#/lib/types'
 
 // ---------------------------------------------------------------------------
@@ -39,30 +35,22 @@ function ColorPickerControl({ value, onChange }: ColorPickerControlProps) {
   const safeValue =
     typeof value === 'string' && value.startsWith('#') ? value : '#000000'
 
-  const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value)
-  }
-
   return (
-    <Popover>
-      <PopoverTrigger className="flex h-8 w-full items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm outline-none hover:bg-accent focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50">
-        <span
-          className="inline-block size-4 shrink-0 rounded border border-border"
-          style={{ backgroundColor: safeValue }}
-        />
-        <span className="font-mono text-xs text-muted-foreground">
-          {safeValue}
-        </span>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-3" side="bottom" align="start">
-        <input
-          type="color"
-          value={safeValue}
-          onChange={handleColorChange}
-          className="h-24 w-24 cursor-pointer rounded border-0 bg-transparent p-0"
-        />
-      </PopoverContent>
-    </Popover>
+    <label className="flex h-8 w-full cursor-pointer items-center gap-2 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm hover:bg-accent">
+      <span
+        className="inline-block size-4 shrink-0 rounded border border-border"
+        style={{ backgroundColor: safeValue }}
+      />
+      <input
+        type="color"
+        value={safeValue}
+        onChange={(e) => onChange(e.target.value)}
+        className="sr-only"
+      />
+      <span className="font-mono text-xs text-muted-foreground">
+        {safeValue}
+      </span>
+    </label>
   )
 }
 
@@ -98,8 +86,8 @@ export function ParamControl({
             onValueChange={handleValueChange}
             className="flex-1"
           />
-          <span className="w-12 shrink-0 text-right font-mono text-xs text-muted-foreground">
-            {numValue.toFixed(2)}
+          <span className="shrink-0 text-right font-mono text-xs text-muted-foreground">
+            {formatCompact(numValue)}
           </span>
         </div>
       )
