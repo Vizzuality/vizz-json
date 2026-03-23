@@ -15,7 +15,7 @@ describe('@@type handler — classes', () => {
 
   it('instantiates a registered class with resolved props', () => {
     const input = { '@@type': 'FakeLayer', id: 'test', opacity: 0.8 }
-    const result = vizzJson.resolve(input) as FakeLayer
+    const result = vizzJson.resolve(input) as unknown as FakeLayer
     expect(result).toBeInstanceOf(FakeLayer)
     expect(result.props).toEqual({ id: 'test', opacity: 0.8 })
   })
@@ -35,7 +35,7 @@ describe('@@type handler — classes', () => {
       '@@type': 'FakeLayer',
       url: { '@@function': 'buildUrl', base: 'https://example.com' },
     }
-    const result = vizzJsonWithFns.resolve(input) as FakeLayer
+    const result = vizzJsonWithFns.resolve(input) as unknown as FakeLayer
     expect(result.props.url).toBe('https://example.com/api')
   })
 })
@@ -211,7 +211,7 @@ describe('mixed handlers in a single spec', () => {
       getPosition: '@@=geometry.coordinates',
       opacity: 0.8,
     }
-    const result = vizzJson.resolve(input) as ScatterplotLayer
+    const result = vizzJson.resolve(input) as unknown as ScatterplotLayer
     expect(result).toBeInstanceOf(ScatterplotLayer)
     expect(typeof result.props.getPosition).toBe('function')
     expect(result.props.id).toBe('earthquakes')

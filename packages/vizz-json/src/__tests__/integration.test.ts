@@ -28,7 +28,7 @@ describe('integration — deck.gl scatterplot spec', () => {
       pickable: true,
     }
 
-    const result = vizzJson.resolve(input) as ScatterplotLayer
+    const result = vizzJson.resolve(input) as unknown as ScatterplotLayer
     expect(result).toBeInstanceOf(ScatterplotLayer)
     expect(result.props.id).toBe('earthquakes-scatter')
     expect(typeof result.props.getPosition).toBe('function')
