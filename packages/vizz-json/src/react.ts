@@ -1,4 +1,5 @@
-import { createElement, type ComponentType, type ReactNode } from 'react'
+import { createElement } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { isComponentDescriptor } from './handlers/type'
 
 /**
@@ -12,7 +13,9 @@ export function Render({ value }: { readonly value: unknown }): ReactNode {
   }
 
   if (isComponentDescriptor(value)) {
-    const Component = value.$$component as ComponentType<Record<string, unknown>>
+    const Component = value.$$component as ComponentType<
+      Record<string, unknown>
+    >
     const resolvedProps: Record<string, ReactNode> = {}
 
     for (const [k, v] of Object.entries(value.props)) {
@@ -26,7 +29,9 @@ export function Render({ value }: { readonly value: unknown }): ReactNode {
 
   if (Array.isArray(value)) {
     return value.map((item, i) =>
-      isComponentDescriptor(item) ? createElement(Render, { key: i, value: item }) : item,
+      isComponentDescriptor(item)
+        ? createElement(Render, { key: i, value: item })
+        : item,
     ) as ReactNode
   }
 

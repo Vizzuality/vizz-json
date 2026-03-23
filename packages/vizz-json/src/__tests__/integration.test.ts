@@ -118,7 +118,7 @@ describe('integration — component descriptors', () => {
       title: 'Population',
       colors: ['#eff6ff', '#1e3a8a'],
     }
-    const result = vizzJson.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input)
     expect(result).toHaveProperty('$$component', GradientLegend)
     expect(result).toHaveProperty('props.title', 'Population')
   })

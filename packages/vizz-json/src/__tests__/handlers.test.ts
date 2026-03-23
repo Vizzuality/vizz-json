@@ -53,7 +53,7 @@ describe('@@type handler — components', () => {
       title: 'Population',
       colors: ['#eff6ff', '#1e3a8a'],
     }
-    const result = vizzJson.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input)
     expect(result).toHaveProperty('$$component', GradientLegend)
     expect(result).toHaveProperty('props', {
       title: 'Population',
@@ -126,7 +126,7 @@ describe('@@= expression handler', () => {
 
   it('creates an accessor function for dot-path expressions', () => {
     const input = { getPosition: '@@=geometry.coordinates' }
-    const result = vizzJson.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input)
     const accessor = result.getPosition as (d: Record<string, unknown>) => unknown
 
     expect(typeof accessor).toBe('function')
@@ -135,7 +135,7 @@ describe('@@= expression handler', () => {
 
   it('handles single-level paths', () => {
     const input = { getValue: '@@=value' }
-    const result = vizzJson.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input)
     const accessor = result.getValue as (d: Record<string, unknown>) => unknown
 
     expect(accessor({ value: 42 })).toBe(42)
@@ -143,7 +143,7 @@ describe('@@= expression handler', () => {
 
   it('returns undefined for missing paths', () => {
     const input = { getValue: '@@=deep.missing.path' }
-    const result = vizzJson.resolve(input) as Record<string, unknown>
+    const result = vizzJson.resolve(input)
     const accessor = result.getValue as (d: Record<string, unknown>) => unknown
 
     expect(accessor({ other: 'value' })).toBeUndefined()

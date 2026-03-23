@@ -14,7 +14,7 @@ export const constantHandler: ValueHandler = {
 
     if (parts.length === 2) {
       const [namespace, key] = parts
-      const enumValue = config.enumerations?.[namespace!]?.[key!]
+      const enumValue = config.enumerations?.[namespace]?.[key]
       if (enumValue !== undefined) return enumValue
     }
 
