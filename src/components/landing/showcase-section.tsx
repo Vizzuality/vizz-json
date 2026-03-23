@@ -28,7 +28,7 @@ const EXAMPLES = [
 const RASTER_OPACITIES = Array.from({ length: 5 }, (_, row) =>
   Array.from({ length: 7 }, (_, col) => {
     const hash = ((row * 7 + col) * 2654435761) >>> 0
-    return 0.15 + (hash % 1000) / 1000 * 0.35
+    return 0.15 + ((hash % 1000) / 1000) * 0.35
   }),
 )
 
