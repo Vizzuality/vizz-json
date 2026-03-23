@@ -10,7 +10,9 @@
     "directory": "packages/vizz-json"
   },
   "homepage": "https://github.com/Vizzuality/vizz-json/tree/main/packages/vizz-json#readme",
-  "bugs": "https://github.com/Vizzuality/vizz-json/issues",
+  "bugs": {
+    "url": "https://github.com/Vizzuality/vizz-json/issues"
+  },
   "keywords": [
     "json",
     "templating",
