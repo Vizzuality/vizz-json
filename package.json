@@ -56,7 +56,7 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.1.18",
     "tw-animate-css": "^1.4.0",
-    "vizz-json": "workspace:*",
+    "@vizzuality/vizz-json": "workspace:*",
     "zod": "^4.3.6"
   },
   "devDependencies": {

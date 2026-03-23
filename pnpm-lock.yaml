@@ -86,6 +86,9 @@ importers:
       '@tanstack/router-plugin':
         specifier: ^1.132.0
         version: 1.167.3(@tanstack/react-router@1.168.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0))
+      '@vizzuality/vizz-json':
+        specifier: workspace:*
+        version: link:packages/vizz-json
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -125,9 +128,6 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
-      vizz-json:
-        specifier: workspace:*
-        version: link:packages/vizz-json
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -199,6 +199,9 @@ importers:
         specifier: '>=18'
         version: 19.2.4
     devDependencies:
+      '@types/react':
+        specifier: ^19.2.0
+        version: 19.2.14
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)
