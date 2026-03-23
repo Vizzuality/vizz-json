@@ -7,13 +7,19 @@
   "sideEffects": false,
   "engines": { "node": ">=18" },
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./react": {
-      "import": "./dist/react.js",
-      "types": "./dist/react.d.ts"
+    ".": "./src/index.ts",
+    "./react": "./src/react.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./react": {
+        "types": "./dist/react.d.ts",
+        "import": "./dist/react.js"
+      }
     }
   },
   "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
