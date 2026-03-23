@@ -59,11 +59,16 @@ function EditableGradient({
         return (
           <div key={i} className="flex items-center gap-2">
             {colorValue !== undefined && mapping.valueParamKey && (
-              <label className="w-6 h-4 rounded-sm shrink-0 cursor-pointer" style={{ backgroundColor: colorValue }}>
+              <label
+                className="w-6 h-4 rounded-sm shrink-0 cursor-pointer"
+                style={{ backgroundColor: colorValue }}
+              >
                 <input
                   type="color"
                   value={colorValue}
-                  onChange={(e) => onChange(mapping.valueParamKey!, e.target.value)}
+                  onChange={(e) =>
+                    onChange(mapping.valueParamKey!, e.target.value)
+                  }
                   className="sr-only"
                 />
               </label>

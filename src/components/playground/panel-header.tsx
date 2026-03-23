@@ -43,7 +43,9 @@ export function PanelHeader({
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Opacity</span>
             <span className="font-mono text-xs text-muted-foreground">
-              {formatCompact(typeof opacityValue === 'number' ? opacityValue : 1)}
+              {formatCompact(
+                typeof opacityValue === 'number' ? opacityValue : 1,
+              )}
             </span>
           </div>
           <Slider

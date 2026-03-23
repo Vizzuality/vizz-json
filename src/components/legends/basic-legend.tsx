@@ -30,7 +30,10 @@ function EditableRow({
   return (
     <div className="flex items-center gap-2 px-1.5 py-1 -mx-1.5">
       {colorValue !== undefined && mapping.valueParamKey ? (
-        <label className="w-4 h-4 rounded-sm border border-border shrink-0 cursor-pointer" style={{ backgroundColor: colorValue }}>
+        <label
+          className="w-4 h-4 rounded-sm border border-border shrink-0 cursor-pointer"
+          style={{ backgroundColor: colorValue }}
+        >
           <input
             type="color"
             value={colorValue}
