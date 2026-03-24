@@ -1,5 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
-import { compileShader, createProgram, createFBO, createDoubleFBO } from '#/lib/fluid/webgl-utils'
+import {
+  compileShader,
+  createProgram,
+  createFBO,
+  createDoubleFBO,
+} from '#/lib/fluid/webgl-utils'
 
 function createMockGL() {
   const mockShader = { __type: 'shader' }
@@ -151,11 +156,7 @@ describe('createProgram', () => {
 
   it('cleans up shader objects after linking', () => {
     const gl = createMockGL()
-    createProgram(
-      gl as unknown as WebGL2RenderingContext,
-      'vertex',
-      'fragment',
-    )
+    createProgram(gl as unknown as WebGL2RenderingContext, 'vertex', 'fragment')
 
     // Two compileShader calls = two shaders created, both should be deleted
     expect(gl.deleteShader).toHaveBeenCalledTimes(2)

@@ -74,7 +74,8 @@ describe('speedToSplatColor', () => {
     const dark = speedToSplatColor(25, true)
     const light = speedToSplatColor(25, false)
     // Themes use different hue ranges and brightness — colors should differ
-    const same = dark[0] === light[0] && dark[1] === light[1] && dark[2] === light[2]
+    const same =
+      dark[0] === light[0] && dark[1] === light[1] && dark[2] === light[2]
     expect(same).toBe(false)
   })
 

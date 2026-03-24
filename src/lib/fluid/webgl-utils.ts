@@ -4,9 +4,18 @@ export type GLContext = {
   readonly gl: WebGL2RenderingContext | WebGLRenderingContext
   readonly ext: {
     readonly halfFloatTexType: number
-    readonly formatRGBA: { readonly internalFormat: number; readonly format: number }
-    readonly formatRG: { readonly internalFormat: number; readonly format: number }
-    readonly formatR: { readonly internalFormat: number; readonly format: number }
+    readonly formatRGBA: {
+      readonly internalFormat: number
+      readonly format: number
+    }
+    readonly formatRG: {
+      readonly internalFormat: number
+      readonly format: number
+    }
+    readonly formatR: {
+      readonly internalFormat: number
+      readonly format: number
+    }
   }
   readonly isWebGL2: boolean
 }

@@ -54,7 +54,11 @@ function compileAllPrograms(
     curl: createProgram(gl, baseVertexShader, curlShader),
     vorticity: createProgram(gl, baseVertexShader, vorticityShader),
     pressure: createProgram(gl, baseVertexShader, pressureShader),
-    gradientSubtract: createProgram(gl, baseVertexShader, gradientSubtractShader),
+    gradientSubtract: createProgram(
+      gl,
+      baseVertexShader,
+      gradientSubtractShader,
+    ),
     splat: createProgram(gl, baseVertexShader, splatShader),
     display: createProgram(gl, baseVertexShader, displayShader),
   }
@@ -75,24 +79,49 @@ function createAllFBOs(
 
   return {
     velocity: createDoubleFBO(
-      gl, simWidth, simHeight,
-      formatRG.internalFormat, formatRG.format, halfFloatTexType, filter,
+      gl,
+      simWidth,
+      simHeight,
+      formatRG.internalFormat,
+      formatRG.format,
+      halfFloatTexType,
+      filter,
     ),
     pressure: createDoubleFBO(
-      gl, simWidth, simHeight,
-      formatR.internalFormat, formatR.format, halfFloatTexType, filter,
+      gl,
+      simWidth,
+      simHeight,
+      formatR.internalFormat,
+      formatR.format,
+      halfFloatTexType,
+      filter,
     ),
     divergence: createFBO(
-      gl, simWidth, simHeight,
-      formatR.internalFormat, formatR.format, halfFloatTexType, filter,
+      gl,
+      simWidth,
+      simHeight,
+      formatR.internalFormat,
+      formatR.format,
+      halfFloatTexType,
+      filter,
     ),
     curl: createFBO(
-      gl, simWidth, simHeight,
-      formatR.internalFormat, formatR.format, halfFloatTexType, filter,
+      gl,
+      simWidth,
+      simHeight,
+      formatR.internalFormat,
+      formatR.format,
+      halfFloatTexType,
+      filter,
     ),
     dye: createDoubleFBO(
-      gl, dyeWidth, dyeHeight,
-      formatRGBA.internalFormat, formatRGBA.format, halfFloatTexType, filter,
+      gl,
+      dyeWidth,
+      dyeHeight,
+      formatRGBA.internalFormat,
+      formatRGBA.format,
+      halfFloatTexType,
+      filter,
     ),
   }
 }
@@ -124,8 +153,10 @@ export function createSimulation(
 
     const fbos = createAllFBOs(
       gl,
-      simRes.width, simRes.height,
-      dyeRes.width, dyeRes.height,
+      simRes.width,
+      simRes.height,
+      dyeRes.width,
+      dyeRes.height,
       ext.halfFloatTexType,
       ext.formatRGBA,
       ext.formatRG,
@@ -175,7 +206,12 @@ export function stepSimulation(state: SimulationState, dt: number): void {
   gl.uniform1i(programs.vorticity.uniforms['uCurl'], 1)
   gl.uniform1f(programs.vorticity.uniforms['uCurlStrength'], config.curl)
   gl.uniform1f(programs.vorticity.uniforms['dt'], dt)
-  blit(gl, fbos.velocity.write.fbo, fbos.velocity.write.width, fbos.velocity.write.height)
+  blit(
+    gl,
+    fbos.velocity.write.fbo,
+    fbos.velocity.write.width,
+    fbos.velocity.write.height,
+  )
   state.fbos.velocity = swapFBO(fbos.velocity)
 
   // 3. Advect velocity
@@ -194,7 +230,12 @@ export function stepSimulation(state: SimulationState, dt: number): void {
     programs.advection.uniforms['uDissipation'],
     config.velocityDissipation,
   )
-  blit(gl, state.fbos.velocity.write.fbo, state.fbos.velocity.write.width, state.fbos.velocity.write.height)
+  blit(
+    gl,
+    state.fbos.velocity.write.fbo,
+    state.fbos.velocity.write.width,
+    state.fbos.velocity.write.height,
+  )
   state.fbos.velocity = swapFBO(state.fbos.velocity)
 
   // 4. Advect dye
@@ -211,7 +252,12 @@ export function stepSimulation(state: SimulationState, dt: number): void {
     programs.advection.uniforms['uDissipation'],
     config.dyeDissipation,
   )
-  blit(gl, state.fbos.dye.write.fbo, state.fbos.dye.write.width, state.fbos.dye.write.height)
+  blit(
+    gl,
+    state.fbos.dye.write.fbo,
+    state.fbos.dye.write.width,
+    state.fbos.dye.write.height,
+  )
   state.fbos.dye = swapFBO(state.fbos.dye)
 
   // 5. Divergence
@@ -223,7 +269,12 @@ export function stepSimulation(state: SimulationState, dt: number): void {
   )
   bindTexture(gl, state.fbos.velocity.read.texture, 0)
   gl.uniform1i(programs.divergence.uniforms['uVelocity'], 0)
-  blit(gl, state.fbos.divergence.fbo, state.fbos.divergence.width, state.fbos.divergence.height)
+  blit(
+    gl,
+    state.fbos.divergence.fbo,
+    state.fbos.divergence.width,
+    state.fbos.divergence.height,
+  )
 
   // 6. Clear pressure
   gl.useProgram(programs.pressure.program)
@@ -239,7 +290,12 @@ export function stepSimulation(state: SimulationState, dt: number): void {
   for (let i = 0; i < config.pressureIterations; i++) {
     bindTexture(gl, state.fbos.pressure.read.texture, 0)
     gl.uniform1i(programs.pressure.uniforms['uPressure'], 0)
-    blit(gl, state.fbos.pressure.write.fbo, state.fbos.pressure.write.width, state.fbos.pressure.write.height)
+    blit(
+      gl,
+      state.fbos.pressure.write.fbo,
+      state.fbos.pressure.write.width,
+      state.fbos.pressure.write.height,
+    )
     state.fbos.pressure = swapFBO(state.fbos.pressure)
   }
 
@@ -254,7 +310,12 @@ export function stepSimulation(state: SimulationState, dt: number): void {
   gl.uniform1i(programs.gradientSubtract.uniforms['uPressure'], 0)
   bindTexture(gl, state.fbos.velocity.read.texture, 1)
   gl.uniform1i(programs.gradientSubtract.uniforms['uVelocity'], 1)
-  blit(gl, state.fbos.velocity.write.fbo, state.fbos.velocity.write.width, state.fbos.velocity.write.height)
+  blit(
+    gl,
+    state.fbos.velocity.write.fbo,
+    state.fbos.velocity.write.width,
+    state.fbos.velocity.write.height,
+  )
   state.fbos.velocity = swapFBO(state.fbos.velocity)
 }
 
@@ -320,7 +381,12 @@ export function addSplat(state: SimulationState, input: SplatInput): void {
   )
   bindTexture(gl, fbos.velocity.read.texture, 0)
   gl.uniform1i(programs.splat.uniforms['uTarget'], 0)
-  blit(gl, fbos.velocity.write.fbo, fbos.velocity.write.width, fbos.velocity.write.height)
+  blit(
+    gl,
+    fbos.velocity.write.fbo,
+    fbos.velocity.write.width,
+    fbos.velocity.write.height,
+  )
   state.fbos.velocity = swapFBO(state.fbos.velocity)
 
   // Splat dye (color)
@@ -358,20 +424,44 @@ export function resizeSimulation(
 
   if (simRes.width !== state.simWidth || simRes.height !== state.simHeight) {
     state.fbos.velocity = resizeDoubleFBO(
-      gl, fbos.velocity, simRes.width, simRes.height,
-      ext.formatRG.internalFormat, ext.formatRG.format, ext.halfFloatTexType, filter,
+      gl,
+      fbos.velocity,
+      simRes.width,
+      simRes.height,
+      ext.formatRG.internalFormat,
+      ext.formatRG.format,
+      ext.halfFloatTexType,
+      filter,
     )
     state.fbos.pressure = resizeDoubleFBO(
-      gl, fbos.pressure, simRes.width, simRes.height,
-      ext.formatR.internalFormat, ext.formatR.format, ext.halfFloatTexType, filter,
+      gl,
+      fbos.pressure,
+      simRes.width,
+      simRes.height,
+      ext.formatR.internalFormat,
+      ext.formatR.format,
+      ext.halfFloatTexType,
+      filter,
     )
     state.fbos.divergence = resizeFBO(
-      gl, fbos.divergence, simRes.width, simRes.height,
-      ext.formatR.internalFormat, ext.formatR.format, ext.halfFloatTexType, filter,
+      gl,
+      fbos.divergence,
+      simRes.width,
+      simRes.height,
+      ext.formatR.internalFormat,
+      ext.formatR.format,
+      ext.halfFloatTexType,
+      filter,
     )
     state.fbos.curl = resizeFBO(
-      gl, fbos.curl, simRes.width, simRes.height,
-      ext.formatR.internalFormat, ext.formatR.format, ext.halfFloatTexType, filter,
+      gl,
+      fbos.curl,
+      simRes.width,
+      simRes.height,
+      ext.formatR.internalFormat,
+      ext.formatR.format,
+      ext.halfFloatTexType,
+      filter,
     )
     state.simWidth = simRes.width
     state.simHeight = simRes.height
@@ -379,8 +469,14 @@ export function resizeSimulation(
 
   if (dyeRes.width !== state.dyeWidth || dyeRes.height !== state.dyeHeight) {
     state.fbos.dye = resizeDoubleFBO(
-      gl, fbos.dye, dyeRes.width, dyeRes.height,
-      ext.formatRGBA.internalFormat, ext.formatRGBA.format, ext.halfFloatTexType, filter,
+      gl,
+      fbos.dye,
+      dyeRes.width,
+      dyeRes.height,
+      ext.formatRGBA.internalFormat,
+      ext.formatRGBA.format,
+      ext.halfFloatTexType,
+      filter,
     )
     state.dyeWidth = dyeRes.width
     state.dyeHeight = dyeRes.height
