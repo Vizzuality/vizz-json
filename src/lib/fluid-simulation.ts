@@ -74,3 +74,42 @@ export function calculateParticleColor(
 
   return { hue, saturation, lightness, alpha }
 }
+
+export function updateParticle(
+  particle: Particle,
+  mouse: MouseState,
+  bounds: Bounds,
+  config: SimulationConfig,
+): Particle {
+  let vx = particle.vx
+  let vy = particle.vy
+
+  if (mouse.active) {
+    const dx = particle.x - mouse.x
+    const dy = particle.y - mouse.y
+    const dist = Math.hypot(dx, dy)
+
+    if (dist < config.mouseRadius) {
+      const influence =
+        Math.exp(-(dist * dist) / (config.mouseRadius * config.mouseRadius)) *
+        config.mouseStrength
+      const mouseDx = mouse.x - mouse.prevX
+      const mouseDy = mouse.y - mouse.prevY
+      vx += mouseDx * influence
+      vy += mouseDy * influence
+    }
+  }
+
+  vx *= config.friction
+  vy *= config.friction
+
+  let x = particle.x + vx
+  let y = particle.y + vy
+
+  if (x < 0) x += bounds.width
+  if (x >= bounds.width) x -= bounds.width
+  if (y < 0) y += bounds.height
+  if (y >= bounds.height) y -= bounds.height
+
+  return { x, y, vx, vy }
+}

@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { parseBgColor, calculateParticleColor } from '#/lib/fluid-simulation'
+import {
+  parseBgColor,
+  calculateParticleColor,
+  updateParticle,
+  DEFAULT_CONFIG,
+} from '#/lib/fluid-simulation'
+import type { Particle, MouseState } from '#/lib/fluid-simulation'
 
 describe('parseBgColor', () => {
   it('parses rgb() format', () => {
@@ -41,5 +47,57 @@ describe('calculateParticleColor', () => {
   it('clamps alpha to maxParticleAlpha', () => {
     const color = calculateParticleColor(100, true)
     expect(color.alpha).toBeLessThanOrEqual(0.7)
+  })
+})
+
+describe('updateParticle', () => {
+  const inactiveMouse: MouseState = { x: 0, y: 0, prevX: 0, prevY: 0, active: false }
+  const bounds = { width: 400, height: 300 }
+
+  it('applies friction to velocity', () => {
+    const p: Particle = { x: 100, y: 100, vx: 10, vy: 5 }
+    const result = updateParticle(p, inactiveMouse, bounds, DEFAULT_CONFIG)
+    expect(result.vx).toBeCloseTo(10 * 0.96, 5)
+    expect(result.vy).toBeCloseTo(5 * 0.96, 5)
+  })
+
+  it('moves particle by velocity after friction', () => {
+    const p: Particle = { x: 100, y: 100, vx: 10, vy: 5 }
+    const result = updateParticle(p, inactiveMouse, bounds, DEFAULT_CONFIG)
+    expect(result.x).toBeCloseTo(100 + 10 * 0.96, 5)
+    expect(result.y).toBeCloseTo(100 + 5 * 0.96, 5)
+  })
+
+  it('applies mouse influence when within radius', () => {
+    const p: Particle = { x: 100, y: 100, vx: 0, vy: 0 }
+    const mouse: MouseState = { x: 100, y: 100, prevX: 90, prevY: 100, active: true }
+    const result = updateParticle(p, mouse, bounds, DEFAULT_CONFIG)
+    expect(result.vx).toBeGreaterThan(0)
+  })
+
+  it('does not apply mouse influence when outside radius', () => {
+    const p: Particle = { x: 0, y: 0, vx: 0, vy: 0 }
+    const mouse: MouseState = { x: 200, y: 200, prevX: 190, prevY: 200, active: true }
+    const result = updateParticle(p, mouse, bounds, DEFAULT_CONFIG)
+    expect(result.vx).toBe(0)
+    expect(result.vy).toBe(0)
+  })
+
+  it('wraps particle at right edge', () => {
+    const p: Particle = { x: 399, y: 100, vx: 10, vy: 0 }
+    const result = updateParticle(p, inactiveMouse, bounds, DEFAULT_CONFIG)
+    expect(result.x).toBeLessThan(bounds.width)
+  })
+
+  it('wraps particle at bottom edge', () => {
+    const p: Particle = { x: 100, y: 299, vx: 0, vy: 10 }
+    const result = updateParticle(p, inactiveMouse, bounds, DEFAULT_CONFIG)
+    expect(result.y).toBeLessThan(bounds.height)
+  })
+
+  it('returns a new object (immutability)', () => {
+    const p: Particle = { x: 100, y: 100, vx: 10, vy: 5 }
+    const result = updateParticle(p, inactiveMouse, bounds, DEFAULT_CONFIG)
+    expect(result).not.toBe(p)
   })
 })
