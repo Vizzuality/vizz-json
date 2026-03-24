@@ -14,7 +14,7 @@ type ExampleSelectorProps = {
 }
 
 const TIER_COLORS = {
-  basic: 'bg-green-950 text-green-400 border-green-800',
+  basic: 'bg-primary/15 text-primary border-primary/25',
   intermediate: 'bg-yellow-950 text-yellow-400 border-yellow-800',
   advanced: 'bg-orange-950 text-orange-400 border-orange-800',
 } as const

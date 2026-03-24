@@ -104,7 +104,7 @@ function GuidelinesOverview() {
             </div>
           </div>
           <span className="text-muted-foreground">→</span>
-          <div className="rounded bg-emerald-500/10 px-3 py-2 text-emerald-400">
+          <div className="rounded bg-primary/10 px-3 py-2 text-primary">
             Rendered Map
           </div>
         </div>
