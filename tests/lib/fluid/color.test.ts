@@ -70,12 +70,12 @@ describe('speedToSplatColor', () => {
     expect(b).toBeGreaterThan(g)
   })
 
-  it('halves brightness in light mode', () => {
+  it('produces different colors per theme', () => {
     const dark = speedToSplatColor(25, true)
     const light = speedToSplatColor(25, false)
-    expect(light[0]).toBeCloseTo(dark[0] * 0.5, 2)
-    expect(light[1]).toBeCloseTo(dark[1] * 0.5, 2)
-    expect(light[2]).toBeCloseTo(dark[2] * 0.5, 2)
+    // Themes use different hue ranges and brightness — colors should differ
+    const same = dark[0] === light[0] && dark[1] === light[1] && dark[2] === light[2]
+    expect(same).toBe(false)
   })
 
   it('returns values in [0, 1] range', () => {

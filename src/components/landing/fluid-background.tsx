@@ -149,7 +149,7 @@ export function FluidBackground() {
 
       stepSimulation(sim, dt)
 
-      const brightness = isDark ? 1.0 : 0.6
+      const brightness = isDark ? 0.45 : 0.5
       renderDisplay(sim, brightness)
 
       animationId = requestAnimationFrame(draw)

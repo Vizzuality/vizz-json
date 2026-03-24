@@ -264,6 +264,16 @@ export function renderDisplay(
 ): void {
   const { gl, programs, fbos } = state
 
+  // Clear to transparent before rendering dye
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+  gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+  gl.clearColor(0, 0, 0, 0)
+  gl.clear(gl.COLOR_BUFFER_BIT)
+
+  // Enable blending so transparent areas show the page behind
+  gl.enable(gl.BLEND)
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+
   gl.useProgram(programs.display.program)
   gl.uniform2f(
     programs.display.uniforms['texelSize'],
@@ -274,6 +284,8 @@ export function renderDisplay(
   gl.uniform1i(programs.display.uniforms['uTexture'], 0)
   gl.uniform1f(programs.display.uniforms['uBrightness'], brightness)
   blit(gl, null, gl.drawingBufferWidth, gl.drawingBufferHeight)
+
+  gl.disable(gl.BLEND)
 }
 
 export function addSplat(state: SimulationState, input: SplatInput): void {

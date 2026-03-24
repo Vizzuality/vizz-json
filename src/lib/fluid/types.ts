@@ -28,9 +28,9 @@ export const DEFAULT_FLUID_CONFIG: FluidConfig = {
   colorConfig: {
     hueMin: 130,
     hueMax: 270,
-    saturationMin: 60,
-    saturationMax: 85,
-    lightness: 50,
+    saturationMin: 30,
+    saturationMax: 50,
+    lightness: 25,
   },
 }
 

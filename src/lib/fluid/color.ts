@@ -59,11 +59,15 @@ export function speedToSplatColor(
     config.colorConfig
 
   const t = Math.min(speed / 50, 1)
-  const hue = hueMin + t * (hueMax - hueMin)
+  // Light mode stays close to the site's primary green (~140°);
+  // dark mode uses full green→purple range
+  const effectiveHueMax = isDark ? hueMax : 150
+  const effectiveHueMin = isDark ? hueMin : 125
+  const hue = effectiveHueMin + t * (effectiveHueMax - effectiveHueMin)
   const saturation = saturationMin + t * (saturationMax - saturationMin)
 
   const [r, g, b] = hslToRgb(hue, saturation, lightness)
 
-  const brightness = isDark ? 1.0 : 0.5
+  const brightness = isDark ? 0.35 : 0.25
   return [r * brightness, g * brightness, b * brightness] as const
 }
