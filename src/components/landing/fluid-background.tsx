@@ -1,15 +1,15 @@
 import { useRef, useEffect } from 'react'
 import {
-  type Particle,
-  type MouseState,
-  type RgbColor,
-  DEFAULT_CONFIG,
-  createParticles,
-  updateParticle,
-  calculateParticleColor,
+  createSimulation,
+  stepSimulation,
+  renderDisplay,
+  addSplat,
+  resizeSimulation,
+  destroySimulation,
   shouldDisableSimulation,
-  parseBgColor,
-} from '#/lib/fluid-simulation'
+  speedToSplatColor,
+} from '#/lib/fluid'
+import type { SimulationState } from '#/lib/fluid'
 
 export function FluidBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -28,78 +28,72 @@ export function FluidBackground() {
       canvas.style.display = 'none'
       return
     }
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
 
     const parent = canvas.parentElement
     if (!parent) return
-
-    // --- State ---
-    let animationId = 0
-    let running = true
-    let isDark = document.documentElement.classList.contains('dark')
-    let bgColor: RgbColor = parseBgColor(
-      getComputedStyle(parent).backgroundColor,
-    )
 
     // --- Canvas sizing ---
     function resize() {
       if (!canvas || !parent) return
       const rect = parent.getBoundingClientRect()
-      const scale = DEFAULT_CONFIG.canvasScale
-      canvas.width = rect.width * scale
-      canvas.height = rect.height * scale
+      canvas.width = rect.width
+      canvas.height = rect.height
       canvas.style.width = rect.width + 'px'
       canvas.style.height = rect.height + 'px'
     }
     resize()
 
-    // --- Particles ---
-    let particles: Particle[] = createParticles(
-      DEFAULT_CONFIG.particleCount,
-      canvas.width,
-      canvas.height,
-    )
-
-    // --- Mouse ---
-    const mouse: {
-      x: number
-      y: number
-      prevX: number
-      prevY: number
-      active: boolean
-    } = {
-      x: 0,
-      y: 0,
-      prevX: 0,
-      prevY: 0,
-      active: false,
+    // --- Initialize simulation ---
+    const simOrNull = createSimulation(canvas)
+    if (!simOrNull) {
+      canvas.style.display = 'none'
+      return
     }
+    const sim: SimulationState = simOrNull
+
+    // --- State ---
+    let animationId = 0
+    let running = true
+    let isDark = document.documentElement.classList.contains('dark')
+    let lastTime = performance.now()
+
+    // --- Mouse state ---
+    let mouseX = 0
+    let mouseY = 0
+    let prevMouseX = 0
+    let prevMouseY = 0
 
     function onMouseMove(e: globalThis.MouseEvent) {
-      if (!canvas || !parent) return
-      const rect = parent.getBoundingClientRect()
-      const scale = DEFAULT_CONFIG.canvasScale
-      mouse.prevX = mouse.x
-      mouse.prevY = mouse.y
-      mouse.x = (e.clientX - rect.left) * scale
-      mouse.y = (e.clientY - rect.top) * scale
-      mouse.active = true
-    }
+      if (!canvas) return
+      const rect = canvas.getBoundingClientRect()
 
-    function onMouseLeave() {
-      mouse.active = false
+      prevMouseX = mouseX
+      prevMouseY = mouseY
+      mouseX = (e.clientX - rect.left) / rect.width
+      mouseY = 1.0 - (e.clientY - rect.top) / rect.height
+
+      const dx = mouseX - prevMouseX
+      const dy = mouseY - prevMouseY
+      const speed = Math.hypot(dx, dy)
+
+      // Only splat when actually moving (burst on movement)
+      if (speed > 0.001) {
+        const color = speedToSplatColor(speed * 1000, isDark)
+        addSplat(sim, {
+          x: mouseX,
+          y: mouseY,
+          dx,
+          dy,
+          color,
+        })
+      }
     }
 
     window.addEventListener('mousemove', onMouseMove)
-    document.addEventListener('mouseleave', onMouseLeave)
 
     // --- Theme observer ---
     const themeObserver = new MutationObserver(() => {
       isDark = document.documentElement.classList.contains('dark')
-      if (parent) {
-        bgColor = parseBgColor(getComputedStyle(parent).backgroundColor)
-      }
     })
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -112,11 +106,7 @@ export function FluidBackground() {
       clearTimeout(resizeTimeout)
       resizeTimeout = setTimeout(() => {
         resize()
-        particles = createParticles(
-          DEFAULT_CONFIG.particleCount,
-          canvas!.width,
-          canvas!.height,
-        )
+        resizeSimulation(sim, canvas.width, canvas.height)
       }, 150)
     })
     resizeObserver.observe(parent)
@@ -127,6 +117,7 @@ export function FluidBackground() {
         running = false
       } else {
         running = true
+        lastTime = performance.now()
         draw()
       }
     }
@@ -137,6 +128,7 @@ export function FluidBackground() {
       ([entry]) => {
         if (entry.isIntersecting) {
           running = true
+          lastTime = performance.now()
           draw()
         } else {
           running = false
@@ -149,26 +141,16 @@ export function FluidBackground() {
     // --- Render loop ---
     function draw() {
       cancelAnimationFrame(animationId)
-      if (!running || !ctx || !canvas) return
+      if (!running || !canvas) return
 
-      ctx.fillStyle = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, ${DEFAULT_CONFIG.fadeAlpha})`
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      const now = performance.now()
+      const dt = Math.min((now - lastTime) / 1000, 0.016667)
+      lastTime = now
 
-      const bounds = { width: canvas.width, height: canvas.height }
-      const mouseState: MouseState = { ...mouse }
+      stepSimulation(sim, dt)
 
-      particles = particles.map((p) => {
-        const updated = updateParticle(p, mouseState, bounds, DEFAULT_CONFIG)
-        const speed = Math.hypot(updated.vx, updated.vy)
-        const color = calculateParticleColor(speed, isDark)
-
-        ctx!.fillStyle = `hsla(${color.hue}, ${color.saturation}%, ${color.lightness}%, ${color.alpha})`
-        ctx!.beginPath()
-        ctx!.arc(updated.x, updated.y, 2 + speed * 0.5, 0, Math.PI * 2)
-        ctx!.fill()
-
-        return updated
-      })
+      const brightness = isDark ? 1.0 : 0.6
+      renderDisplay(sim, brightness)
 
       animationId = requestAnimationFrame(draw)
     }
@@ -178,12 +160,12 @@ export function FluidBackground() {
     return () => {
       cancelAnimationFrame(animationId)
       window.removeEventListener('mousemove', onMouseMove)
-      document.removeEventListener('mouseleave', onMouseLeave)
       document.removeEventListener('visibilitychange', onVisibilityChange)
       themeObserver.disconnect()
       resizeObserver.disconnect()
       intersectionObserver.disconnect()
       clearTimeout(resizeTimeout)
+      destroySimulation(sim)
     }
   }, [])
 
