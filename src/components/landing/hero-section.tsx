@@ -39,7 +39,7 @@ function TransformationPreview() {
               &nbsp;&nbsp;&nbsp;&nbsp;
               <span className="text-blue-400">&quot;raster-opacity&quot;</span>
               {': '}
-              <span className="text-emerald-400">
+              <span className="text-primary">
                 &quot;@@#params.opacity&quot;
               </span>
             </div>
@@ -53,7 +53,7 @@ function TransformationPreview() {
               &nbsp;&nbsp;&nbsp;&nbsp;
               <span className="text-blue-400">&quot;visibility&quot;</span>
               {': '}
-              <span className="text-emerald-400">
+              <span className="text-primary">
                 &quot;@@#params.visible&quot;
               </span>
             </div>
@@ -98,7 +98,7 @@ function TransformationPreview() {
             <div className="text-zinc-400">&nbsp;&nbsp;{'}'}</div>
             <div className="text-zinc-600">{'}'}</div>
             {/* Subtle glow to indicate "resolved" */}
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-emerald-500/[0.03] to-transparent" />
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-primary/[0.03] to-transparent" />
           </div>
         </div>
         {/* Bottom bar: param controls */}

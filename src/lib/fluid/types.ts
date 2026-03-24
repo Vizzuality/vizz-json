@@ -26,7 +26,7 @@ export const DEFAULT_FLUID_CONFIG: FluidConfig = {
   splatRadiusMax: 0.5,
   splatForce: 6000,
   colorConfig: {
-    hueMin: 130,
+    hueMin: 148,
     hueMax: 270,
     saturationMin: 30,
     saturationMax: 50,
@@ -92,9 +92,6 @@ export type SplatInput = {
   readonly dx: number
   readonly dy: number
   readonly color: readonly [number, number, number]
-  /** Explicit radius in config-space units (before /1000 division).
-   *  When omitted, radius is derived from speed (dx/dy). */
-  readonly radius?: number
 }
 
 export type RgbColor = {
