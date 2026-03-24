@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 import {
   type Particle,
   type MouseState,
@@ -13,9 +13,11 @@ import {
 
 export function FluidBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [enabled, setEnabled] = useState(false)
 
   useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
     const disabled = shouldDisableSimulation(
       navigator.userAgent,
       window.innerWidth,
@@ -23,12 +25,9 @@ export function FluidBackground() {
       navigator.hardwareConcurrency,
     )
     if (disabled) {
+      canvas.style.display = 'none'
       return
     }
-    setEnabled(true)
-
-    const canvas = canvasRef.current
-    if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
@@ -187,8 +186,6 @@ export function FluidBackground() {
       clearTimeout(resizeTimeout)
     }
   }, [])
-
-  if (!enabled) return null
 
   return (
     <canvas

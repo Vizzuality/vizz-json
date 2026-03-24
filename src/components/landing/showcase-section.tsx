@@ -43,7 +43,7 @@ function PatternSvg({ pattern }: { readonly pattern: string }) {
                 height="21"
                 rx="2"
                 fill="currentColor"
-                opacity={0.15 + Math.random() * 0.35}
+                opacity={0.15 + (((row * 7 + col) * 2654435761) % 100) / 285}
               />
             )),
           )}
