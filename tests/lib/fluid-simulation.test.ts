@@ -18,6 +18,10 @@ describe('parseBgColor', () => {
     expect(parseBgColor('rgba(10, 10, 10, 1)')).toEqual({ r: 10, g: 10, b: 10 })
   })
 
+  it('parses rgb() with decimal values', () => {
+    expect(parseBgColor('rgb(10.5, 20.7, 30.2)')).toEqual({ r: 11, g: 21, b: 30 })
+  })
+
   it('returns black for unparseable input', () => {
     expect(parseBgColor('invalid')).toEqual({ r: 0, g: 0, b: 0 })
   })

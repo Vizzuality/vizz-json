@@ -52,12 +52,12 @@ export const DEFAULT_CONFIG: SimulationConfig = {
 }
 
 export function parseBgColor(computed: string): RgbColor {
-  const match = computed.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+  const match = computed.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/)
   if (!match) return { r: 0, g: 0, b: 0 }
   return {
-    r: Number(match[1]),
-    g: Number(match[2]),
-    b: Number(match[3]),
+    r: Math.round(Number(match[1])),
+    g: Math.round(Number(match[2])),
+    b: Math.round(Number(match[3])),
   }
 }
 
@@ -106,10 +106,8 @@ export function updateParticle(
   let x = particle.x + vx
   let y = particle.y + vy
 
-  if (x < 0) x += bounds.width
-  if (x >= bounds.width) x -= bounds.width
-  if (y < 0) y += bounds.height
-  if (y >= bounds.height) y -= bounds.height
+  x = ((x % bounds.width) + bounds.width) % bounds.width
+  y = ((y % bounds.height) + bounds.height) % bounds.height
 
   return { x, y, vx, vy }
 }
