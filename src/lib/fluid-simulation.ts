@@ -127,3 +127,16 @@ export function shouldDisableSimulation(
 
   return isMobile || isSmallScreen || lowMemory || lowCores
 }
+
+export function createParticles(
+  count: number,
+  width: number,
+  height: number,
+): Particle[] {
+  return Array.from({ length: count }, () => ({
+    x: Math.random() * width,
+    y: Math.random() * height,
+    vx: 0,
+    vy: 0,
+  }))
+}

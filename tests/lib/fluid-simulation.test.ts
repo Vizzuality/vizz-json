@@ -4,6 +4,7 @@ import {
   calculateParticleColor,
   updateParticle,
   shouldDisableSimulation,
+  createParticles,
   DEFAULT_CONFIG,
 } from '#/lib/fluid-simulation'
 import type { Particle, MouseState } from '#/lib/fluid-simulation'
@@ -126,5 +127,30 @@ describe('shouldDisableSimulation', () => {
 
   it('enables when deviceMemory is undefined (Firefox/Safari)', () => {
     expect(shouldDisableSimulation('Firefox Desktop', 1440, undefined, 8)).toBe(false)
+  })
+})
+
+describe('createParticles', () => {
+  it('creates the requested number of particles', () => {
+    const particles = createParticles(50, 400, 300)
+    expect(particles).toHaveLength(50)
+  })
+
+  it('places particles within bounds', () => {
+    const particles = createParticles(100, 400, 300)
+    for (const p of particles) {
+      expect(p.x).toBeGreaterThanOrEqual(0)
+      expect(p.x).toBeLessThan(400)
+      expect(p.y).toBeGreaterThanOrEqual(0)
+      expect(p.y).toBeLessThan(300)
+    }
+  })
+
+  it('initializes velocity to zero', () => {
+    const particles = createParticles(10, 400, 300)
+    for (const p of particles) {
+      expect(p.vx).toBe(0)
+      expect(p.vy).toBe(0)
+    }
   })
 })
