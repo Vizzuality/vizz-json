@@ -13,7 +13,7 @@ import {
 
 export function FluidBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [enabled, setEnabled] = useState(true)
+  const [enabled, setEnabled] = useState(false)
 
   useEffect(() => {
     const disabled = shouldDisableSimulation(
@@ -23,9 +23,9 @@ export function FluidBackground() {
       navigator.hardwareConcurrency,
     )
     if (disabled) {
-      setEnabled(false)
       return
     }
+    setEnabled(true)
 
     const canvas = canvasRef.current
     if (!canvas) return
@@ -149,6 +149,7 @@ export function FluidBackground() {
 
     // --- Render loop ---
     function draw() {
+      cancelAnimationFrame(animationId)
       if (!running || !ctx || !canvas) return
 
       ctx.fillStyle = `rgba(${bgColor.r}, ${bgColor.g}, ${bgColor.b}, ${DEFAULT_CONFIG.fadeAlpha})`
