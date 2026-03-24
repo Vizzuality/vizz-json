@@ -288,6 +288,13 @@ export function renderDisplay(
   gl.disable(gl.BLEND)
 }
 
+/** Derive splat radius from velocity speed (used when no explicit radius given). */
+function computeSpeedRadius(dx: number, dy: number, config: FluidConfig): number {
+  const speed = Math.hypot(dx, dy)
+  const t = Math.min(speed * 100, 1)
+  return config.splatRadiusMin + t * (config.splatRadiusMax - config.splatRadiusMin)
+}
+
 export function addSplat(state: SimulationState, input: SplatInput): void {
   const { gl, programs, fbos } = state
 
@@ -304,12 +311,8 @@ export function addSplat(state: SimulationState, input: SplatInput): void {
     0.0,
   )
 
-  // Calculate radius based on mouse speed
-  const speed = Math.hypot(input.dx, input.dy)
-  const t = Math.min(speed * 100, 1)
-  const radius =
-    state.config.splatRadiusMin +
-    t * (state.config.splatRadiusMax - state.config.splatRadiusMin)
+  // Use explicit radius if provided, otherwise derive from speed
+  const radius = input.radius ?? computeSpeedRadius(input.dx, input.dy, state.config)
   gl.uniform1f(programs.splat.uniforms['radius'], radius / 1000)
 
   // Splat velocity

@@ -8,6 +8,9 @@ import {
   destroySimulation,
   shouldDisableSimulation,
   speedToSplatColor,
+  generateAmbientArc,
+  nextAmbientDelay,
+  DEFAULT_AMBIENT_CONFIG,
 } from '#/lib/fluid'
 import type { SimulationState } from '#/lib/fluid'
 
@@ -91,6 +94,36 @@ export function FluidBackground() {
 
     window.addEventListener('mousemove', onMouseMove)
 
+    // --- Ambient arcs (sporadic curved ink gestures) ---
+    let ambientTimeoutId: ReturnType<typeof setTimeout>
+    const arcStepTimers: ReturnType<typeof setTimeout>[] = []
+
+    function scheduleAmbientArc() {
+      const delay = nextAmbientDelay(Math.random)
+      ambientTimeoutId = setTimeout(() => {
+        if (!running) {
+          scheduleAmbientArc()
+          return
+        }
+
+        const arcSplats = generateAmbientArc(isDark, Math.random)
+        const stepDelay = DEFAULT_AMBIENT_CONFIG.arcStepDelay
+
+        // Fire each splat along the arc with a small delay between steps
+        arcSplats.forEach((splat, i) => {
+          const timerId = setTimeout(() => {
+            if (running) {
+              addSplat(sim, splat)
+            }
+          }, i * stepDelay)
+          arcStepTimers.push(timerId)
+        })
+
+        scheduleAmbientArc()
+      }, delay)
+    }
+    scheduleAmbientArc()
+
     // --- Theme observer ---
     const themeObserver = new MutationObserver(() => {
       isDark = document.documentElement.classList.contains('dark')
@@ -159,6 +192,8 @@ export function FluidBackground() {
     // --- Cleanup ---
     return () => {
       cancelAnimationFrame(animationId)
+      clearTimeout(ambientTimeoutId)
+      arcStepTimers.forEach(clearTimeout)
       window.removeEventListener('mousemove', onMouseMove)
       document.removeEventListener('visibilitychange', onVisibilityChange)
       themeObserver.disconnect()

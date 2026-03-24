@@ -92,6 +92,9 @@ export type SplatInput = {
   readonly dx: number
   readonly dy: number
   readonly color: readonly [number, number, number]
+  /** Explicit radius in config-space units (before /1000 division).
+   *  When omitted, radius is derived from speed (dx/dy). */
+  readonly radius?: number
 }
 
 export type RgbColor = {
