@@ -60,3 +60,17 @@ export function parseBgColor(computed: string): RgbColor {
     b: Number(match[3]),
   }
 }
+
+export function calculateParticleColor(
+  speed: number,
+  isDark: boolean,
+): ParticleColor {
+  const t = Math.min(speed / 8, 1)
+  const hue = 130 + t * 140
+  const saturation = Math.min(60 + t * 20, 85)
+  const lightness = 50
+  const rawAlpha = Math.min(speed * 0.12, DEFAULT_CONFIG.maxParticleAlpha)
+  const alpha = isDark ? rawAlpha : rawAlpha * 0.5
+
+  return { hue, saturation, lightness, alpha }
+}
