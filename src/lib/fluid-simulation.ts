@@ -113,3 +113,17 @@ export function updateParticle(
 
   return { x, y, vx, vy }
 }
+
+export function shouldDisableSimulation(
+  userAgent: string,
+  innerWidth: number,
+  deviceMemory: number | undefined,
+  hardwareConcurrency: number | undefined,
+): boolean {
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(userAgent)
+  const isSmallScreen = innerWidth < 768
+  const lowMemory = deviceMemory !== undefined && deviceMemory < 4
+  const lowCores = hardwareConcurrency !== undefined && hardwareConcurrency < 4
+
+  return isMobile || isSmallScreen || lowMemory || lowCores
+}

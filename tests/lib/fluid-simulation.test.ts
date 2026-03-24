@@ -3,6 +3,7 @@ import {
   parseBgColor,
   calculateParticleColor,
   updateParticle,
+  shouldDisableSimulation,
   DEFAULT_CONFIG,
 } from '#/lib/fluid-simulation'
 import type { Particle, MouseState } from '#/lib/fluid-simulation'
@@ -99,5 +100,31 @@ describe('updateParticle', () => {
     const p: Particle = { x: 100, y: 100, vx: 10, vy: 5 }
     const result = updateParticle(p, inactiveMouse, bounds, DEFAULT_CONFIG)
     expect(result).not.toBe(p)
+  })
+})
+
+describe('shouldDisableSimulation', () => {
+  it('disables on mobile user agent', () => {
+    expect(shouldDisableSimulation('iPhone', 1024, undefined, 8)).toBe(true)
+  })
+
+  it('disables on small screen', () => {
+    expect(shouldDisableSimulation('Chrome Desktop', 600, undefined, 8)).toBe(true)
+  })
+
+  it('disables on low memory', () => {
+    expect(shouldDisableSimulation('Chrome Desktop', 1024, 2, 8)).toBe(true)
+  })
+
+  it('disables on low cores', () => {
+    expect(shouldDisableSimulation('Chrome Desktop', 1024, undefined, 2)).toBe(true)
+  })
+
+  it('enables on capable desktop', () => {
+    expect(shouldDisableSimulation('Chrome Desktop', 1440, undefined, 8)).toBe(false)
+  })
+
+  it('enables when deviceMemory is undefined (Firefox/Safari)', () => {
+    expect(shouldDisableSimulation('Firefox Desktop', 1440, undefined, 8)).toBe(false)
   })
 })
