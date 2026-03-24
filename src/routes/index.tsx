@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { FluidBackground } from '#/components/landing/fluid-background'
 import { HeroSection } from '#/components/landing/hero-section'
 import { ProblemSection } from '#/components/landing/problem-section'
 import { PrefixFamilySection } from '#/components/landing/prefix-family-section'
@@ -12,12 +13,7 @@ export const Route = createFileRoute('/')({
 function LandingPage() {
   return (
     <main className="min-h-screen landing-page-bg">
-      <div className="landing-blobs" aria-hidden="true">
-        <div className="landing-blob" />
-        <div className="landing-blob" />
-        <div className="landing-blob" />
-        <div className="landing-blob" />
-      </div>
+      <FluidBackground />
       <HeroSection />
       <div className="landing-separator" />
       <ProblemSection />
