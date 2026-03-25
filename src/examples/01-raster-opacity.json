@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "Raster — COG with Opacity",
+    "title": "Params — Opacity & Visibility",
     "description": "Simple raster layer with parameterized opacity and visibility",
     "tier": "basic"
   },

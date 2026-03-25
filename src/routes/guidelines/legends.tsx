@@ -5,7 +5,7 @@ import { InteractiveExample } from '#/components/guidelines/interactive-example'
 import { BasicLegend } from '#/components/legends/basic-legend'
 import { ChoroplethLegend } from '#/components/legends/choropleth-legend'
 import { GradientLegend } from '#/components/legends/gradient-legend'
-import type { LegendConfig, LegendItem } from '#/lib/types'
+import type { LegendConfig } from '#/lib/types'
 
 export const Route = createFileRoute('/guidelines/legends')({
   component: GuidelinesLegends,
