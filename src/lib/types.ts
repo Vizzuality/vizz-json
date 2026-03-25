@@ -33,10 +33,25 @@ export type ExampleMetadata = {
   readonly title: string
   readonly description: string
   readonly tier: 'basic' | 'intermediate' | 'advanced'
+  readonly preview?: 'components'
 }
 
-export type ExampleConfig = LayerSchema & {
+export type MapExample = LayerSchema & {
   readonly metadata: ExampleMetadata
+}
+
+export type ComponentExample = {
+  readonly metadata: ExampleMetadata & { readonly preview: 'components' }
+  readonly components: readonly Record<string, unknown>[]
+  readonly params_config: readonly ParamConfig[]
+}
+
+export type ExampleConfig = MapExample | ComponentExample
+
+export function isComponentExample(
+  example: ExampleConfig,
+): example is ComponentExample {
+  return example.metadata.preview === 'components'
 }
 
 export type ParamControlType =
