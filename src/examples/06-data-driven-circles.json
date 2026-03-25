@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "Data-Driven Circles — heatmap crossfade",
+    "title": "Multi-Layer — Zoom Crossfade",
     "description": "Heatmap at low zoom crossfades to magnitude-scaled circles — transition range is fully controllable",
     "tier": "intermediate"
   },

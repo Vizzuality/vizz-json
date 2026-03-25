@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "Raster COG — @@function URL Builder",
+    "title": "@@function — Dynamic URLs",
     "description": "Dynamic tile URL construction via @@function",
     "tier": "advanced"
   },

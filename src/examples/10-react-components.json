@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "React Components — @@type Legend",
+    "title": "@@type — React Components",
     "description": "Demonstrates @@type resolving to registered React components for legends",
     "tier": "advanced"
   },

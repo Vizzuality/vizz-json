@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "title": "Conditional Styling — case + @@function",
+    "title": "Expression — case + @@function",
     "description": "Conditional logic with case expression and parameterized threshold",
     "tier": "advanced"
   },
