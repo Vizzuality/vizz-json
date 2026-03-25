@@ -135,7 +135,9 @@ function PlaygroundPage() {
 
       const wrapped = { components }
       const paramsResolved = resolveParams(wrapped, paramValues)
-      const result = converterRef.resolve(paramsResolved as Record<string, unknown>)
+      const result = converterRef.resolve(
+        paramsResolved,
+      )
       const unwrapped = result.components
 
       return {
@@ -170,7 +172,9 @@ function PlaygroundPage() {
               onSelect={handleExampleSelect}
             />
           </div>
-          <StatusIndicator error={previewMode === 'components' ? componentError : error} />
+          <StatusIndicator
+            error={previewMode === 'components' ? componentError : error}
+          />
         </div>
       }
       editor={

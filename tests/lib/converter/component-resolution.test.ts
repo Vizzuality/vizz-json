@@ -9,7 +9,13 @@ describe('component resolution pipeline', () => {
   it('resolves @@type entries in a components array via wrap/unwrap', () => {
     const components = [
       { '@@type': 'InfoPanel', title: 'Hello', description: 'World' },
-      { '@@type': 'StatCard', label: 'Count', value: '42', unit: 'items', color: '#000' },
+      {
+        '@@type': 'StatCard',
+        label: 'Count',
+        value: '42',
+        unit: 'items',
+        color: '#000',
+      },
     ]
 
     // Wrap
@@ -31,7 +37,11 @@ describe('component resolution pipeline', () => {
 
   it('resolves @@#params inside @@type component props', () => {
     const components = [
-      { '@@type': 'InfoPanel', title: '@@#params.myTitle', description: 'static' },
+      {
+        '@@type': 'InfoPanel',
+        title: '@@#params.myTitle',
+        description: 'static',
+      },
     ]
 
     const wrapped = { components }
@@ -41,7 +51,10 @@ describe('component resolution pipeline', () => {
     const resolved = result.components as unknown[]
     expect(isComponentDescriptor(resolved[0])).toBe(true)
 
-    const descriptor = resolved[0] as { $$component: unknown; props: Record<string, unknown> }
+    const descriptor = resolved[0] as {
+      $$component: unknown
+      props: Record<string, unknown>
+    }
     expect(descriptor.props.title).toBe('Resolved Title')
     expect(descriptor.props.description).toBe('static')
   })
@@ -67,8 +80,14 @@ describe('component resolution pipeline', () => {
     const resolved = result.components as unknown[]
     expect(isComponentDescriptor(resolved[0])).toBe(true)
 
-    const descriptor = resolved[0] as { $$component: unknown; props: Record<string, unknown> }
-    const items = descriptor.props.items as Array<{ label: string; value: string }>
+    const descriptor = resolved[0] as {
+      $$component: unknown
+      props: Record<string, unknown>
+    }
+    const items = descriptor.props.items as Array<{
+      label: string
+      value: string
+    }>
     expect(items[0].value).toBe('#ffffff')
     expect(items[1].value).toBe('#000000')
   })

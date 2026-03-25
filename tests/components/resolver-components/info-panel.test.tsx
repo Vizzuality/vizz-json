@@ -5,7 +5,9 @@ import { InfoPanel } from '#/components/resolver-components/info-panel'
 describe('InfoPanel', () => {
   it('renders title as a heading', () => {
     render(<InfoPanel title="Test Title" description="Test body" />)
-    expect(screen.getByRole('heading', { name: 'Test Title' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Test Title' }),
+    ).toBeInTheDocument()
   })
 
   it('renders description text', () => {

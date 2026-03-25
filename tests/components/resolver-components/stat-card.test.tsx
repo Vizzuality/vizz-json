@@ -4,7 +4,14 @@ import { StatCard } from '#/components/resolver-components/stat-card'
 
 describe('StatCard', () => {
   it('renders label text', () => {
-    render(<StatCard label="Population" value="8.1B" unit="people" color="#3b82f6" />)
+    render(
+      <StatCard
+        label="Population"
+        value="8.1B"
+        unit="people"
+        color="#3b82f6"
+      />,
+    )
     expect(screen.getByText('Population')).toBeInTheDocument()
   })
 
