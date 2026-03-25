@@ -63,11 +63,7 @@ function ColorBar({
         }
 
         return (
-          <div
-            key={i}
-            className="flex-1"
-            style={{ backgroundColor: color }}
-          />
+          <div key={i} className="flex-1" style={{ backgroundColor: color }} />
         )
       })}
     </div>
@@ -91,9 +87,10 @@ function Labels({
     <div className="mt-1 flex">
       {items.map((item, i) => {
         const mapping = isEditable ? paramMapping.get(i) : undefined
-        const labelValue = mapping?.labelParamKey && values
-          ? String(values[mapping.labelParamKey] ?? item.label)
-          : undefined
+        const labelValue =
+          mapping?.labelParamKey && values
+            ? String(values[mapping.labelParamKey] ?? item.label)
+            : undefined
 
         if (labelValue !== undefined && mapping?.labelParamKey && onChange) {
           return (

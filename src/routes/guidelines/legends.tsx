@@ -20,7 +20,10 @@ const LEGEND_COMPONENTS = {
 function ResolveLegendPreview({
   resolved,
 }: {
-  readonly resolved: { value: Record<string, unknown> | null; error: string | null }
+  readonly resolved: {
+    value: Record<string, unknown> | null
+    error: string | null
+  }
 }) {
   if (resolved.error || !resolved.value) return null
 
@@ -28,7 +31,6 @@ function ResolveLegendPreview({
   if (!legendConfig) return null
 
   const LegendComponent = LEGEND_COMPONENTS[legendConfig.type]
-  if (!LegendComponent) return null
 
   return (
     <div className="p-4">
@@ -36,7 +38,7 @@ function ResolveLegendPreview({
         Legend preview
       </div>
       <div className="rounded-lg border border-border p-4">
-        <LegendComponent items={legendConfig.items as readonly LegendItem[]} />
+        <LegendComponent items={legendConfig.items} />
       </div>
     </div>
   )
@@ -226,7 +228,6 @@ function GuidelinesLegends() {
           {(resolved) => <ResolveLegendPreview resolved={resolved} />}
         </InteractiveExample>
       </section>
-
     </div>
   )
 }
