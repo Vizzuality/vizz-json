@@ -9,72 +9,116 @@ type ChoroplethLegendProps = {
   readonly onChange?: (key: string, value: unknown) => void
 }
 
-function EditableRow({
-  item,
-  mapping,
+function getColor(item: LegendItem): string {
+  return typeof item.value === 'string' ? item.value : '#000'
+}
+
+function resolveColor(
+  item: LegendItem,
+  mapping: ItemParamMapping | undefined,
+  values: Record<string, unknown> | undefined,
+): string {
+  if (mapping?.valueParamKey && values) {
+    return String(values[mapping.valueParamKey] ?? item.value)
+  }
+  return getColor(item)
+}
+
+function ColorBar({
+  items,
+  paramMapping,
   values,
   onChange,
 }: {
-  readonly item: LegendItem
-  readonly mapping: ItemParamMapping
-  readonly values: Record<string, unknown>
-  readonly onChange: (key: string, value: unknown) => void
+  readonly items: readonly LegendItem[]
+  readonly paramMapping?: ReadonlyMap<number, ItemParamMapping>
+  readonly values?: Record<string, unknown>
+  readonly onChange?: (key: string, value: unknown) => void
 }) {
-  const colorValue = mapping.valueParamKey
-    ? String(values[mapping.valueParamKey] ?? item.value)
-    : undefined
-  const labelValue = mapping.labelParamKey
-    ? String(values[mapping.labelParamKey] ?? item.label)
-    : undefined
+  const isEditable = paramMapping && values && onChange
 
   return (
-    <div className="flex items-center gap-2 px-1.5 py-1 -mx-1.5">
-      {colorValue !== undefined && mapping.valueParamKey ? (
-        <label
-          className="w-6 h-4 rounded-sm shrink-0 cursor-pointer"
-          style={{ backgroundColor: colorValue }}
-        >
-          <input
-            type="color"
-            value={colorValue}
-            onChange={(e) => onChange(mapping.valueParamKey!, e.target.value)}
-            className="sr-only"
+    <div className="flex h-4 w-full overflow-hidden rounded-sm">
+      {items.map((item, i) => {
+        const mapping = isEditable ? paramMapping.get(i) : undefined
+        const color = resolveColor(item, mapping, values)
+
+        if (mapping?.valueParamKey && onChange) {
+          return (
+            <label
+              key={i}
+              className="flex-1 cursor-pointer"
+              style={{ backgroundColor: color }}
+            >
+              <input
+                type="color"
+                value={color}
+                onChange={(e) =>
+                  onChange(mapping.valueParamKey!, e.target.value)
+                }
+                className="sr-only"
+              />
+            </label>
+          )
+        }
+
+        return (
+          <div
+            key={i}
+            className="flex-1"
+            style={{ backgroundColor: color }}
           />
-        </label>
-      ) : (
-        <div
-          className="w-6 h-4 rounded-sm shrink-0"
-          style={{
-            backgroundColor:
-              typeof item.value === 'string' ? item.value : undefined,
-          }}
-        />
-      )}
-      {labelValue !== undefined && mapping.labelParamKey ? (
-        <Input
-          type="text"
-          value={labelValue}
-          onChange={(e) => onChange(mapping.labelParamKey!, e.target.value)}
-          className="h-7 flex-1 text-xs"
-        />
-      ) : (
-        <span className="text-xs text-muted-foreground">{item.label}</span>
-      )}
+        )
+      })}
     </div>
   )
 }
 
-function StaticRow({ item }: { readonly item: LegendItem }) {
+function Labels({
+  items,
+  paramMapping,
+  values,
+  onChange,
+}: {
+  readonly items: readonly LegendItem[]
+  readonly paramMapping?: ReadonlyMap<number, ItemParamMapping>
+  readonly values?: Record<string, unknown>
+  readonly onChange?: (key: string, value: unknown) => void
+}) {
+  const isEditable = paramMapping && values && onChange
+
   return (
-    <div className="flex items-center gap-2 px-1.5 py-1 -mx-1.5">
-      <div
-        className="w-6 h-4 rounded-sm shrink-0"
-        style={{
-          backgroundColor:
-            typeof item.value === 'string' ? item.value : undefined,
-        }}
-      />
-      <span className="text-xs text-muted-foreground">{item.label}</span>
+    <div className="mt-1 flex">
+      {items.map((item, i) => {
+        const mapping = isEditable ? paramMapping.get(i) : undefined
+        const labelValue = mapping?.labelParamKey && values
+          ? String(values[mapping.labelParamKey] ?? item.label)
+          : undefined
+
+        if (labelValue !== undefined && mapping?.labelParamKey && onChange) {
+          return (
+            <div key={i} className="flex-1">
+              <Input
+                type="text"
+                value={labelValue}
+                onChange={(e) =>
+                  onChange(mapping.labelParamKey!, e.target.value)
+                }
+                className="h-6 text-[10px]"
+              />
+            </div>
+          )
+        }
+
+        return (
+          <span
+            key={i}
+            className="flex-1 text-center text-[10px] text-muted-foreground"
+          >
+            {item.label}
+          </span>
+        )
+      })}
     </div>
   )
 }
@@ -85,27 +129,20 @@ export function ChoroplethLegend({
   values,
   onChange,
 }: ChoroplethLegendProps) {
-  const isEditable = paramMapping && values && onChange
-
   return (
-    <div className="flex flex-col gap-0.5">
-      {items.map((item, i) => {
-        const mapping = isEditable ? paramMapping.get(i) : undefined
-
-        if (mapping && values && onChange) {
-          return (
-            <EditableRow
-              key={i}
-              item={item}
-              mapping={mapping}
-              values={values}
-              onChange={onChange}
-            />
-          )
-        }
-
-        return <StaticRow key={i} item={item} />
-      })}
+    <div>
+      <ColorBar
+        items={items}
+        paramMapping={paramMapping}
+        values={values}
+        onChange={onChange}
+      />
+      <Labels
+        items={items}
+        paramMapping={paramMapping}
+        values={values}
+        onChange={onChange}
+      />
     </div>
   )
 }
