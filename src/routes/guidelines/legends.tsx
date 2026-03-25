@@ -2,14 +2,47 @@ import { createFileRoute } from '@tanstack/react-router'
 import { SectionHeader } from '#/components/guidelines/section-header'
 import { CodeBlock } from '#/components/guidelines/code-block'
 import { InteractiveExample } from '#/components/guidelines/interactive-example'
-import { Callout } from '#/components/guidelines/callout'
 import { BasicLegend } from '#/components/legends/basic-legend'
 import { ChoroplethLegend } from '#/components/legends/choropleth-legend'
 import { GradientLegend } from '#/components/legends/gradient-legend'
+import type { LegendConfig, LegendItem } from '#/lib/types'
 
 export const Route = createFileRoute('/guidelines/legends')({
   component: GuidelinesLegends,
 })
+
+const LEGEND_COMPONENTS = {
+  basic: BasicLegend,
+  choropleth: ChoroplethLegend,
+  gradient: GradientLegend,
+} as const
+
+function ResolveLegendPreview({
+  resolved,
+}: {
+  readonly resolved: {
+    value: Record<string, unknown> | null
+    error: string | null
+  }
+}) {
+  if (resolved.error || !resolved.value) return null
+
+  const legendConfig = resolved.value.legend_config as LegendConfig | undefined
+  if (!legendConfig) return null
+
+  const LegendComponent = LEGEND_COMPONENTS[legendConfig.type]
+
+  return (
+    <div className="p-4">
+      <div className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        Legend preview
+      </div>
+      <div className="rounded-lg border border-border p-4">
+        <LegendComponent items={legendConfig.items} />
+      </div>
+    </div>
+  )
+}
 
 function GuidelinesLegends() {
   return (
@@ -155,38 +188,46 @@ function GuidelinesLegends() {
           title="Parameterized choropleth legend"
           description="Change the colors and see both the config output and legend update."
           config={{
-            paint: {
-              'fill-color': [
-                'case',
-                ['>', ['get', 'pop_est'], 50000000],
-                '@@#params.above_color',
-                '@@#params.below_color',
+            legend_config: {
+              type: 'choropleth',
+              items: [
+                { label: 'Sparse', value: '@@#params.low_color' },
+                { label: 'Medium', value: '@@#params.mid_color' },
+                { label: 'Dense', value: '@@#params.high_color' },
               ],
             },
           }}
           paramsConfig={[
-            { key: 'above_color', default: '#dc2626', group: 'legend' },
-            { key: 'below_color', default: '#3b82f6', group: 'legend' },
+            { key: 'low_color', default: '#dbeafe', group: 'legend' },
+            { key: 'mid_color', default: '#3b82f6', group: 'legend' },
+            { key: 'high_color', default: '#1e3a5f', group: 'legend' },
           ]}
-        />
-      </section>
+        >
+          {(resolved) => <ResolveLegendPreview resolved={resolved} />}
+        </InteractiveExample>
 
-      <Callout title="Tips & Gotchas">
-        <ul className="ml-4 list-disc space-y-1">
-          <li>
-            <code>legend_config</code> is not resolved by the converter — it
-            uses its own rendering pipeline with the legend React components.
-          </li>
-          <li>
-            Use <code>{"group: 'legend'"}</code> on params to co-locate their
-            controls inside the legend card.
-          </li>
-          <li>
-            Legend item values with <code>@@#params</code> references are
-            resolved alongside the map config, keeping them in sync.
-          </li>
-        </ul>
-      </Callout>
+        <InteractiveExample
+          title="Parameterized gradient legend"
+          description="Adjust the gradient stops and watch the legend update in real time."
+          config={{
+            legend_config: {
+              type: 'gradient',
+              items: [
+                { label: 'Cold', value: '@@#params.cold_color' },
+                { label: 'Warm', value: '@@#params.warm_color' },
+                { label: 'Hot', value: '@@#params.hot_color' },
+              ],
+            },
+          }}
+          paramsConfig={[
+            { key: 'cold_color', default: '#440154', group: 'legend' },
+            { key: 'warm_color', default: '#21918c', group: 'legend' },
+            { key: 'hot_color', default: '#fde725', group: 'legend' },
+          ]}
+        >
+          {(resolved) => <ResolveLegendPreview resolved={resolved} />}
+        </InteractiveExample>
+      </section>
     </div>
   )
 }

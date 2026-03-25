@@ -1,6 +1,7 @@
 import { Editor } from '@monaco-editor/react'
 import type { OnMount } from '@monaco-editor/react'
 import { useCallback, useRef } from 'react'
+import { useResolvedTheme } from '#/hooks/use-resolved-theme'
 
 type JsonEditorProps = {
   readonly value: string
@@ -8,6 +9,7 @@ type JsonEditorProps = {
 }
 
 export function JsonEditor({ value, onChange }: JsonEditorProps) {
+  const theme = useResolvedTheme()
   const editorRef = useRef<Parameters<OnMount>[0] | null>(null)
 
   const handleMount: OnMount = useCallback((editor) => {
@@ -28,7 +30,7 @@ export function JsonEditor({ value, onChange }: JsonEditorProps) {
       <div className="relative flex-1 overflow-hidden">
         <Editor
           defaultLanguage="json"
-          theme="vs-dark"
+          theme={theme === 'dark' ? 'vs-dark' : 'light'}
           value={value}
           onChange={handleChange}
           onMount={handleMount}
