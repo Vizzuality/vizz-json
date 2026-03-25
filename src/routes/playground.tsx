@@ -135,9 +135,7 @@ function PlaygroundPage() {
 
       const wrapped = { components }
       const paramsResolved = resolveParams(wrapped, paramValues)
-      const result = converterRef.resolve(
-        paramsResolved,
-      )
+      const result = converterRef.resolve(paramsResolved)
       const unwrapped = result.components
 
       return {
