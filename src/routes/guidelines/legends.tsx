@@ -161,6 +161,28 @@ function GuidelinesLegends() {
         </p>
 
         <InteractiveExample
+          title="Parameterized basic legend"
+          description="Change the category colors and see the legend update."
+          config={{
+            legend_config: {
+              type: 'basic',
+              items: [
+                { label: 'Forest', value: '@@#params.forest_color' },
+                { label: 'Water', value: '@@#params.water_color' },
+                { label: 'Urban', value: '@@#params.urban_color' },
+              ],
+            },
+          }}
+          paramsConfig={[
+            { key: 'forest_color', default: '#22c55e', group: 'legend' },
+            { key: 'water_color', default: '#3b82f6', group: 'legend' },
+            { key: 'urban_color', default: '#94a3b8', group: 'legend' },
+          ]}
+        >
+          {(resolved) => <ResolveLegendPreview resolved={resolved} />}
+        </InteractiveExample>
+
+        <InteractiveExample
           title="Parameterized choropleth legend"
           description="Change the colors and see both the config output and legend update."
           config={{

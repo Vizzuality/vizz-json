@@ -15,4 +15,11 @@ hooks = [
     entry = "pnpm -r typecheck",
     pass_filenames = false,
   },
+  {
+    id = "format-check",
+    name = "format check",
+    language = "system",
+    entry = "pnpm -r format",
+    pass_filenames = false,
+  },
 ]
