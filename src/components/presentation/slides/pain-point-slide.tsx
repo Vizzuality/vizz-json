@@ -24,19 +24,19 @@ export function PainPointSlide({ step }: SlideProps) {
           <span className="token-string">"get"</span>,{' '}
           <span className="token-string">"mag"</span>],{'\n'}
           {'      '}1,{' '}
-          <Step visible={step >= 1} className="inline" delay={0}>
+          <Step visible={step >= 1} inline delay={0}>
             <span className="rounded bg-destructive/20 px-1 font-bold text-destructive">
               4
             </span>
           </Step>
           {step < 1 && <span className="token-number">4</span>}, 3,{' '}
-          <Step visible={step >= 1} className="inline" delay={200}>
+          <Step visible={step >= 1} inline delay={200}>
             <span className="rounded bg-destructive/20 px-1 font-bold text-destructive">
               8
             </span>
           </Step>
           {step < 1 && <span className="token-number">8</span>}, 5,{' '}
-          <Step visible={step >= 1} className="inline" delay={400}>
+          <Step visible={step >= 1} inline delay={400}>
             <span className="rounded bg-destructive/20 px-1 font-bold text-destructive">
               16
             </span>
@@ -44,7 +44,7 @@ export function PainPointSlide({ step }: SlideProps) {
           {step < 1 && <span className="token-number">16</span>}],{'\n'}
           {'    '}
           <span className="token-key">"circle-color"</span>:{' '}
-          <Step visible={step >= 1} className="inline" delay={600}>
+          <Step visible={step >= 1} inline delay={600}>
             <span className="rounded bg-destructive/20 px-1 font-bold text-destructive">
               "#d7191c"
             </span>
@@ -52,7 +52,7 @@ export function PainPointSlide({ step }: SlideProps) {
           {step < 1 && <span className="token-string">"#d7191c"</span>},{'\n'}
           {'    '}
           <span className="token-key">"circle-opacity"</span>:{' '}
-          <Step visible={step >= 1} className="inline" delay={800}>
+          <Step visible={step >= 1} inline delay={800}>
             <span className="rounded bg-destructive/20 px-1 font-bold text-destructive">
               0.8
             </span>
@@ -60,7 +60,7 @@ export function PainPointSlide({ step }: SlideProps) {
           {step < 1 && <span className="token-number">0.8</span>},{'\n'}
           {'    '}
           <span className="token-key">"circle-stroke-color"</span>:{' '}
-          <Step visible={step >= 1} className="inline" delay={1000}>
+          <Step visible={step >= 1} inline delay={1000}>
             <span className="rounded bg-destructive/20 px-1 font-bold text-destructive">
               "#ffffff"
             </span>

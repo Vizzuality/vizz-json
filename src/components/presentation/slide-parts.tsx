@@ -6,16 +6,24 @@ type StepProps = {
   readonly children: ReactNode
   readonly className?: string
   readonly delay?: number
+  readonly inline?: boolean
 }
 
-export function Step({ visible, children, className, delay = 0 }: StepProps) {
+export function Step({
+  visible,
+  children,
+  className,
+  delay = 0,
+  inline = false,
+}: StepProps) {
+  const Tag = inline ? 'span' : 'div'
   return (
-    <div
+    <Tag
       className={cn(visible ? 'step-visible' : 'step-hidden', className)}
       style={visible ? { transitionDelay: `${delay}ms` } : undefined}
     >
       {children}
-    </div>
+    </Tag>
   )
 }
 

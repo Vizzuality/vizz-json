@@ -73,6 +73,18 @@
     transform 400ms ease-out;
 }
 
+/* Inline step variants (spans inside code blocks) */
+span.step-hidden {
+  opacity: 0;
+  transform: none;
+}
+
+span.step-visible {
+  opacity: 1;
+  transform: none;
+  transition: opacity 300ms ease-out;
+}
+
 /* Code highlight glow */
 @keyframes highlightSweep {
   0% {
