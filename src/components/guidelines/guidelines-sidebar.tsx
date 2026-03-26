@@ -23,7 +23,6 @@ const NAV_GROUPS: readonly NavGroup[] = [
       { label: '@@function:', to: '/guidelines/functions' },
       { label: '@@type:', to: '/guidelines/types' },
       { label: '@@=[expr]', to: '/guidelines/expressions' },
-      { label: '@@#GL.', to: '/guidelines/gl-constants' },
     ],
   },
   {

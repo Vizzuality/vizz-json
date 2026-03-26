@@ -18,7 +18,6 @@ import { Route as GuidelinesIndexRouteImport } from './routes/guidelines/index'
 import { Route as GuidelinesTypesRouteImport } from './routes/guidelines/types'
 import { Route as GuidelinesParamsRouteImport } from './routes/guidelines/params'
 import { Route as GuidelinesLegendsRouteImport } from './routes/guidelines/legends'
-import { Route as GuidelinesGlConstantsRouteImport } from './routes/guidelines/gl-constants'
 import { Route as GuidelinesFunctionsRouteImport } from './routes/guidelines/functions'
 import { Route as GuidelinesExpressionsRouteImport } from './routes/guidelines/expressions'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
@@ -71,11 +70,6 @@ const GuidelinesParamsRoute = GuidelinesParamsRouteImport.update({
 const GuidelinesLegendsRoute = GuidelinesLegendsRouteImport.update({
   id: '/legends',
   path: '/legends',
-  getParentRoute: () => GuidelinesRoute,
-} as any)
-const GuidelinesGlConstantsRoute = GuidelinesGlConstantsRouteImport.update({
-  id: '/gl-constants',
-  path: '/gl-constants',
   getParentRoute: () => GuidelinesRoute,
 } as any)
 const GuidelinesFunctionsRoute = GuidelinesFunctionsRouteImport.update({
@@ -132,7 +126,6 @@ export interface FileRoutesByFullPath {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
-  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
@@ -151,7 +144,6 @@ export interface FileRoutesByTo {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
-  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
@@ -172,7 +164,6 @@ export interface FileRoutesById {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
-  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
@@ -194,7 +185,6 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
-    | '/guidelines/gl-constants'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
@@ -213,7 +203,6 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
-    | '/guidelines/gl-constants'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
@@ -233,7 +222,6 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
-    | '/guidelines/gl-constants'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
@@ -320,13 +308,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidelinesLegendsRouteImport
       parentRoute: typeof GuidelinesRoute
     }
-    '/guidelines/gl-constants': {
-      id: '/guidelines/gl-constants'
-      path: '/gl-constants'
-      fullPath: '/guidelines/gl-constants'
-      preLoaderRoute: typeof GuidelinesGlConstantsRouteImport
-      parentRoute: typeof GuidelinesRoute
-    }
     '/guidelines/functions': {
       id: '/guidelines/functions'
       path: '/functions'
@@ -389,7 +370,6 @@ declare module '@tanstack/react-router' {
 interface GuidelinesRouteChildren {
   GuidelinesExpressionsRoute: typeof GuidelinesExpressionsRoute
   GuidelinesFunctionsRoute: typeof GuidelinesFunctionsRoute
-  GuidelinesGlConstantsRoute: typeof GuidelinesGlConstantsRoute
   GuidelinesLegendsRoute: typeof GuidelinesLegendsRoute
   GuidelinesParamsRoute: typeof GuidelinesParamsRoute
   GuidelinesTypesRoute: typeof GuidelinesTypesRoute
@@ -399,7 +379,6 @@ interface GuidelinesRouteChildren {
 const GuidelinesRouteChildren: GuidelinesRouteChildren = {
   GuidelinesExpressionsRoute: GuidelinesExpressionsRoute,
   GuidelinesFunctionsRoute: GuidelinesFunctionsRoute,
-  GuidelinesGlConstantsRoute: GuidelinesGlConstantsRoute,
   GuidelinesLegendsRoute: GuidelinesLegendsRoute,
   GuidelinesParamsRoute: GuidelinesParamsRoute,
   GuidelinesTypesRoute: GuidelinesTypesRoute,

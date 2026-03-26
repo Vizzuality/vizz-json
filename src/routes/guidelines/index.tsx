@@ -31,12 +31,6 @@ const PREFIXES = [
     example: '"@@=geometry.coordinates"',
     link: '/guidelines/expressions',
   },
-  {
-    prefix: '@@#GL.CONSTANT',
-    description: 'Resolve a WebGL constant',
-    example: '"@@#GL.POINTS"',
-    link: '/guidelines/gl-constants',
-  },
 ] as const
 
 const DEMO_CONFIG = {
@@ -100,7 +94,7 @@ function GuidelinesOverview() {
             <div className="font-mono font-semibold">Stage 2</div>
             <div className="text-xs">JSONConverter</div>
             <div className="text-xs text-muted-foreground">
-              @@function: @@type: @@= @@#GL.
+              @@function: @@type: @@=
             </div>
           </div>
           <span className="text-muted-foreground">→</span>
