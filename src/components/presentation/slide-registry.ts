@@ -8,9 +8,12 @@ import { PrefixOverviewSlide } from './slides/prefix-overview-slide'
 import { ParamsSlide } from './slides/params-slide'
 import { ParamsConfigSlide } from './slides/params-config-slide'
 import { FunctionSlide } from './slides/function-slide'
+import { FunctionRegistrySlide } from './slides/function-registry-slide'
 import { TypeSlide } from './slides/type-slide'
+import { TypeRegistrySlide } from './slides/type-registry-slide'
 import { ExpressionSlide } from './slides/expression-slide'
 import { PipelineSlide } from './slides/pipeline-slide'
+import { CtaSlide } from './slides/cta-slide'
 
 export const SLIDES: readonly SlideDefinition[] = [
   { id: 'title', title: 'VizzJson', component: TitleSlide },
@@ -34,7 +37,18 @@ export const SLIDES: readonly SlideDefinition[] = [
     component: ParamsConfigSlide,
   },
   { id: 'function', title: '@@function:', component: FunctionSlide },
+  {
+    id: 'function-registry',
+    title: 'Registering Functions',
+    component: FunctionRegistrySlide,
+  },
   { id: 'type', title: '@@type:', component: TypeSlide },
+  {
+    id: 'type-registry',
+    title: 'Registering Components',
+    component: TypeRegistrySlide,
+  },
   { id: 'expression', title: '@@=[...]', component: ExpressionSlide },
-{ id: 'pipeline', title: 'Resolution Pipeline', component: PipelineSlide },
+  { id: 'pipeline', title: 'Resolution Pipeline', component: PipelineSlide },
+  { id: 'cta', title: 'Try It', component: CtaSlide },
 ] as const

@@ -10,7 +10,7 @@ export function ParamsConfigSlide() {
   return (
     <Slide className="items-start">
       <p className="mb-2 text-sm font-semibold tracking-wider text-chart-1 uppercase">
-        params_config
+        @@#params.X
       </p>
       <SlideHeading className="mb-4 text-foreground">
         Declaring what&apos;s <span className="text-primary">tuneable</span>

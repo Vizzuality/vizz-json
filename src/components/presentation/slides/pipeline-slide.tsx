@@ -5,21 +5,19 @@ const STAGES = [
   {
     label: 'JSON Config',
     desc: 'with @@ prefixes',
+    detail: 'Raw config with @@#params, @@function, @@type, and @@= directives',
     color: 'border-chart-1 bg-chart-1/10',
   },
   {
-    label: 'Stage 1',
-    desc: 'resolveParams()',
+    label: 'resolveConfig(config, params)',
+    desc: '',
+    detail: '',
     color: 'border-chart-2 bg-chart-2/10',
   },
   {
-    label: 'Stage 2',
-    desc: 'JSONConverter',
-    color: 'border-chart-3 bg-chart-3/10',
-  },
-  {
-    label: 'Rendered Map',
-    desc: 'native objects',
+    label: 'Resolved JSON',
+    desc: 'native objects & callables',
+    detail: '',
     color: 'border-primary bg-primary/10',
   },
 ] as const
@@ -71,9 +69,11 @@ export function PipelineSlide() {
         The resolution <span className="text-primary">pipeline</span>
       </SlideHeading>
       <SlideText className="mb-12 text-muted-foreground">
-        Two stages, one pass each, no compilation step. First, parameter
-        references are resolved against user values. Then, deck.gl's
-        JSONConverter handles functions, types, and expressions.
+        One function, two stages.{' '}
+        <code className="font-mono">resolveConfig(config, params)</code> first
+        merges params_config defaults with the app's current settings, then
+        passes the result to the converter for @@function, @@type, and @@=
+        resolution.
       </SlideText>
 
       <div className="flex w-full flex-col items-center gap-3 lg:flex-row lg:justify-center lg:gap-2">
@@ -90,16 +90,18 @@ export function PipelineSlide() {
             )}
             <div
               className={cn(
-                'rounded-lg border-2 px-4 py-3 text-center lg:px-6 lg:py-5',
+                'w-full rounded-lg border-2 px-6 py-5 text-center lg:h-56 lg:w-80 lg:px-8 lg:py-7',
                 stage.color,
               )}
             >
-              <p className="text-[clamp(0.75rem,1.2vw,1.1rem)] font-semibold text-foreground">
+              <p className="text-[clamp(1rem,1.6vw,1.5rem)] font-semibold text-foreground">
                 {stage.label}
               </p>
-              <p className="mt-1 font-mono text-sm text-muted-foreground">
-                {stage.desc}
-              </p>
+              {stage.desc && (
+                <p className="mt-2 font-mono text-[clamp(0.8rem,1.2vw,1.1rem)] text-muted-foreground">
+                  {stage.desc}
+                </p>
+              )}
             </div>
           </div>
         ))}

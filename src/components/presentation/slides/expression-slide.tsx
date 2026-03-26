@@ -1,7 +1,16 @@
 import { Slide, SlideCode, SlideHeading, SlideText } from '../slide-parts'
 
 const CONFIG = `{
-  "circle-radius": "@@=[*, 2, [get, mag]]"
+  "@@type": "HexagonLayer",
+  "data": [
+    { "lat": 0, "lng": 0 },
+    { "lat": 0, "lng": 0 },
+    { "lat": 0, "lng": 0 },
+    { "lat": 1.2, "lng": 1.2 },
+    { "lat": 1.2, "lng": 1.2 },
+    { "lat": 1.2, "lng": 1.2 }
+  ],
+  "getPosition": "@@=[lng, lat]"
 }`
 
 export function ExpressionSlide() {
@@ -14,19 +23,23 @@ export function ExpressionSlide() {
         Inline <span className="text-primary">expressions</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
-        Embed a functional expression directly in the JSON. The resolver parses
-        the S-expression syntax into a callable function — useful for
-        data-driven styling like scaling radius by a feature property.
+        Embed inline JavaScript expressions directly in the JSON. Each{' '}
+        <code className="font-mono text-chart-4">@@=</code> string becomes an
+        accessor function — extract coordinates, compute colors, or apply
+        conditional logic without leaving the config.
       </SlideText>
 
       <SlideCode value={CONFIG} />
 
-      <div className="mt-6 flex w-full flex-col items-start gap-3 md:flex-row md:items-center md:gap-4">
-        <div className="rounded-md border border-border bg-card px-4 py-3">
-          <p className="font-mono text-sm text-chart-4">
-            (feature) =&gt; 2 * feature.properties.mag
-          </p>
-        </div>
+      <div className="mt-6 rounded-md border border-border bg-card px-4 py-3">
+        <p className="text-sm text-muted-foreground">
+          Each <span className="font-mono text-chart-4">@@=</span> value is
+          compiled into{' '}
+          <span className="font-mono text-chart-4">
+            (datum) =&gt; datum.lng, datum.lat
+          </span>{' '}
+          — a real accessor function at runtime.
+        </p>
       </div>
     </Slide>
   )

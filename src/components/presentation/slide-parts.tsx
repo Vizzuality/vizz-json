@@ -128,8 +128,8 @@ export function SlideCallout({ children, className }: SlideProps) {
         className,
       )}
     >
-      <AlertTriangleIcon className="size-[clamp(1.25rem,2vw,2.25rem)] shrink-0 text-amber-500" />
-      <p className="text-[clamp(1rem,1.8vw,2rem)] leading-[1.6] text-foreground/90">
+      <AlertTriangleIcon className="size-[clamp(1rem,1.5vw,1.5rem)] shrink-0 text-amber-500" />
+      <p className="text-[clamp(0.875rem,1.4vw,1.5rem)] leading-[1.5] text-foreground/90">
         {children}
       </p>
     </div>

@@ -16,7 +16,7 @@ export function TypeSlide() {
         @@type:
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Component <span className="text-primary">instantiation</span>
+        Component or class <span className="text-primary">instantiation</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
         Declare a React component or deck.gl layer class by name. The converter
