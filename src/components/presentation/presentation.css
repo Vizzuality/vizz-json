@@ -47,25 +47,3 @@
   transition: stroke-dashoffset 600ms ease-out;
 }
 
-/* Code syntax token colors */
-.token-key {
-  color: oklch(0.75 0.15 250);
-}
-
-.token-string {
-  color: oklch(0.8 0.15 150);
-}
-
-.token-param {
-  color: oklch(0.85 0.18 85);
-  font-weight: 600;
-}
-
-.token-number {
-  color: oklch(0.8 0.15 30);
-}
-
-.token-comment {
-  color: oklch(0.55 0 0);
-  font-style: italic;
-}

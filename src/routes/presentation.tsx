@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react'
+import { useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { PresentationLayout } from '#/components/presentation/presentation-layout'
@@ -18,11 +18,8 @@ function PresentationPage() {
   const { slide: slideParam } = Route.useSearch()
   const navigate = Route.useNavigate()
 
-  const stepsPerSlide = useMemo(() => SLIDES.map((s) => s.totalSteps), [])
-
-  const { slide, step, progress } = useSlideNavigation({
+  const { slide, progress } = useSlideNavigation({
     totalSlides: SLIDES.length,
-    stepsPerSlide,
     initialSlide: slideParam - 1,
   })
 
@@ -45,7 +42,7 @@ function PresentationPage() {
       totalSlides={SLIDES.length}
       progress={progress}
     >
-      <CurrentSlide step={step} />
+      <CurrentSlide />
     </PresentationLayout>
   )
 }

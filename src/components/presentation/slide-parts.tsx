@@ -1,4 +1,5 @@
 import { cn } from '#/lib/utils'
+import Editor from '@monaco-editor/react'
 import type { ReactNode } from 'react'
 
 type SlideProps = {
@@ -58,55 +59,57 @@ export function SlideText({ children, className }: SlideProps) {
   )
 }
 
-type StepComponentProps = {
-  readonly visible: boolean
-  readonly children: ReactNode
+const LINE_HEIGHT = 22
+const PADDING = 16
+const FONT_SIZE = 15
+
+const EDITOR_OPTIONS = {
+  readOnly: true,
+  domReadOnly: true,
+  minimap: { enabled: false },
+  fontSize: FONT_SIZE,
+  lineHeight: LINE_HEIGHT,
+  lineNumbers: 'off' as const,
+  scrollBeyondLastLine: false,
+  automaticLayout: true,
+  scrollbar: { vertical: 'hidden' as const, horizontal: 'hidden' as const },
+  overviewRulerLanes: 0,
+  hideCursorInOverviewRuler: true,
+  overviewRulerBorder: false,
+  renderLineHighlight: 'none' as const,
+  folding: false,
+  glyphMargin: false,
+  lineDecorationsWidth: PADDING,
+  contextmenu: false,
+  padding: { top: PADDING, bottom: PADDING },
+} as const
+
+type SlideCodeProps = {
+  readonly value: string
   readonly className?: string
-  readonly delay?: number
-  readonly inline?: boolean
+  readonly language?: string
 }
 
-export function Step({
-  visible,
-  children,
+export function SlideCode({
+  value,
   className,
-  delay = 0,
-  inline = false,
-}: StepComponentProps) {
-  const Tag = inline ? 'span' : 'div'
-  const visibilityClasses = inline
-    ? visible
-      ? 'opacity-100 transition-opacity duration-300 ease-out'
-      : 'opacity-0'
-    : visible
-      ? 'opacity-100 translate-y-0 transition-[opacity,transform] duration-[400ms] ease-out'
-      : 'opacity-0 translate-y-3'
+  language = 'json',
+}: SlideCodeProps) {
+  const lineCount = value.split('\n').length
+  const height = lineCount * LINE_HEIGHT + PADDING * 2
 
   return (
-    <Tag
-      className={cn(visibilityClasses, className)}
-      style={visible ? { transitionDelay: `${delay}ms` } : undefined}
+    <div
+      className={cn('w-full overflow-hidden rounded-lg', className)}
+      style={{ height }}
     >
-      {children}
-    </Tag>
-  )
-}
-
-type CodeBlockProps = {
-  readonly children: ReactNode
-  readonly className?: string
-}
-
-export function CodeBlock({ children, className }: CodeBlockProps) {
-  return (
-    <pre
-      className={cn(
-        'w-full overflow-x-auto rounded-lg bg-[oklch(0.145_0.008_326)] p-[clamp(1rem,2vw,2.5rem)] font-mono text-[length:clamp(0.8rem,1.5vw,1.75rem)] leading-[1.7] text-[oklch(0.985_0_0)]',
-        className,
-      )}
-    >
-      {children}
-    </pre>
+      <Editor
+        defaultLanguage={language}
+        theme="vs-dark"
+        value={value}
+        options={EDITOR_OPTIONS}
+      />
+    </div>
   )
 }
 

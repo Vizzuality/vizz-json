@@ -1,6 +1,5 @@
 import { cn } from '#/lib/utils'
-import { Slide, Step, SlideHeading, SlideText } from '../slide-parts'
-import type { SlideProps } from '../slide-types'
+import { Slide, SlideHeading, SlideText } from '../slide-parts'
 
 const PREFIXES = [
   {
@@ -30,7 +29,7 @@ const PREFIXES = [
   },
 ] as const
 
-export function PrefixOverviewSlide({ step }: SlideProps) {
+export function PrefixOverviewSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-4 text-foreground">
@@ -42,7 +41,7 @@ export function PrefixOverviewSlide({ step }: SlideProps) {
 
       <div className="w-full overflow-hidden rounded-lg border border-border bg-card">
         {PREFIXES.map((row, i) => (
-          <Step key={row.prefix} visible={step >= i} delay={i * 100}>
+          <div key={row.prefix}>
             <div className="flex items-center gap-3 px-4 py-3 md:gap-6 md:px-8 md:py-5">
               <code
                 className={cn(
@@ -59,7 +58,7 @@ export function PrefixOverviewSlide({ step }: SlideProps) {
             {i < PREFIXES.length - 1 && (
               <div className="mx-3 border-t border-border md:mx-6" />
             )}
-          </Step>
+          </div>
         ))}
       </div>
     </Slide>

@@ -1,7 +1,10 @@
-import { Slide, CodeBlock, SlideHeading, SlideText } from '../slide-parts'
-import type { SlideProps } from '../slide-types'
+import { Slide, SlideCode, SlideHeading, SlideText } from '../slide-parts'
 
-export function EnumSlide(_props: SlideProps) {
+const BEFORE = `"drawMode": "@@#GL.POINTS"`
+
+const AFTER = `"drawMode": 0  // GL.POINTS === 0`
+
+export function EnumSlide() {
   return (
     <Slide className="items-start">
       <p className="mb-2 text-sm font-semibold tracking-wider text-chart-5 uppercase">
@@ -16,23 +19,9 @@ export function EnumSlide(_props: SlideProps) {
       </SlideText>
 
       <div className="flex w-full flex-col items-stretch gap-4 md:flex-row md:items-center md:gap-6">
-        <CodeBlock className="md:flex-1">
-          <code>
-            <span className="token-key">"drawMode"</span>:{' '}
-            <span className="token-param">"@@#GL.POINTS"</span>
-          </code>
-        </CodeBlock>
-
+        <SlideCode value={BEFORE} className="md:flex-1" />
         <span className="text-2xl text-muted-foreground">→</span>
-
-        <CodeBlock className="md:flex-1">
-          <code>
-            <span className="token-key">"drawMode"</span>:{' '}
-            <span className="token-number">0</span>
-            {'  '}
-            <span className="token-comment">// GL.POINTS === 0</span>
-          </code>
-        </CodeBlock>
+        <SlideCode value={AFTER} className="md:flex-1" />
       </div>
     </Slide>
   )

@@ -1,6 +1,5 @@
 import { cn } from '#/lib/utils'
-import { Slide, Step, SlideHeading, SlideText } from '../slide-parts'
-import type { SlideProps } from '../slide-types'
+import { Slide, SlideHeading, SlideText } from '../slide-parts'
 
 const STAGES = [
   {
@@ -65,7 +64,7 @@ function ArrowRight() {
   )
 }
 
-export function PipelineSlide({ step }: SlideProps) {
+export function PipelineSlide() {
   return (
     <Slide>
       <SlideHeading className="mb-4 text-foreground">
@@ -77,10 +76,8 @@ export function PipelineSlide({ step }: SlideProps) {
 
       <div className="flex w-full flex-col items-center gap-3 lg:flex-row lg:justify-center lg:gap-2">
         {STAGES.map((stage, i) => (
-          <Step
+          <div
             key={stage.label}
-            visible={step >= i}
-            delay={i * 150}
             className="flex flex-col items-center gap-2 lg:flex-row"
           >
             {i > 0 && (
@@ -102,7 +99,7 @@ export function PipelineSlide({ step }: SlideProps) {
                 {stage.desc}
               </p>
             </div>
-          </Step>
+          </div>
         ))}
       </div>
     </Slide>

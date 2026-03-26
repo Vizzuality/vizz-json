@@ -1,8 +1,18 @@
-import { cn } from '#/lib/utils'
-import { Slide, Step, CodeBlock, SlideHeading, SlideText } from '../slide-parts'
-import type { SlideProps } from '../slide-types'
+import { Slide, SlideCode, SlideHeading, SlideText } from '../slide-parts'
 
-export function WhatIfSlide({ step }: SlideProps) {
+const BEFORE = `{
+  "circle-opacity": 0.8,
+  "circle-color": "#d7191c",
+  "circle-radius": 16
+}`
+
+const AFTER = `{
+  "circle-opacity": "@@#params.opacity",
+  "circle-color": "@@#params.color",
+  "circle-radius": "@@#params.radius"
+}`
+
+export function WhatIfSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-8 text-foreground">What if...</SlideHeading>
@@ -10,36 +20,18 @@ export function WhatIfSlide({ step }: SlideProps) {
         ...the JSON could reference runtime parameters?
       </SlideText>
 
-      <div className={cn('grid w-full gap-6', step >= 1 && 'md:grid-cols-2')}>
+      <div className="grid w-full gap-6 md:grid-cols-2">
         <div>
           <p className="mb-3 text-sm font-semibold text-muted-foreground">
             Before
           </p>
-          <CodeBlock>
-            <code>
-              <span className="token-key">"circle-opacity"</span>:{' '}
-              <span className="token-number">0.8</span>,{'\n'}
-              <span className="token-key">"circle-color"</span>:{' '}
-              <span className="token-string">"#d7191c"</span>,{'\n'}
-              <span className="token-key">"circle-radius"</span>:{' '}
-              <span className="token-number">16</span>
-            </code>
-          </CodeBlock>
+          <SlideCode value={BEFORE} />
         </div>
 
-        <Step visible={step >= 1}>
+        <div>
           <p className="mb-3 text-sm font-semibold text-primary">After</p>
-          <CodeBlock>
-            <code>
-              <span className="token-key">"circle-opacity"</span>:{' '}
-              <span className="token-param">"@@#params.opacity"</span>,{'\n'}
-              <span className="token-key">"circle-color"</span>:{' '}
-              <span className="token-param">"@@#params.color"</span>,{'\n'}
-              <span className="token-key">"circle-radius"</span>:{' '}
-              <span className="token-param">"@@#params.radius"</span>
-            </code>
-          </CodeBlock>
-        </Step>
+          <SlideCode value={AFTER} />
+        </div>
       </div>
     </Slide>
   )

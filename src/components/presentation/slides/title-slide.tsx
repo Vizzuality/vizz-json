@@ -1,7 +1,6 @@
 import { Slide, SlideTitle, SlideText } from '../slide-parts'
-import type { SlideProps } from '../slide-types'
 
-export function TitleSlide(_props: SlideProps) {
+export function TitleSlide() {
   return (
     <Slide className="text-center">
       <p className="mb-6 text-sm tracking-widest text-muted-foreground uppercase">
