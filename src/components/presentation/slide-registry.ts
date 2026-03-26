@@ -11,9 +11,6 @@ import { EnumSlide } from './slides/enum-slide'
 import { PipelineSlide } from './slides/pipeline-slide'
 import { ImmutabilitySlide } from './slides/immutability-slide'
 import { ParamInferenceSlide } from './slides/param-inference-slide'
-import { RecapSlide } from './slides/recap-slide'
-import { TryItSlide } from './slides/try-it-slide'
-import { ThankYouSlide } from './slides/thank-you-slide'
 
 export const SLIDES: readonly SlideDefinition[] = [
   { id: 'title', title: 'VizzJson', totalSteps: 1, component: TitleSlide },
@@ -62,18 +59,5 @@ export const SLIDES: readonly SlideDefinition[] = [
     title: 'Param Inference',
     totalSteps: 2,
     component: ParamInferenceSlide,
-  },
-  { id: 'recap', title: 'Key Takeaways', totalSteps: 4, component: RecapSlide },
-  {
-    id: 'try-it',
-    title: 'Try It Yourself',
-    totalSteps: 1,
-    component: TryItSlide,
-  },
-  {
-    id: 'thank-you',
-    title: 'Thank You',
-    totalSteps: 1,
-    component: ThankYouSlide,
   },
 ] as const

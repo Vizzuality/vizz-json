@@ -1,18 +1,16 @@
-import { Step, CodeBlock } from '../slide-parts'
+import { cn } from '#/lib/utils'
+import { Slide, Step, CodeBlock, SlideHeading, SlideText } from '../slide-parts'
 import type { SlideProps } from '../slide-types'
 
 export function WhatIfSlide({ step }: SlideProps) {
   return (
-    <div className="slide items-start">
-      <h2 className="mb-8 text-foreground">What if...</h2>
-      <p className="mb-8 text-muted-foreground">
+    <Slide className="items-start">
+      <SlideHeading className="mb-8 text-foreground">What if...</SlideHeading>
+      <SlideText className="mb-8 text-muted-foreground">
         ...the JSON could reference runtime parameters?
-      </p>
+      </SlideText>
 
-      <div
-        className="grid w-full gap-6"
-        style={{ gridTemplateColumns: step >= 1 ? '1fr 1fr' : '1fr' }}
-      >
+      <div className={cn('grid w-full gap-6', step >= 1 && 'md:grid-cols-2')}>
         <div>
           <p className="mb-3 text-sm font-semibold text-muted-foreground">
             Before
@@ -43,6 +41,6 @@ export function WhatIfSlide({ step }: SlideProps) {
           </CodeBlock>
         </Step>
       </div>
-    </div>
+    </Slide>
   )
 }

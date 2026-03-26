@@ -1,15 +1,17 @@
-import { Step, CodeBlock } from '../slide-parts'
+import { Slide, Step, CodeBlock, SlideHeading, SlideText } from '../slide-parts'
 import type { SlideProps } from '../slide-types'
 
 export function ImmutabilitySlide({ step }: SlideProps) {
   return (
-    <div className="slide items-start">
-      <h2 className="mb-4 text-foreground">Immutability by design</h2>
-      <p className="mb-10 text-muted-foreground">
+    <Slide className="items-start">
+      <SlideHeading className="mb-4 text-foreground">
+        Immutability by design
+      </SlideHeading>
+      <SlideText className="mb-10 text-muted-foreground">
         <code className="font-mono text-primary">resolveParams()</code> never
         mutates. It returns a fresh object tree — the original config stays
         untouched.
-      </p>
+      </SlideText>
 
       <CodeBlock>
         <code>
@@ -31,7 +33,7 @@ export function ImmutabilitySlide({ step }: SlideProps) {
       </CodeBlock>
 
       <Step visible={step >= 1} className="mt-8 w-full">
-        <div className="grid w-full grid-cols-2 gap-6">
+        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
           <div className="rounded-lg border-2 border-chart-2 bg-chart-2/10 p-5">
             <p className="mb-2 text-sm font-semibold text-chart-2">
               Original (unchanged)
@@ -50,6 +52,6 @@ export function ImmutabilitySlide({ step }: SlideProps) {
           </div>
         </div>
       </Step>
-    </div>
+    </Slide>
   )
 }

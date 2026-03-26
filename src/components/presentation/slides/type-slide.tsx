@@ -1,17 +1,19 @@
-import { Step, CodeBlock } from '../slide-parts'
+import { Slide, Step, CodeBlock, SlideHeading, SlideText } from '../slide-parts'
 import type { SlideProps } from '../slide-types'
 
 export function TypeSlide({ step }: SlideProps) {
   return (
-    <div className="slide items-start">
+    <Slide className="items-start">
       <p className="mb-2 text-sm font-semibold tracking-wider text-chart-3 uppercase">
         @@type:
       </p>
-      <h2 className="mb-4 text-foreground">Component instantiation</h2>
-      <p className="mb-10 text-muted-foreground">
+      <SlideHeading className="mb-4 text-foreground">
+        Component instantiation
+      </SlideHeading>
+      <SlideText className="mb-10 text-muted-foreground">
         Declare a class or React component by name. The converter instantiates
         it with the surrounding properties as props.
-      </p>
+      </SlideText>
 
       <CodeBlock>
         <code>
@@ -31,7 +33,7 @@ export function TypeSlide({ step }: SlideProps) {
       </CodeBlock>
 
       <Step visible={step >= 1} className="mt-8 w-full">
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:gap-6">
           <span className="text-2xl text-muted-foreground">→</span>
           <div className="rounded-lg border border-border bg-card px-6 py-4">
             <p className="mb-2 text-sm font-semibold text-chart-3">
@@ -47,6 +49,6 @@ export function TypeSlide({ step }: SlideProps) {
           </div>
         </div>
       </Step>
-    </div>
+    </Slide>
   )
 }

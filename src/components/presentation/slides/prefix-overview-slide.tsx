@@ -1,4 +1,5 @@
-import { Step } from '../slide-parts'
+import { cn } from '#/lib/utils'
+import { Slide, Step, SlideHeading, SlideText } from '../slide-parts'
 import type { SlideProps } from '../slide-types'
 
 const PREFIXES = [
@@ -31,37 +32,36 @@ const PREFIXES = [
 
 export function PrefixOverviewSlide({ step }: SlideProps) {
   return (
-    <div className="slide items-start">
-      <h2 className="mb-4 text-foreground">
+    <Slide className="items-start">
+      <SlideHeading className="mb-4 text-foreground">
         The <code className="text-primary">@@</code> family
-      </h2>
-      <p className="mb-10 text-muted-foreground">
+      </SlideHeading>
+      <SlideText className="mb-10 text-muted-foreground">
         One convention, five capabilities.
-      </p>
+      </SlideText>
 
       <div className="w-full overflow-hidden rounded-lg border border-border bg-card">
         {PREFIXES.map((row, i) => (
           <Step key={row.prefix} visible={step >= i} delay={i * 100}>
-            <div className="flex items-center gap-6 px-8 py-5">
+            <div className="flex items-center gap-3 px-4 py-3 md:gap-6 md:px-8 md:py-5">
               <code
-                className={`whitespace-nowrap font-mono font-semibold ${row.color}`}
-                style={{ fontSize: 'var(--slide-code)' }}
+                className={cn(
+                  'whitespace-nowrap font-mono text-[length:clamp(0.8rem,1.5vw,1.75rem)] font-semibold',
+                  row.color,
+                )}
               >
                 {row.prefix}
               </code>
-              <span
-                className="text-muted-foreground"
-                style={{ fontSize: 'var(--slide-body)' }}
-              >
+              <span className="text-[clamp(1rem,1.8vw,2rem)] leading-[1.6] text-muted-foreground">
                 {row.desc}
               </span>
             </div>
             {i < PREFIXES.length - 1 && (
-              <div className="mx-6 border-t border-border" />
+              <div className="mx-3 border-t border-border md:mx-6" />
             )}
           </Step>
         ))}
       </div>
-    </div>
+    </Slide>
   )
 }

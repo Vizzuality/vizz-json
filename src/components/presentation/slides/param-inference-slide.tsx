@@ -1,4 +1,4 @@
-import { Step, CodeBlock } from '../slide-parts'
+import { Slide, Step, CodeBlock, SlideHeading, SlideText } from '../slide-parts'
 import type { SlideProps } from '../slide-types'
 
 const INFERENCES = [
@@ -10,12 +10,14 @@ const INFERENCES = [
 
 export function ParamInferenceSlide({ step }: SlideProps) {
   return (
-    <div className="slide items-start">
-      <h2 className="mb-4 text-foreground">Automatic param inference</h2>
-      <p className="mb-10 text-muted-foreground">
+    <Slide className="items-start">
+      <SlideHeading className="mb-4 text-foreground">
+        Automatic param inference
+      </SlideHeading>
+      <SlideText className="mb-10 text-muted-foreground">
         The UI control type is inferred from the parameter config — no manual
         wiring needed.
-      </p>
+      </SlideText>
 
       <CodeBlock>
         <code>
@@ -53,7 +55,7 @@ export function ParamInferenceSlide({ step }: SlideProps) {
       </CodeBlock>
 
       <Step visible={step >= 1} className="mt-8 w-full">
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           {INFERENCES.map((inf) => (
             <div
               key={inf.type}
@@ -70,6 +72,6 @@ export function ParamInferenceSlide({ step }: SlideProps) {
           ))}
         </div>
       </Step>
-    </div>
+    </Slide>
   )
 }
