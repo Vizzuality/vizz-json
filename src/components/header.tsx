@@ -32,6 +32,16 @@ export default function Header() {
           >
             Playground
           </Link>
+          <Link
+            to="/presentation"
+            search={{ slide: 1 }}
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              'no-underline',
+            )}
+          >
+            Presentation
+          </Link>
           <ThemeToggle />
           <div aria-hidden="true" className="mx-1 h-4 w-px bg-border" />
           <ParaglideLocaleSwitcher />
