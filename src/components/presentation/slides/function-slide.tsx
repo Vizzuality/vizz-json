@@ -33,7 +33,6 @@ export function FunctionSlide() {
             {' }'}
           </p>
         </div>
-        <span className="text-2xl text-muted-foreground">→</span>
         <div className="rounded-md border border-border bg-card px-4 py-3">
           <p className="font-mono text-sm text-chart-2">ƒ setQueryParams()</p>
         </div>

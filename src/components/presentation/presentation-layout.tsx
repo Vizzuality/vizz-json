@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { FluidBackground } from '#/components/landing/fluid-background'
 import './presentation.css'
 
 type PresentationLayoutProps = {
@@ -16,6 +17,7 @@ export function PresentationLayout({
 }: PresentationLayoutProps) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-background to-primary/10">
+      <FluidBackground />
       <div
         className="fixed top-0 left-0 z-50 h-0.5 bg-primary transition-[width] duration-300 ease-out"
         style={{ width: `${progress * 100}%` }}

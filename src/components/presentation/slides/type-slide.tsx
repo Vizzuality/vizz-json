@@ -1,8 +1,12 @@
 import { Slide, SlideCode, SlideHeading, SlideText } from '../slide-parts'
 
 const CONFIG = `{
-  "@@type": "BasicLegend",
-  "items": [{ "label": "Forest", "value": "#22c55e" }]
+  "@@type": "ChoroplethLegend",
+  "items": [
+    { "label": "Low",    "value": "#f1eef6" },
+    { "label": "Medium", "value": "#74a9cf" },
+    { "label": "High",   "value": "#045a8d" }
+  ]
 }`
 
 export function TypeSlide() {
@@ -23,17 +27,25 @@ export function TypeSlide() {
       <SlideCode value={CONFIG} />
 
       <div className="mt-8 flex w-full flex-col items-start gap-3 md:flex-row md:items-center md:gap-6">
-        <span className="text-2xl text-muted-foreground">→</span>
-        <div className="rounded-lg border border-border bg-card px-6 py-4">
-          <p className="mb-2 text-sm font-semibold text-chart-3">
-            {'<BasicLegend />'}
+        <div className="w-full max-w-xs rounded-lg border border-border bg-card px-6 py-4">
+          <p className="mb-3 text-sm font-semibold text-chart-3">
+            {'<ChoroplethLegend />'}
           </p>
-          <div className="flex items-center gap-3">
-            <div
-              className="h-4 w-4 rounded"
-              style={{ background: '#22c55e' }}
-            />
-            <span className="text-sm text-muted-foreground">Forest</span>
+          <div className="flex h-4 w-full overflow-hidden rounded-sm">
+            <div className="flex-1" style={{ background: '#f1eef6' }} />
+            <div className="flex-1" style={{ background: '#74a9cf' }} />
+            <div className="flex-1" style={{ background: '#045a8d' }} />
+          </div>
+          <div className="mt-1 flex">
+            <span className="flex-1 text-center text-[10px] text-muted-foreground">
+              Low
+            </span>
+            <span className="flex-1 text-center text-[10px] text-muted-foreground">
+              Medium
+            </span>
+            <span className="flex-1 text-center text-[10px] text-muted-foreground">
+              High
+            </span>
           </div>
         </div>
       </div>

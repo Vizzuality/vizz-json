@@ -33,7 +33,6 @@ export function ParamsSlide() {
             {' }'}
           </p>
         </div>
-        <span className="text-2xl text-muted-foreground">→</span>
         <SlideCode value={RESOLVED} className="md:flex-1" />
       </div>
     </Slide>
