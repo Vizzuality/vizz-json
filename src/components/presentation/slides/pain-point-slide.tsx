@@ -1,4 +1,10 @@
-import { Slide, SlideCode, SlideHeading, SlideText } from '../slide-parts'
+import {
+  Slide,
+  SlideCallout,
+  SlideCode,
+  SlideHeading,
+  SlideText,
+} from '../slide-parts'
 
 const LAYER_JSON = `{
   "id": "deforestation-alerts",
@@ -28,16 +34,16 @@ export function PainPointSlide() {
         A single layer
       </SlideHeading>
       <SlideText className="mb-6 text-muted-foreground">
-        Even one MapLibre layer is a wall of config. Paint, layout, filters,
-        source — all interleaved.
+        Even one MapLibre/Mapbox layer is a wall of config. Paint, layout,
+        filters, source — all interleaved.
       </SlideText>
 
       <SlideCode value={LAYER_JSON} />
 
-      <p className="mt-6 text-sm text-destructive">
+      <SlideCallout>
         Filters, paint properties, layout — all hardcoded. Which values should a
         user be able to tweak?
-      </p>
+      </SlideCallout>
     </Slide>
   )
 }

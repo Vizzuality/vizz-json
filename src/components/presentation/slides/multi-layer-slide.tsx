@@ -1,4 +1,10 @@
-import { Slide, SlideCode, SlideHeading, SlideText } from '../slide-parts'
+import {
+  Slide,
+  SlideCallout,
+  SlideCode,
+  SlideHeading,
+  SlideText,
+} from '../slide-parts'
 
 const CIRCLE = `{
   "type": "circle",
@@ -60,10 +66,10 @@ export function MultiLayerSlide() {
         </div>
       </div>
 
-      <p className="mt-6 text-sm text-destructive">
+      <SlideCallout>
         circle-radius, fill-color, line-width — every layer type speaks a
         different dialect. No standard way to parameterize them.
-      </p>
+      </SlideCallout>
     </Slide>
   )
 }

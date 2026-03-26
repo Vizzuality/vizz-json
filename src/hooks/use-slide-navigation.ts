@@ -14,7 +14,11 @@ type SlideNavigationState = {
 type NavigationAction =
   | { readonly type: 'ADVANCE'; readonly totalSlides: number }
   | { readonly type: 'RETREAT' }
-  | { readonly type: 'GO_TO'; readonly slide: number; readonly totalSlides: number }
+  | {
+      readonly type: 'GO_TO'
+      readonly slide: number
+      readonly totalSlides: number
+    }
 
 function navigationReducer(state: number, action: NavigationAction): number {
   switch (action.type) {

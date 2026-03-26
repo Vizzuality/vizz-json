@@ -1,5 +1,6 @@
 import { cn } from '#/lib/utils'
 import Editor from '@monaco-editor/react'
+import { AlertTriangleIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 type SlideProps = {
@@ -11,7 +12,7 @@ export function Slide({ children, className }: SlideProps) {
   return (
     <div
       className={cn(
-        'mx-auto flex min-h-dvh max-w-5xl flex-col items-center justify-center px-[4vw] py-[4vh] md:px-[6vw] md:py-[8vh]',
+        'mx-auto flex min-h-dvh max-w-[90rem] flex-col items-center justify-center px-[3vw] py-[4vh] md:px-[4vw] md:py-[8vh]',
         className,
       )}
     >
@@ -48,12 +49,7 @@ export function SlideHeading({ children, className }: SlideProps) {
 
 export function SlideText({ children, className }: SlideProps) {
   return (
-    <p
-      className={cn(
-        'text-[clamp(1rem,1.8vw,2rem)] leading-[1.6]',
-        className,
-      )}
-    >
+    <p className={cn('text-[clamp(1rem,1.8vw,2rem)] leading-[1.6]', className)}>
       {children}
     </p>
   )
@@ -121,5 +117,21 @@ type SlideAccentProps = {
 export function SlideAccent({ color, children }: SlideAccentProps) {
   return (
     <span className={cn('font-mono font-semibold', color)}>{children}</span>
+  )
+}
+
+export function SlideCallout({ children, className }: SlideProps) {
+  return (
+    <div
+      className={cn(
+        'mt-6 flex w-full items-center gap-4 rounded-lg border-l-4 border-amber-500 bg-amber-500/10 px-5 py-4',
+        className,
+      )}
+    >
+      <AlertTriangleIcon className="size-[clamp(1.25rem,2vw,2.25rem)] shrink-0 text-amber-500" />
+      <p className="text-[clamp(1rem,1.8vw,2rem)] leading-[1.6] text-foreground/90">
+        {children}
+      </p>
+    </div>
   )
 }

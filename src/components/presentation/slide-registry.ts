@@ -20,7 +20,11 @@ export const SLIDES: readonly SlideDefinition[] = [
     component: MultiLayerSlide,
   },
   { id: 'what-if', title: 'What If...', component: WhatIfSlide },
-  { id: 'prefix-overview', title: 'The @@ Family', component: PrefixOverviewSlide },
+  {
+    id: 'prefix-overview',
+    title: 'The @@ Family',
+    component: PrefixOverviewSlide,
+  },
   { id: 'params', title: '@@#params.X', component: ParamsSlide },
   { id: 'function', title: '@@function:', component: FunctionSlide },
   { id: 'type', title: '@@type:', component: TypeSlide },

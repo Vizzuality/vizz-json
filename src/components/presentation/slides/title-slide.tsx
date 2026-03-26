@@ -10,8 +10,7 @@ export function TitleSlide() {
         Vizz<span className="text-primary">Json</span>
       </SlideTitle>
       <SlideText className="text-muted-foreground">
-        JSON with <code className="font-mono text-primary">@@</code>{' '}
-        Superpowers
+        JSON with <code className="font-mono text-primary">@@</code> Superpowers
       </SlideText>
       <div className="mt-16 text-sm text-muted-foreground/60">
         <p>Miguel Barrenechea</p>

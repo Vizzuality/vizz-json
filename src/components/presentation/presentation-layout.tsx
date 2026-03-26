@@ -15,7 +15,7 @@ export function PresentationLayout({
   progress,
 }: PresentationLayoutProps) {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-background to-primary/10">
       <div
         className="fixed top-0 left-0 z-50 h-0.5 bg-primary transition-[width] duration-300 ease-out"
         style={{ width: `${progress * 100}%` }}
