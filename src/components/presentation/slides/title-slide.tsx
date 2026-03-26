@@ -9,7 +9,10 @@ export function TitleSlide(_props: SlideProps) {
       <h1 className="mb-6 text-foreground">
         Vizz<span className="text-primary">Json</span>
       </h1>
-      <p className="text-muted-foreground" style={{ fontSize: 'var(--slide-body)' }}>
+      <p
+        className="text-muted-foreground"
+        style={{ fontSize: 'var(--slide-body)' }}
+      >
         JSON with <code className="text-primary font-mono">@@</code> Superpowers
       </p>
       <div className="mt-16 text-sm text-muted-foreground/60">

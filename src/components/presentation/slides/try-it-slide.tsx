@@ -8,7 +8,8 @@ export function TryItSlide(_props: SlideProps) {
     <div className="slide text-center">
       <h2 className="mb-6 text-foreground">Try it yourself</h2>
       <p className="mb-10 text-muted-foreground">
-        Open the playground and experiment with the <code className="text-primary">@@</code> convention live.
+        Open the playground and experiment with the{' '}
+        <code className="text-primary">@@</code> convention live.
       </p>
 
       <Link
@@ -21,9 +22,7 @@ export function TryItSlide(_props: SlideProps) {
         Open Playground
       </Link>
 
-      <p className="mt-8 text-sm text-muted-foreground/60">
-        /playground
-      </p>
+      <p className="mt-8 text-sm text-muted-foreground/60">/playground</p>
     </div>
   )
 }

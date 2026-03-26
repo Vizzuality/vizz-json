@@ -79,6 +79,7 @@ function NotFound() {
 function RootDocument({ children }: { children: React.ReactNode }) {
   const location = useRouterState({ select: (s) => s.location })
   const isPlayground = location.pathname === '/playground'
+  const isPresentation = location.pathname === '/presentation'
 
   return (
     <html lang={getLocale()} suppressHydrationWarning>
@@ -88,9 +89,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-primary/20">
         <TanStackQueryProvider>
-          <Header />
+          {!isPresentation && <Header />}
           {children}
-          {!isPlayground && <Footer />}
+          {!isPlayground && !isPresentation && <Footer />}
           <TanStackDevtools
             config={{
               position: 'bottom-right',

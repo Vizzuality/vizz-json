@@ -9,8 +9,8 @@ export function ParamsSlide({ step }: SlideProps) {
       </p>
       <h2 className="mb-4 text-foreground">Runtime parameter injection</h2>
       <p className="mb-10 text-muted-foreground">
-        Reference a named parameter anywhere in the JSON. At resolution time, the string is
-        replaced with the actual value.
+        Reference a named parameter anywhere in the JSON. At resolution time,
+        the string is replaced with the actual value.
       </p>
 
       <CodeBlock>

@@ -9,7 +9,8 @@ export function FunctionSlide({ step }: SlideProps) {
       </p>
       <h2 className="mb-4 text-foreground">Named function dispatch</h2>
       <p className="mb-10 text-muted-foreground">
-        Reference a registered function by name. The converter looks it up and calls it.
+        Reference a registered function by name. The converter looks it up and
+        calls it.
       </p>
 
       <CodeBlock>
@@ -30,7 +31,9 @@ export function FunctionSlide({ step }: SlideProps) {
               registry = {'{ '}
               <span className="font-mono text-chart-2">setQueryParams</span>
               {': '}
-              <span className="font-mono text-muted-foreground">(url, params) =&gt; ...</span>
+              <span className="font-mono text-muted-foreground">
+                (url, params) =&gt; ...
+              </span>
               {' }'}
             </p>
           </div>

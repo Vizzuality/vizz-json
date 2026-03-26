@@ -2,11 +2,31 @@ import { Step } from '../slide-parts'
 import type { SlideProps } from '../slide-types'
 
 const PREFIXES = [
-  { prefix: '@@#params.X', desc: 'Runtime parameter injection', color: 'text-chart-1' },
-  { prefix: '@@function:', desc: 'Named function dispatch', color: 'text-chart-2' },
-  { prefix: '@@type:', desc: 'Class or React component instantiation', color: 'text-chart-3' },
-  { prefix: '@@=[...]', desc: 'Inline expression → function', color: 'text-chart-4' },
-  { prefix: '@@#ENUM.X', desc: 'Constant/enum resolution', color: 'text-chart-5' },
+  {
+    prefix: '@@#params.X',
+    desc: 'Runtime parameter injection',
+    color: 'text-chart-1',
+  },
+  {
+    prefix: '@@function:',
+    desc: 'Named function dispatch',
+    color: 'text-chart-2',
+  },
+  {
+    prefix: '@@type:',
+    desc: 'Class or React component instantiation',
+    color: 'text-chart-3',
+  },
+  {
+    prefix: '@@=[...]',
+    desc: 'Inline expression → function',
+    color: 'text-chart-4',
+  },
+  {
+    prefix: '@@#ENUM.X',
+    desc: 'Constant/enum resolution',
+    color: 'text-chart-5',
+  },
 ] as const
 
 export function PrefixOverviewSlide({ step }: SlideProps) {
@@ -15,7 +35,9 @@ export function PrefixOverviewSlide({ step }: SlideProps) {
       <h2 className="mb-4 text-foreground">
         The <code className="text-primary">@@</code> family
       </h2>
-      <p className="mb-10 text-muted-foreground">One convention, five capabilities.</p>
+      <p className="mb-10 text-muted-foreground">
+        One convention, five capabilities.
+      </p>
 
       <div className="w-full overflow-hidden rounded-lg border border-border bg-card">
         {PREFIXES.map((row, i) => (
@@ -27,11 +49,16 @@ export function PrefixOverviewSlide({ step }: SlideProps) {
               >
                 {row.prefix}
               </code>
-              <span className="text-muted-foreground" style={{ fontSize: 'var(--slide-body)' }}>
+              <span
+                className="text-muted-foreground"
+                style={{ fontSize: 'var(--slide-body)' }}
+              >
                 {row.desc}
               </span>
             </div>
-            {i < PREFIXES.length - 1 && <div className="mx-6 border-t border-border" />}
+            {i < PREFIXES.length - 1 && (
+              <div className="mx-6 border-t border-border" />
+            )}
           </Step>
         ))}
       </div>

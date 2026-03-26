@@ -9,8 +9,8 @@ export function ExpressionSlide({ step }: SlideProps) {
       </p>
       <h2 className="mb-4 text-foreground">Inline expressions</h2>
       <p className="mb-10 text-muted-foreground">
-        Embed a functional expression directly in the JSON. Parsed at resolution time into a
-        callable function.
+        Embed a functional expression directly in the JSON. Parsed at resolution
+        time into a callable function.
       </p>
 
       <CodeBlock>

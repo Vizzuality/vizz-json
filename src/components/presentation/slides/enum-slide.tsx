@@ -9,8 +9,8 @@ export function EnumSlide(_props: SlideProps) {
       </p>
       <h2 className="mb-4 text-foreground">Constant resolution</h2>
       <p className="mb-10 text-muted-foreground">
-        Reference named constants from an enum registry. Commonly used for WebGL constants that
-        deck.gl expects as numeric values.
+        Reference named constants from an enum registry. Commonly used for WebGL
+        constants that deck.gl expects as numeric values.
       </p>
 
       <div className="flex w-full items-center gap-6">

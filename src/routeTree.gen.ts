@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as AboutRouteImport } from './routes/about'
@@ -27,6 +28,11 @@ import { Route as DemoI18nRouteImport } from './routes/demo.i18n'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
 
+const PresentationRoute = PresentationRouteImport.update({
+  id: '/presentation',
+  path: '/presentation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlaygroundRoute = PlaygroundRouteImport.update({
   id: '/playground',
   path: '/playground',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
+  '/presentation': typeof PresentationRoute
   '/api/$': typeof ApiSplatRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/playground': typeof PlaygroundRoute
+  '/presentation': typeof PresentationRoute
   '/api/$': typeof ApiSplatRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
+  '/presentation': typeof PresentationRoute
   '/api/$': typeof ApiSplatRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/guidelines'
     | '/playground'
+    | '/presentation'
     | '/api/$'
     | '/demo/i18n'
     | '/demo/orpc-todo'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/playground'
+    | '/presentation'
     | '/api/$'
     | '/demo/i18n'
     | '/demo/orpc-todo'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/guidelines'
     | '/playground'
+    | '/presentation'
     | '/api/$'
     | '/demo/i18n'
     | '/demo/orpc-todo'
@@ -234,6 +246,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   GuidelinesRoute: typeof GuidelinesRouteWithChildren
   PlaygroundRoute: typeof PlaygroundRoute
+  PresentationRoute: typeof PresentationRoute
   ApiSplatRoute: typeof ApiSplatRoute
   DemoI18nRoute: typeof DemoI18nRoute
   DemoOrpcTodoRoute: typeof DemoOrpcTodoRoute
@@ -244,6 +257,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/presentation': {
+      id: '/presentation'
+      path: '/presentation'
+      fullPath: '/presentation'
+      preLoaderRoute: typeof PresentationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/playground': {
       id: '/playground'
       path: '/playground'
@@ -395,6 +415,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   GuidelinesRoute: GuidelinesRouteWithChildren,
   PlaygroundRoute: PlaygroundRoute,
+  PresentationRoute: PresentationRoute,
   ApiSplatRoute: ApiSplatRoute,
   DemoI18nRoute: DemoI18nRoute,
   DemoOrpcTodoRoute: DemoOrpcTodoRoute,
