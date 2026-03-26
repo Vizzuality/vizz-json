@@ -12,11 +12,12 @@ export function TypeSlide() {
         @@type:
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Component instantiation
+        Component <span className="text-primary">instantiation</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
-        Declare a class or React component by name. The converter instantiates
-        it with the surrounding properties as props.
+        Declare a React component or deck.gl layer class by name. The converter
+        instantiates it with the surrounding properties as props — turning
+        plain JSON into live, interactive UI without any imperative code.
       </SlideText>
 
       <SlideCode value={CONFIG} />

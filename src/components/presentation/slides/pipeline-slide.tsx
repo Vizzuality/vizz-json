@@ -68,10 +68,12 @@ export function PipelineSlide() {
   return (
     <Slide>
       <SlideHeading className="mb-4 text-foreground">
-        The resolution pipeline
+        The resolution <span className="text-primary">pipeline</span>
       </SlideHeading>
       <SlideText className="mb-12 text-muted-foreground">
-        Two stages. One pass each. No compilation step.
+        Two stages, one pass each, no compilation step. First, parameter
+        references are resolved against user values. Then, deck.gl's
+        JSONConverter handles functions, types, and expressions.
       </SlideText>
 
       <div className="flex w-full flex-col items-center gap-3 lg:flex-row lg:justify-center lg:gap-2">

@@ -31,11 +31,12 @@ export function PainPointSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-4 text-foreground">
-        A single layer
+        A <span className="text-primary">single</span> layer
       </SlideHeading>
       <SlideText className="mb-6 text-muted-foreground">
-        Even one MapLibre/Mapbox layer is a wall of config. Paint, layout,
-        filters, source — all interleaved.
+        Even one MapLibre layer is a wall of config — paint properties, layout
+        rules, filters, and source references all tangled together. Every value
+        is hardcoded. Want to let a user tweak the opacity? Good luck.
       </SlideText>
 
       <SlideCode value={LAYER_JSON} />

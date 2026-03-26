@@ -15,11 +15,12 @@ export function ParamsSlide() {
         @@#params.X
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Runtime parameter injection
+        Runtime parameter <span className="text-primary">injection</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
-        Reference a named parameter anywhere in the JSON. At resolution time,
-        the string is replaced with the actual value.
+        Place a named parameter reference anywhere in the JSON. At resolution
+        time, the placeholder is swapped for the real value — a number, color,
+        boolean, or any type the UI control provides.
       </SlideText>
 
       <SlideCode value={CONFIG} />

@@ -11,11 +11,12 @@ export function ExpressionSlide() {
         @@=[...]
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Inline expressions
+        Inline <span className="text-primary">expressions</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
-        Embed a functional expression directly in the JSON. Parsed at resolution
-        time into a callable function.
+        Embed a functional expression directly in the JSON. The resolver parses
+        the S-expression syntax into a callable function — useful for
+        data-driven styling like scaling radius by a feature property.
       </SlideText>
 
       <SlideCode value={CONFIG} />

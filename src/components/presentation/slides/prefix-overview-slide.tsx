@@ -22,21 +22,19 @@ const PREFIXES = [
     desc: 'Inline expression → function',
     color: 'text-chart-4',
   },
-  {
-    prefix: '@@#ENUM.X',
-    desc: 'Constant/enum resolution',
-    color: 'text-chart-5',
-  },
 ] as const
 
 export function PrefixOverviewSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-4 text-foreground">
-        The <code className="text-primary">@@</code> family
+        The <code className="font-mono text-primary">@@</code> family
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
-        One convention, five capabilities.
+        One convention, four capabilities. Every string starting with{' '}
+        <code className="font-mono text-primary">@@</code> is a directive that
+        the resolver knows how to handle — parameters, functions, types, and
+        expressions.
       </SlideText>
 
       <div className="w-full overflow-hidden rounded-lg border border-border bg-card">

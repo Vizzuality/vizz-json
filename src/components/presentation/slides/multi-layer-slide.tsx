@@ -37,10 +37,12 @@ export function MultiLayerSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-4 text-foreground">
-        Now multiply that
+        Now <span className="text-primary">multiply</span> that
       </SlideHeading>
       <SlideText className="mb-6 text-muted-foreground">
-        Real maps stack layers. Each type has its own property names and shapes.
+        Real maps stack many layers at once. Each type — circle, fill, line —
+        has its own property names, value shapes, and quirks. Managing all of
+        them in raw JSON without any abstraction doesn't scale.
       </SlideText>
 
       <div className="grid w-full grid-cols-1 gap-3 md:grid-cols-3">

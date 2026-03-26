@@ -11,11 +11,12 @@ export function FunctionSlide() {
         @@function:
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Named function dispatch
+        Named function <span className="text-primary">dispatch</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
-        Reference a registered function by name. The converter looks it up and
-        calls it.
+        Reference a registered function by name. The converter looks it up in a
+        function registry and injects the callable — perfect for tile URL
+        builders, data transforms, or any logic that doesn't belong in JSON.
       </SlideText>
 
       <SlideCode value={CONFIG} />
