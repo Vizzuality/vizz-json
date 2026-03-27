@@ -1,6 +1,7 @@
 import type { ValueHandler, ResolverConfig } from '../types'
 
 const CONSTANT_PREFIX = '@@#'
+const FORBIDDEN_SEGMENTS = new Set(['__proto__', 'constructor', 'prototype'])
 
 export const constantHandler: ValueHandler = {
   name: 'constant',
@@ -14,6 +15,11 @@ export const constantHandler: ValueHandler = {
 
     if (parts.length === 2) {
       const [namespace, key] = parts
+      if (FORBIDDEN_SEGMENTS.has(namespace) || FORBIDDEN_SEGMENTS.has(key)) {
+        throw new Error(
+          `[vizz-json] Forbidden path segment in constant: "${value}"`,
+        )
+      }
       const enumValue = config.enumerations?.[namespace]?.[key]
       if (enumValue !== undefined) return enumValue
     }

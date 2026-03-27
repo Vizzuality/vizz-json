@@ -1,9 +1,16 @@
 import type { Handler, KeyHandler, ResolverConfig } from './types'
 
+const FORBIDDEN_SEGMENTS = new Set(['__proto__', 'constructor', 'prototype'])
+
 function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
   const parts = path.split('.')
   let current: unknown = obj
   for (const part of parts) {
+    if (FORBIDDEN_SEGMENTS.has(part)) {
+      throw new Error(
+        `[vizz-json] Forbidden path segment: "${part}" in path "${path}"`,
+      )
+    }
     if (
       current === null ||
       current === undefined ||

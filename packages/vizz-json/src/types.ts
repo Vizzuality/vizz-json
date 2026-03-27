@@ -18,6 +18,15 @@ export type ValueHandler = {
 
 export type Handler = KeyHandler | ValueHandler
 
+/**
+ * Configuration for a VizzJson resolver.
+ *
+ * @security All entries in `functions`, `classes`, and `components` are invoked
+ * with caller-controlled props derived from the resolved JSON. Never register
+ * callables that perform sensitive operations (network requests, file I/O, writes
+ * to shared state) without validating their props internally. Do not expose this
+ * resolver to untrusted JSON without reviewing every registered entry.
+ */
 export type ResolverConfig = {
   readonly classes?: Record<string, new (props: any) => any>
   readonly components?: Record<string, (props: any) => any>
