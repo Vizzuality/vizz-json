@@ -87,7 +87,11 @@
     ],
     "overrides": {
       "anymatch>picomatch": "2.3.2",
-      "readdirp>picomatch": "2.3.2"
+      "readdirp>picomatch": "2.3.2",
+      "unplugin>picomatch": "4.0.4",
+      "@tanstack/devtools-vite>picomatch": "4.0.4",
+      "vite>picomatch": "4.0.4",
+      "vitest>picomatch": "4.0.4"
     }
   }
 }
