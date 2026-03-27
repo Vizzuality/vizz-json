@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { Github } from 'lucide-react'
 import { buttonVariants } from '#/components/ui/button'
 import { cn } from '#/lib/utils'
 import ParaglideLocaleSwitcher from './locale-switcher'
@@ -42,6 +43,18 @@ export default function Header() {
           >
             Presentation
           </Link>
+          <a
+            href="https://github.com/Vizzuality/vizz-json"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'icon' }),
+              'size-8',
+            )}
+            aria-label="GitHub repository"
+          >
+            <Github className="size-4" />
+          </a>
           <ThemeToggle />
           <div aria-hidden="true" className="mx-1 h-4 w-px bg-border" />
           <ParaglideLocaleSwitcher />
