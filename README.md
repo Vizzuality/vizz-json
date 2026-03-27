@@ -8,13 +8,13 @@ Built as an internal [Vizzuality](https://www.vizzuality.com/) showcase.
 
 VizzJson introduces a set of prefixes that turn static JSON into dynamic, parameterized configurations:
 
-| Prefix | Purpose | Example |
-|--------|---------|---------|
-| `@@#params.X` | Runtime parameter (dot notation) | `"opacity": "@@#params.opacity"` |
-| `@@function:` | Call a registered function | `"@@function:setQueryParams"` |
-| `@@type:` | Instantiate a deck.gl layer or component | `"@@type:ScatterplotLayer"` |
-| `@@=[expr]` | Evaluate a JS expression | `"@@=[props.value * 2]"` |
-| `@@#GL.` | OpenGL constant | `"@@#GL.POINTS"` |
+| Prefix        | Purpose                                  | Example                          |
+| ------------- | ---------------------------------------- | -------------------------------- |
+| `@@#params.X` | Runtime parameter (dot notation)         | `"opacity": "@@#params.opacity"` |
+| `@@function:` | Call a registered function               | `"@@function:setQueryParams"`    |
+| `@@type:`     | Instantiate a deck.gl layer or component | `"@@type:ScatterplotLayer"`      |
+| `@@=[expr]`   | Evaluate a JS expression                 | `"@@=[props.value * 2]"`         |
+| `@@#GL.`      | OpenGL constant                          | `"@@#GL.POINTS"`                 |
 
 ### Quick Example
 
@@ -25,15 +25,21 @@ VizzJson introduces a set of prefixes that turn static JSON into dynamic, parame
       "type": "raster",
       "tiles": ["https://tiles.example.com/{z}/{y}/{x}.jpg"]
     },
-    "styles": [{
-      "type": "raster",
-      "paint": { "raster-opacity": "@@#params.opacity" },
-      "layout": { "visibility": "@@#params.visibility" }
-    }]
+    "styles": [
+      {
+        "type": "raster",
+        "paint": { "raster-opacity": "@@#params.opacity" },
+        "layout": { "visibility": "@@#params.visibility" }
+      }
+    ]
   },
   "params_config": [
     { "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 },
-    { "key": "visibility", "default": "visible", "options": ["visible", "none"] }
+    {
+      "key": "visibility",
+      "default": "visible",
+      "options": ["visible", "none"]
+    }
   ]
 }
 ```
@@ -63,25 +69,25 @@ pnpm dev        # Dev server on http://localhost:3000
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Dev server on :3000 |
-| `pnpm build` | Production build |
-| `pnpm test` | Run all tests (vitest) |
-| `pnpm test:watch` | Tests in watch mode |
-| `pnpm lint` | ESLint check |
-| `pnpm format` | Prettier check |
-| `pnpm check` | Auto-fix lint + formatting |
-| `pnpm typecheck` | TypeScript type checking |
+| Command           | Description                |
+| ----------------- | -------------------------- |
+| `pnpm dev`        | Dev server on :3000        |
+| `pnpm build`      | Production build           |
+| `pnpm test`       | Run all tests (vitest)     |
+| `pnpm test:watch` | Tests in watch mode        |
+| `pnpm lint`       | ESLint check               |
+| `pnpm format`     | Prettier check             |
+| `pnpm check`      | Auto-fix lint + formatting |
+| `pnpm typecheck`  | TypeScript type checking   |
 
 ## Routes
 
-| Route | Description |
-|-------|-------------|
-| `/` | Landing page |
-| `/playground` | Interactive editor with Monaco, parameter controls, map renderer, and legend panel |
-| `/presentation` | Full-screen slide deck walking through the system |
-| `/guidelines` | Documentation for params, functions, types, expressions, and legends |
+| Route           | Description                                                                        |
+| --------------- | ---------------------------------------------------------------------------------- |
+| `/`             | Landing page                                                                       |
+| `/playground`   | Interactive editor with Monaco, parameter controls, map renderer, and legend panel |
+| `/presentation` | Full-screen slide deck walking through the system                                  |
+| `/guidelines`   | Documentation for params, functions, types, expressions, and legends               |
 
 ## Project Structure
 
@@ -117,17 +123,17 @@ src/
 
 The playground includes 9 progressive examples in `src/examples/`:
 
-| # | Example | Tier |
-|---|---------|------|
-| 01 | Raster Opacity & Visibility | Basic |
-| 02 | Vector Fill Color | Intermediate |
-| 03 | Choropleth Match Expression | Intermediate |
-| 04 | Graduated Interpolate | Intermediate |
-| 05 | Classified Step Expression | Intermediate |
-| 06 | Data-Driven Circles | Intermediate |
-| 07 | Raster with Registered Functions | Advanced |
-| 09 | Conditional Case Expression | Advanced |
-| 10 | React Component Composition | Advanced |
+| #   | Example                          | Tier         |
+| --- | -------------------------------- | ------------ |
+| 01  | Raster Opacity & Visibility      | Basic        |
+| 02  | Vector Fill Color                | Intermediate |
+| 03  | Choropleth Match Expression      | Intermediate |
+| 04  | Graduated Interpolate            | Intermediate |
+| 05  | Classified Step Expression       | Intermediate |
+| 06  | Data-Driven Circles              | Intermediate |
+| 07  | Raster with Registered Functions | Advanced     |
+| 09  | Conditional Case Expression      | Advanced     |
+| 10  | React Component Composition      | Advanced     |
 
 ## Testing
 
@@ -148,10 +154,10 @@ npm install @vizzuality/vizz-json
 
 It exposes two entry points:
 
-| Entry | Import | Description |
-|-------|--------|-------------|
-| Main | `@vizzuality/vizz-json` | `resolveConfig()`, `resolveParams()`, types |
-| React | `@vizzuality/vizz-json/react` | React hook and components |
+| Entry | Import                        | Description                                 |
+| ----- | ----------------------------- | ------------------------------------------- |
+| Main  | `@vizzuality/vizz-json`       | `resolveConfig()`, `resolveParams()`, types |
+| React | `@vizzuality/vizz-json/react` | React hook and components                   |
 
 Releases are automated via [Release Please](https://github.com/googleapis/release-please). Merging to `main` triggers a release PR; merging the release PR publishes to npm and creates a GitHub release.
 
