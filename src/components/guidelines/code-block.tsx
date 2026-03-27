@@ -5,12 +5,7 @@ type CodeBlockProps = {
   readonly title?: string
 }
 
-type HighlightType =
-  | 'param-ref'
-  | 'function-ref'
-  | 'type-ref'
-  | 'expr-ref'
-  | 'gl-ref'
+type HighlightType = 'param-ref' | 'function-ref' | 'type-ref' | 'expr-ref'
 
 type TextSegment = {
   readonly text: string
@@ -22,7 +17,6 @@ const HIGHLIGHT_STYLES: Record<HighlightType, string> = {
   'function-ref': 'text-purple-400 bg-purple-400/10 rounded px-0.5',
   'type-ref': 'text-emerald-400 bg-emerald-400/10 rounded px-0.5',
   'expr-ref': 'text-amber-400 bg-amber-400/10 rounded px-0.5',
-  'gl-ref': 'text-pink-400 bg-pink-400/10 rounded px-0.5',
 }
 
 function classifyPrefix(value: string): HighlightType | undefined {
@@ -30,7 +24,6 @@ function classifyPrefix(value: string): HighlightType | undefined {
   if (value.startsWith('@@function')) return 'function-ref'
   if (value.startsWith('@@type')) return 'type-ref'
   if (value.startsWith('@@=')) return 'expr-ref'
-  if (value.startsWith('@@#GL.')) return 'gl-ref'
   return undefined
 }
 
@@ -38,7 +31,7 @@ function classifyPrefix(value: string): HighlightType | undefined {
 function segmentJsonLine(line: string): TextSegment[] {
   const segments: TextSegment[] = []
   const regex =
-    /"(@@#params\.[^"]*|@@function:[^"]*|@@function|@@type:[^"]*|@@type|@@=[^"]*|@@#GL\.[^"]*)"/g
+    /"(@@#params\.[^"]*|@@function:[^"]*|@@function|@@type:[^"]*|@@type|@@=[^"]*)"/g
   let lastIndex = 0
   let match: RegExpExecArray | null
 

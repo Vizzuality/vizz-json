@@ -26,12 +26,6 @@ const PREFIXES = [
     example: '"@@=[case, [">", ...], ...]"',
     colorClass: 'text-chart-4',
   },
-  {
-    prefix: '@@#ENUM.X',
-    description: 'Constant/enum resolution',
-    example: '"@@#GL.POINTS"',
-    colorClass: 'text-chart-5',
-  },
 ] as const
 
 export function PrefixFamilySection() {
@@ -42,7 +36,7 @@ export function PrefixFamilySection() {
           The @@ Prefix Family
         </Badge>
         <h2 className="mb-12 text-3xl font-bold text-foreground">
-          One convention, five capabilities.
+          One convention, four capabilities.
         </h2>
 
         <div className="overflow-hidden rounded-lg border border-border bg-card">

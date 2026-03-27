@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as AboutRouteImport } from './routes/about'
@@ -17,7 +18,6 @@ import { Route as GuidelinesIndexRouteImport } from './routes/guidelines/index'
 import { Route as GuidelinesTypesRouteImport } from './routes/guidelines/types'
 import { Route as GuidelinesParamsRouteImport } from './routes/guidelines/params'
 import { Route as GuidelinesLegendsRouteImport } from './routes/guidelines/legends'
-import { Route as GuidelinesGlConstantsRouteImport } from './routes/guidelines/gl-constants'
 import { Route as GuidelinesFunctionsRouteImport } from './routes/guidelines/functions'
 import { Route as GuidelinesExpressionsRouteImport } from './routes/guidelines/expressions'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
@@ -27,6 +27,11 @@ import { Route as DemoI18nRouteImport } from './routes/demo.i18n'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
 
+const PresentationRoute = PresentationRouteImport.update({
+  id: '/presentation',
+  path: '/presentation',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlaygroundRoute = PlaygroundRouteImport.update({
   id: '/playground',
   path: '/playground',
@@ -65,11 +70,6 @@ const GuidelinesParamsRoute = GuidelinesParamsRouteImport.update({
 const GuidelinesLegendsRoute = GuidelinesLegendsRouteImport.update({
   id: '/legends',
   path: '/legends',
-  getParentRoute: () => GuidelinesRoute,
-} as any)
-const GuidelinesGlConstantsRoute = GuidelinesGlConstantsRouteImport.update({
-  id: '/gl-constants',
-  path: '/gl-constants',
   getParentRoute: () => GuidelinesRoute,
 } as any)
 const GuidelinesFunctionsRoute = GuidelinesFunctionsRouteImport.update({
@@ -118,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
+  '/presentation': typeof PresentationRoute
   '/api/$': typeof ApiSplatRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
@@ -125,7 +126,6 @@ export interface FileRoutesByFullPath {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
-  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
@@ -136,6 +136,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/playground': typeof PlaygroundRoute
+  '/presentation': typeof PresentationRoute
   '/api/$': typeof ApiSplatRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
@@ -143,7 +144,6 @@ export interface FileRoutesByTo {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
-  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
@@ -156,6 +156,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
+  '/presentation': typeof PresentationRoute
   '/api/$': typeof ApiSplatRoute
   '/demo/i18n': typeof DemoI18nRoute
   '/demo/orpc-todo': typeof DemoOrpcTodoRoute
@@ -163,7 +164,6 @@ export interface FileRoutesById {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
-  '/guidelines/gl-constants': typeof GuidelinesGlConstantsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
@@ -177,6 +177,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/guidelines'
     | '/playground'
+    | '/presentation'
     | '/api/$'
     | '/demo/i18n'
     | '/demo/orpc-todo'
@@ -184,7 +185,6 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
-    | '/guidelines/gl-constants'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
@@ -195,6 +195,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/playground'
+    | '/presentation'
     | '/api/$'
     | '/demo/i18n'
     | '/demo/orpc-todo'
@@ -202,7 +203,6 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
-    | '/guidelines/gl-constants'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
@@ -214,6 +214,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/guidelines'
     | '/playground'
+    | '/presentation'
     | '/api/$'
     | '/demo/i18n'
     | '/demo/orpc-todo'
@@ -221,7 +222,6 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
-    | '/guidelines/gl-constants'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
@@ -234,6 +234,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   GuidelinesRoute: typeof GuidelinesRouteWithChildren
   PlaygroundRoute: typeof PlaygroundRoute
+  PresentationRoute: typeof PresentationRoute
   ApiSplatRoute: typeof ApiSplatRoute
   DemoI18nRoute: typeof DemoI18nRoute
   DemoOrpcTodoRoute: typeof DemoOrpcTodoRoute
@@ -244,6 +245,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/presentation': {
+      id: '/presentation'
+      path: '/presentation'
+      fullPath: '/presentation'
+      preLoaderRoute: typeof PresentationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/playground': {
       id: '/playground'
       path: '/playground'
@@ -298,13 +306,6 @@ declare module '@tanstack/react-router' {
       path: '/legends'
       fullPath: '/guidelines/legends'
       preLoaderRoute: typeof GuidelinesLegendsRouteImport
-      parentRoute: typeof GuidelinesRoute
-    }
-    '/guidelines/gl-constants': {
-      id: '/guidelines/gl-constants'
-      path: '/gl-constants'
-      fullPath: '/guidelines/gl-constants'
-      preLoaderRoute: typeof GuidelinesGlConstantsRouteImport
       parentRoute: typeof GuidelinesRoute
     }
     '/guidelines/functions': {
@@ -369,7 +370,6 @@ declare module '@tanstack/react-router' {
 interface GuidelinesRouteChildren {
   GuidelinesExpressionsRoute: typeof GuidelinesExpressionsRoute
   GuidelinesFunctionsRoute: typeof GuidelinesFunctionsRoute
-  GuidelinesGlConstantsRoute: typeof GuidelinesGlConstantsRoute
   GuidelinesLegendsRoute: typeof GuidelinesLegendsRoute
   GuidelinesParamsRoute: typeof GuidelinesParamsRoute
   GuidelinesTypesRoute: typeof GuidelinesTypesRoute
@@ -379,7 +379,6 @@ interface GuidelinesRouteChildren {
 const GuidelinesRouteChildren: GuidelinesRouteChildren = {
   GuidelinesExpressionsRoute: GuidelinesExpressionsRoute,
   GuidelinesFunctionsRoute: GuidelinesFunctionsRoute,
-  GuidelinesGlConstantsRoute: GuidelinesGlConstantsRoute,
   GuidelinesLegendsRoute: GuidelinesLegendsRoute,
   GuidelinesParamsRoute: GuidelinesParamsRoute,
   GuidelinesTypesRoute: GuidelinesTypesRoute,
@@ -395,6 +394,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   GuidelinesRoute: GuidelinesRouteWithChildren,
   PlaygroundRoute: PlaygroundRoute,
+  PresentationRoute: PresentationRoute,
   ApiSplatRoute: ApiSplatRoute,
   DemoI18nRoute: DemoI18nRoute,
   DemoOrpcTodoRoute: DemoOrpcTodoRoute,
