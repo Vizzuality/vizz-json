@@ -15,6 +15,6 @@ export const functionHandler: KeyHandler = {
         `[vizz-json] Unknown function: "${fnName}". Register it in functions.`,
       )
     }
-    return fn(props as never)
+    return fn(props)
   },
 }

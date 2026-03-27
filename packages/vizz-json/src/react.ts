@@ -13,6 +13,11 @@ export function Render({ value }: { readonly value: unknown }): ReactNode {
   }
 
   if (isComponentDescriptor(value)) {
+    if (typeof value.$$component !== 'function') {
+      throw new Error(
+        `[vizz-json] $$component must be a function (React component or class), got: ${typeof value.$$component}`,
+      )
+    }
     const Component = value.$$component as ComponentType<
       Record<string, unknown>
     >
