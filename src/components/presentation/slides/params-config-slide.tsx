@@ -37,9 +37,7 @@ export function ParamsConfigSlide() {
           <p className="text-sm text-foreground">Dropdown</p>
         </div>
         <div className="rounded-md border border-border bg-card px-4 py-3">
-          <p className="mb-1 font-mono text-xs text-muted-foreground">
-            color
-          </p>
+          <p className="mb-1 font-mono text-xs text-muted-foreground">color</p>
           <p className="text-sm text-foreground">Color picker</p>
         </div>
       </div>

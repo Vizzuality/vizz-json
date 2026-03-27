@@ -19,9 +19,9 @@ export function WhatIfSlide() {
         What <span className="text-primary">if</span>...
       </SlideHeading>
       <SlideText className="mb-8 text-muted-foreground">
-        ...the JSON itself could declare which values are parametrizable?
-        Same config, different behavior — and anyone reading the JSON can
-        instantly tell what's meant to be tweaked and what's fixed.
+        ...the JSON itself could declare which values are parametrizable? Same
+        config, different behavior — and anyone reading the JSON can instantly
+        tell what's meant to be tweaked and what's fixed.
       </SlideText>
 
       <div className="grid w-full gap-6 md:grid-cols-2">

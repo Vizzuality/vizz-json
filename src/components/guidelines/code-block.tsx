@@ -5,11 +5,7 @@ type CodeBlockProps = {
   readonly title?: string
 }
 
-type HighlightType =
-  | 'param-ref'
-  | 'function-ref'
-  | 'type-ref'
-  | 'expr-ref'
+type HighlightType = 'param-ref' | 'function-ref' | 'type-ref' | 'expr-ref'
 
 type TextSegment = {
   readonly text: string

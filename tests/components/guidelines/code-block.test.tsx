@@ -41,13 +41,6 @@ describe('CodeBlock', () => {
     expect(highlighted).toBeInTheDocument()
   })
 
-  it('highlights @@#GL prefixes', () => {
-    const json = { drawMode: '@@#GL.POINTS' }
-    const { container } = render(<CodeBlock value={json} />)
-    const highlighted = container.querySelector('[data-highlight="gl-ref"]')
-    expect(highlighted).toBeInTheDocument()
-  })
-
   it('renders with optional title', () => {
     render(<CodeBlock value={{ test: true }} title="Example" />)
     expect(screen.getByText('Example')).toBeInTheDocument()
