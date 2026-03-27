@@ -1,4 +1,4 @@
-import type { SlideDefinition } from './slide-types'
+import type { Act, SlideDefinition } from './slide-types'
 import { TitleSlide } from './slides/title-slide'
 import { PainPointSlide } from './slides/pain-point-slide'
 import { ChoroplethSlide } from './slides/choropleth-slide'
@@ -52,3 +52,16 @@ export const SLIDES: readonly SlideDefinition[] = [
   { id: 'pipeline', title: 'Resolution Pipeline', component: PipelineSlide },
   { id: 'cta', title: 'Try It', component: CtaSlide },
 ] as const
+
+export const ACTS: readonly Act[] = [
+  { id: 'problem', label: 'The Problem', startSlide: 0, endSlide: 3 },
+  { id: 'idea', label: 'The Idea', startSlide: 4, endSlide: 5 },
+  { id: 'prefixes', label: 'The Prefixes', startSlide: 6, endSlide: 12 },
+  { id: 'in-action', label: 'In Action', startSlide: 13, endSlide: 14 },
+] as const
+
+export function getCurrentAct(slideIndex: number): Act | undefined {
+  return ACTS.find(
+    (act) => slideIndex >= act.startSlide && slideIndex <= act.endSlide,
+  )
+}

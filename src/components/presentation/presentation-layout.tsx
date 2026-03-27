@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { FluidBackground } from '#/components/landing/fluid-background'
+import { SectionIndicator } from './section-indicator'
 import './presentation.css'
 
 type PresentationLayoutProps = {
@@ -22,6 +23,8 @@ export function PresentationLayout({
         className="fixed top-0 left-0 z-50 h-0.5 bg-primary transition-[width] duration-300 ease-out"
         style={{ width: `${progress * 100}%` }}
       />
+
+      <SectionIndicator slide={slide} />
 
       <main
         className="animate-in fade-in-0 slide-in-from-bottom-5 duration-300"

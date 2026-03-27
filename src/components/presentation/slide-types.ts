@@ -5,3 +5,10 @@ export type SlideDefinition = {
   readonly title: string
   readonly component: ComponentType
 }
+
+export type Act = {
+  readonly id: string
+  readonly label: string
+  readonly startSlide: number
+  readonly endSlide: number
+}
