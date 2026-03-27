@@ -84,6 +84,10 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "lightningcss"
-    ]
+    ],
+    "overrides": {
+      "anymatch>picomatch": "2.3.2",
+      "readdirp>picomatch": "2.3.2"
+    }
   }
 }
