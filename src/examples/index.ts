@@ -22,6 +22,35 @@ export const examples: readonly ExampleConfig[] = [
   example10 as ExampleConfig,
 ]
 
+// -------------------------------------------------------------------------
+// Slug-based example lookup (for URL search params)
+// -------------------------------------------------------------------------
+
+export const EXAMPLE_SLUGS = [
+  'raster-opacity',
+  'vector-fill',
+  'choropleth-match',
+  'graduated-interpolate',
+  'classified-step',
+  'data-driven-circles',
+  'raster-function',
+  'conditional-case',
+  'react-components',
+] as const
+
+export type ExampleSlug = (typeof EXAMPLE_SLUGS)[number]
+
+export const DEFAULT_EXAMPLE_SLUG: ExampleSlug = EXAMPLE_SLUGS[0]
+
+export function getExampleIndexBySlug(slug: string): number | undefined {
+  const index = EXAMPLE_SLUGS.indexOf(slug as ExampleSlug)
+  return index === -1 ? undefined : index
+}
+
+export function getSlugByIndex(index: number): ExampleSlug | undefined {
+  return EXAMPLE_SLUGS[index]
+}
+
 export function getExampleById(index: number): ExampleConfig | undefined {
   return examples[index]
 }

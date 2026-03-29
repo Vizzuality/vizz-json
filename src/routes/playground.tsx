@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
 import { PlaygroundLayout } from '#/components/playground/playground-layout'
 import { JsonEditor } from '#/components/playground/json-editor'
 import { MapRenderer } from '#/components/playground/map-renderer'
@@ -13,7 +14,13 @@ import { useConverter } from '#/hooks/use-converter'
 import { useDebouncedValue } from '#/hooks/use-debounced-value'
 import { resolveParams, createConverter } from '#/lib/converter'
 import { inferParamControl } from '#/lib/param-inference'
-import { examples } from '#/examples'
+import {
+  examples,
+  EXAMPLE_SLUGS,
+  DEFAULT_EXAMPLE_SLUG,
+  getExampleIndexBySlug,
+  getSlugByIndex,
+} from '#/examples'
 import type {
   ParamConfig,
   LegendConfig,
@@ -23,7 +30,15 @@ import type {
 import type { RawLegendConfig } from '#/lib/legend-param-mapping'
 import type { VizzJson } from '@vizzuality/vizz-json'
 
+const searchSchema = z.object({
+  example: z
+    .enum(EXAMPLE_SLUGS)
+    .default(DEFAULT_EXAMPLE_SLUG)
+    .catch(DEFAULT_EXAMPLE_SLUG),
+})
+
 export const Route = createFileRoute('/playground')({
+  validateSearch: searchSchema,
   component: PlaygroundPage,
 })
 
@@ -36,25 +51,35 @@ function buildDefaultParams(
 }
 
 function PlaygroundPage() {
-  const [selectedExampleIndex, setSelectedExampleIndex] = useState(0)
+  const { example: exampleSlug } = Route.useSearch()
+  const navigate = Route.useNavigate()
+  const selectedExampleIndex = getExampleIndexBySlug(exampleSlug) ?? 0
+
   const [jsonString, setJsonString] = useState(() =>
-    JSON.stringify(examples[0], null, 2),
+    JSON.stringify(examples[selectedExampleIndex], null, 2),
   )
   const [paramValues, setParamValues] = useState<ResolvedParams>(() =>
-    buildDefaultParams(examples[0].params_config),
+    buildDefaultParams(examples[selectedExampleIndex].params_config),
   )
   const [showResolved, setShowResolved] = useState(false)
 
   // -------------------------------------------------------------------------
   // Example selection
   // -------------------------------------------------------------------------
-  const handleExampleSelect = useCallback((index: number) => {
-    const example = examples[index]
-    setSelectedExampleIndex(index)
-    setJsonString(JSON.stringify(example, null, 2))
-    setParamValues(buildDefaultParams(example.params_config))
-    setShowResolved(false)
-  }, [])
+  const handleExampleSelect = useCallback(
+    (index: number) => {
+      const slug = getSlugByIndex(index)
+      if (!slug) return
+
+      const example = examples[index]
+      setJsonString(JSON.stringify(example, null, 2))
+      setParamValues(buildDefaultParams(example.params_config))
+      setShowResolved(false)
+
+      navigate({ search: { example: slug }, replace: true })
+    },
+    [navigate],
+  )
 
   // -------------------------------------------------------------------------
   // Param change handler (immutable update)
