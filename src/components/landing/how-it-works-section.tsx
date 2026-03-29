@@ -21,30 +21,12 @@ const NODE_H = 40
 
 const HUB_CX = 350
 const HUB_CY = 200
-const OUTER_R = 90
-const INNER_R = 72
+const HUB_R = 88 // outer ring base radius
+const HUB_DASH_R = 76 // dashed ring base radius
+const HUB_GLOW_R = 70 // glow base radius
 
-function hexPoints(cx: number, cy: number, r: number): string {
-  return Array.from({ length: 6 }, (_, i) => {
-    const angle = (Math.PI / 3) * i - Math.PI / 2
-    return `${Math.round(cx + r * Math.cos(angle))},${Math.round(cy + r * Math.sin(angle))}`
-  }).join(' ')
-}
-
-const OUTER_HEX = hexPoints(HUB_CX, HUB_CY, OUTER_R)
-const INNER_HEX = hexPoints(HUB_CX, HUB_CY, INNER_R)
-
-const OUTER_VERTICES = Array.from({ length: 6 }, (_, i) => {
-  const angle = (Math.PI / 3) * i - Math.PI / 2
-  return {
-    x: Math.round(HUB_CX + OUTER_R * Math.cos(angle)),
-    y: Math.round(HUB_CY + OUTER_R * Math.sin(angle)),
-  }
-})
-
-// Left/right midpoints of inner hex edges (for path connections)
-const HUB_LEFT_X = Math.round(HUB_CX - INNER_R * Math.cos(Math.PI / 6))
-const HUB_RIGHT_X = Math.round(HUB_CX + INNER_R * Math.cos(Math.PI / 6))
+const HUB_LEFT_X = HUB_CX - HUB_R
+const HUB_RIGHT_X = HUB_CX + HUB_R
 
 function inputPath(inputY: number) {
   const startX = INPUT_X + INPUT_W
@@ -77,8 +59,8 @@ function AnimatedParticle({
   readonly color: string
   readonly direction: 'into-hub' | 'from-hub'
 }) {
-  // into-hub: visible → gone before outer hex border
-  // from-hub: invisible at hub → fades in after outer hex border
+  // into-hub: visible → fades out before reaching hub ring
+  // from-hub: invisible at hub → fades in after hub ring
   const opacityValues =
     direction === 'into-hub' ? '1;0.8;0.2;0;0' : '0;0;0.2;0.8;1'
   const keyTimes =
@@ -161,43 +143,107 @@ function NodeRect({
   )
 }
 
-function HexHub() {
+const ANIM_DUR = '4s'
+const ANIM_SPLINES = '0.4 0 0.6 1;0.4 0 0.6 1'
+
+function CircleHub() {
   return (
     <g>
-      {/* Outer pulsing ring */}
-      <polygon
-        points={OUTER_HEX}
+      {/* Gradient definitions */}
+      <defs>
+        <radialGradient id="hub-glow">
+          <stop offset="0%" stopColor="var(--diagram-input)" stopOpacity={0.15} />
+          <stop
+            offset="40%"
+            stopColor="var(--diagram-ring-accent)"
+            stopOpacity={0.05}
+          />
+          <stop offset="100%" stopColor="var(--diagram-input)" stopOpacity={0} />
+        </radialGradient>
+        <linearGradient id="hub-ring-gradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="var(--diagram-input)" />
+          <stop offset="50%" stopColor="var(--diagram-ring-accent)" />
+          <stop offset="100%" stopColor="var(--diagram-input)" />
+        </linearGradient>
+      </defs>
+
+      {/* Background masking circle — hides path lines inside hub */}
+      <circle cx={HUB_CX} cy={HUB_CY} r={HUB_R} fill="var(--background)" />
+
+      {/* Breathing radial glow */}
+      <circle cx={HUB_CX} cy={HUB_CY} r={HUB_GLOW_R} fill="url(#hub-glow)">
+        <animate
+          attributeName="r"
+          values="55;72;55"
+          dur={ANIM_DUR}
+          repeatCount="indefinite"
+          calcMode="spline"
+          keySplines={ANIM_SPLINES}
+        />
+        <animate
+          attributeName="opacity"
+          values="0.6;1;0.6"
+          dur={ANIM_DUR}
+          repeatCount="indefinite"
+          calcMode="spline"
+          keySplines={ANIM_SPLINES}
+        />
+      </circle>
+
+      {/* Outer gradient ring — breathes outward */}
+      <circle
+        cx={HUB_CX}
+        cy={HUB_CY}
+        r={HUB_R}
+        fill="none"
+        stroke="url(#hub-ring-gradient)"
+        strokeWidth={1.5}
+      >
+        <animate
+          attributeName="r"
+          values="85;91;85"
+          dur={ANIM_DUR}
+          repeatCount="indefinite"
+          calcMode="spline"
+          keySplines={ANIM_SPLINES}
+        />
+        <animate
+          attributeName="stroke-opacity"
+          values="0.12;0.35;0.12"
+          dur={ANIM_DUR}
+          repeatCount="indefinite"
+          calcMode="spline"
+          keySplines={ANIM_SPLINES}
+        />
+      </circle>
+
+      {/* Dashed middle ring — counter-breathes */}
+      <circle
+        cx={HUB_CX}
+        cy={HUB_CY}
+        r={HUB_DASH_R}
         fill="none"
         stroke="var(--diagram-stroke)"
         strokeWidth={1}
+        strokeDasharray="4 6"
       >
         <animate
-          attributeName="stroke-opacity"
-          values="0.15;0.35;0.15"
-          dur="4s"
+          attributeName="r"
+          values="77;74;77"
+          dur={ANIM_DUR}
           repeatCount="indefinite"
+          calcMode="spline"
+          keySplines={ANIM_SPLINES}
         />
-      </polygon>
-
-      {/* Vertex accent dots */}
-      {OUTER_VERTICES.map((v) => (
-        <circle
-          key={`${v.x}-${v.y}`}
-          cx={v.x}
-          cy={v.y}
-          r={2.5}
-          fill="var(--diagram-stroke)"
-          opacity={0.4}
+        <animate
+          attributeName="stroke-opacity"
+          values="0.06;0.14;0.06"
+          dur={ANIM_DUR}
+          repeatCount="indefinite"
+          calcMode="spline"
+          keySplines={ANIM_SPLINES}
         />
-      ))}
-
-      {/* Inner hexagon */}
-      <polygon
-        points={INNER_HEX}
-        fill="var(--diagram-hub)"
-        stroke="var(--diagram-stroke)"
-        strokeWidth={2}
-      />
+      </circle>
 
       {/* @@ symbol */}
       <text
@@ -291,6 +337,9 @@ function HubDiagram() {
         )
       })}
 
+      {/* Circle hub (drawn before nodes so masking circle covers path endpoints) */}
+      <CircleHub />
+
       {/* Input nodes */}
       {INPUTS.map((input) => (
         <NodeRect
@@ -303,9 +352,6 @@ function HubDiagram() {
           labelColor="var(--diagram-input)"
         />
       ))}
-
-      {/* Hexagonal hub */}
-      <HexHub />
 
       {/* Output nodes */}
       {OUTPUTS.map((output) => (
