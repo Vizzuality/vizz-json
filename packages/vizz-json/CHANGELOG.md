@@ -2,10 +2,9 @@
 
 ## [0.3.3](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.3.2...@vizzuality/vizz-json-v0.3.3) (2026-03-27)
 
-
 ### Bug Fixes
 
-* harden vizz-json against prototype pollution and unsafe component rendering ([#18](https://github.com/Vizzuality/vizz-json/issues/18)) ([9948a53](https://github.com/Vizzuality/vizz-json/commit/9948a539a74ff385a461ccd2135a7e70a54ad655))
+- harden vizz-json against prototype pollution and unsafe component rendering ([#18](https://github.com/Vizzuality/vizz-json/issues/18)) ([9948a53](https://github.com/Vizzuality/vizz-json/commit/9948a539a74ff385a461ccd2135a7e70a54ad655))
 
 ## [0.3.2](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.3.1...@vizzuality/vizz-json-v0.3.2) (2026-03-23)
 

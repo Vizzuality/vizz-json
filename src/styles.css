@@ -41,6 +41,7 @@
   --diagram-stroke: oklch(0.42 0.15 158);
   --diagram-input: oklch(0.38 0.13 158);
   --diagram-output: oklch(0.42 0.15 158);
+  --diagram-ring-accent: oklch(0.35 0.12 190);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0.008 326);
@@ -101,6 +102,7 @@ pre code {
   --diagram-stroke: oklch(0.72 0.18 158);
   --diagram-input: oklch(0.78 0.16 158);
   --diagram-output: oklch(0.84 0.13 158);
+  --diagram-ring-accent: oklch(0.7 0.16 190);
   --sidebar: oklch(0.212 0.019 322.12);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.74 0.2 157);
