@@ -70,15 +70,15 @@ export function InteractiveGradientBar({
 
       const bar = barRef.current
       if (!bar) return
-      const rect = bar.getBoundingClientRect()
       const sorted = [...stops].sort((a, b) => a.position - b.position)
       const rangeMin = sorted[0]?.dataValue ?? 0
       const rangeMax = sorted[sorted.length - 1]?.dataValue ?? 0
 
       const handleMove = (moveEvent: PointerEvent) => {
+        const currentRect = bar.getBoundingClientRect()
         const position = Math.max(
           0,
-          Math.min(1, (moveEvent.clientX - rect.left) / rect.width),
+          Math.min(1, (moveEvent.clientX - currentRect.left) / currentRect.width),
         )
         const dataValue = positionToDataValue(position, rangeMin, rangeMax)
         onUpdateStop(stopId, { position, dataValue })

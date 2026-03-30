@@ -1,8 +1,43 @@
+import { useState } from 'react'
 import { cn } from '#/lib/utils'
 import { Input } from '#/components/ui/input'
 import { Button } from '#/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import type { GradientStop } from '#/lib/gradient-types'
+
+const HEX_REGEX = /^#[0-9a-fA-F]{6}$/
+
+function HexColorInput({
+  value,
+  onChange,
+}: {
+  readonly value: string
+  readonly onChange: (color: string) => void
+}) {
+  const [draft, setDraft] = useState(value)
+  const isValid = HEX_REGEX.test(draft)
+
+  return (
+    <Input
+      type="text"
+      value={draft}
+      onChange={(e) => {
+        setDraft(e.target.value)
+        if (HEX_REGEX.test(e.target.value)) {
+          onChange(e.target.value)
+        }
+      }}
+      onBlur={() => {
+        if (!isValid) setDraft(value)
+      }}
+      className={cn(
+        'h-7 flex-1 font-mono text-xs',
+        !isValid && 'border-destructive',
+      )}
+      placeholder="#000000"
+    />
+  )
+}
 
 type StopListProps = {
   readonly stops: readonly GradientStop[]
@@ -74,17 +109,9 @@ export function StopList({
                       className="sr-only"
                     />
                   </label>
-                  <Input
-                    type="text"
+                  <HexColorInput
                     value={stop.color}
-                    onChange={(e) => {
-                      const val = e.target.value
-                      if (/^#[0-9a-fA-F]{6}$/.test(val)) {
-                        onUpdateStop(stop.id, { color: val })
-                      }
-                    }}
-                    className="h-7 flex-1 font-mono text-xs"
-                    placeholder="#000000"
+                    onChange={(color) => onUpdateStop(stop.id, { color })}
                   />
                 </div>
 

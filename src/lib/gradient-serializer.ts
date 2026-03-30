@@ -61,9 +61,9 @@ export function serializeGradientToJson(
     },
   ])
 
-  parsed.params_config = [...preservedParams, ...newParams]
+  const newParamsConfig = [...preservedParams, ...newParams]
 
-  parsed.legend_config = {
+  const newLegendConfig = {
     type: 'gradient',
     items: stopsWithKeys.map((stop, i) => ({
       label: stop.label || `Stop ${i + 1}`,
@@ -71,28 +71,41 @@ export function serializeGradientToJson(
     })),
   }
 
-  // --- Rebuild interpolate expression ---
+  // --- Rebuild interpolate expression (immutable) ---
   const config = parsed.config as Record<string, unknown> | undefined
+  const interpolatePairs = stopsWithKeys.flatMap((stop) => [
+    `@@#params.${stop.thresholdParamKey}`,
+    `@@#params.${stop.colorParamKey}`,
+  ])
+
+  let newConfig = config
   if (config) {
     const styles = config.styles as Record<string, unknown>[] | undefined
     if (styles) {
-      for (const style of styles) {
+      const newStyles = styles.map((style) => {
         const paint = style.paint as Record<string, unknown> | undefined
-        if (!paint) continue
-        for (const prop of Object.keys(paint)) {
-          const val = paint[prop]
-          if (Array.isArray(val) && val[0] === 'interpolate') {
-            const header = val.slice(0, 3)
-            const pairs = stopsWithKeys.flatMap((stop) => [
-              `@@#params.${stop.thresholdParamKey}`,
-              `@@#params.${stop.colorParamKey}`,
-            ])
-            paint[prop] = [...header, ...pairs]
-          }
-        }
-      }
+        if (!paint) return style
+
+        const newPaint = Object.fromEntries(
+          Object.entries(paint).map(([prop, val]) => {
+            if (Array.isArray(val) && val[0] === 'interpolate') {
+              return [prop, [...val.slice(0, 3), ...interpolatePairs]]
+            }
+            return [prop, val]
+          }),
+        )
+        return { ...style, paint: newPaint }
+      })
+      newConfig = { ...config, styles: newStyles }
     }
   }
 
-  return JSON.stringify(parsed, null, 2)
+  const result = {
+    ...parsed,
+    ...(newConfig !== config ? { config: newConfig } : {}),
+    params_config: newParamsConfig,
+    legend_config: newLegendConfig,
+  }
+
+  return JSON.stringify(result, null, 2)
 }
