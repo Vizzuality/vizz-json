@@ -26,11 +26,12 @@ export function initializeGradientStops(
   const stops: GradientStop[] = items.map((item, i) => {
     const mapping = paramMapping.get(i)
     const colorParamKey = mapping?.valueParamKey
-    const thresholdParam = thresholdParams[i]
-    const thresholdParamKey = thresholdParam?.key
+    const thresholdParamKey = i < thresholdParams.length
+      ? thresholdParams[i].key
+      : undefined
     const dataValue =
       thresholdParamKey && typeof values[thresholdParamKey] === 'number'
-        ? (values[thresholdParamKey] as number)
+        ? values[thresholdParamKey]
         : 0
 
     return {
