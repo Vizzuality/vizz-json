@@ -61,51 +61,38 @@ export function serializeGradientToJson(
     },
   ])
 
-  const updatedParsed = {
-    ...parsed,
-    params_config: [...preservedParams, ...newParams],
-    legend_config: {
-      type: 'gradient',
-      items: stopsWithKeys.map((stop, i) => ({
-        label: stop.label || `Stop ${i + 1}`,
-        value: `@@#params.${stop.colorParamKey}`,
-      })),
-    },
+  parsed.params_config = [...preservedParams, ...newParams]
+
+  parsed.legend_config = {
+    type: 'gradient',
+    items: stopsWithKeys.map((stop, i) => ({
+      label: stop.label || `Stop ${i + 1}`,
+      value: `@@#params.${stop.colorParamKey}`,
+    })),
   }
 
   // --- Rebuild interpolate expression ---
-  const config = updatedParsed.config as Record<string, unknown> | undefined
+  const config = parsed.config as Record<string, unknown> | undefined
   if (config) {
     const styles = config.styles as Record<string, unknown>[] | undefined
     if (styles) {
-      const updatedStyles = styles.map((style) => {
+      for (const style of styles) {
         const paint = style.paint as Record<string, unknown> | undefined
-        if (!paint) return style
-
-        const updatedPaint = Object.fromEntries(
-          Object.entries(paint).map(([prop, val]) => {
-            if (Array.isArray(val) && val[0] === 'interpolate') {
-              const header = val.slice(0, 3)
-              const pairs = stopsWithKeys.flatMap((stop) => [
-                `@@#params.${stop.thresholdParamKey}`,
-                `@@#params.${stop.colorParamKey}`,
-              ])
-              return [prop, [...header, ...pairs]]
-            }
-            return [prop, val]
-          }),
-        )
-
-        return { ...style, paint: updatedPaint }
-      })
-
-      return JSON.stringify(
-        { ...updatedParsed, config: { ...config, styles: updatedStyles } },
-        null,
-        2,
-      )
+        if (!paint) continue
+        for (const prop of Object.keys(paint)) {
+          const val = paint[prop]
+          if (Array.isArray(val) && val[0] === 'interpolate') {
+            const header = val.slice(0, 3)
+            const pairs = stopsWithKeys.flatMap((stop) => [
+              `@@#params.${stop.thresholdParamKey}`,
+              `@@#params.${stop.colorParamKey}`,
+            ])
+            paint[prop] = [...header, ...pairs]
+          }
+        }
+      }
     }
   }
 
-  return JSON.stringify(updatedParsed, null, 2)
+  return JSON.stringify(parsed, null, 2)
 }
