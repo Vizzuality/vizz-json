@@ -99,10 +99,14 @@ export function InteractiveGradientBar({
     <div className="relative mb-6">
       <div
         ref={barRef}
-        className="h-7 w-full cursor-crosshair rounded-md"
+        className="group/bar relative h-7 w-full cursor-crosshair rounded-md"
         style={{ background: `linear-gradient(to right, ${gradientCss})` }}
         onClick={handleBarClick}
-      />
+      >
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white opacity-0 mix-blend-difference transition-opacity duration-300 group-hover/bar:opacity-100">
+          Click to add stop
+        </span>
+      </div>
       {sortedStops.map((stop) => (
         <div
           key={stop.id}

@@ -21,9 +21,9 @@
     {
       "@@type": "GradientLegend",
       "items": [
-        { "label": "Low", "value": "@@#params.color_low" },
-        { "label": "Mid", "value": "@@#params.color_mid" },
-        { "label": "High", "value": "@@#params.color_high" }
+        { "label": "Low", "value": "@@#params.color_1" },
+        { "label": "Mid", "value": "@@#params.color_2" },
+        { "label": "High", "value": "@@#params.color_3" }
       ]
     }
   ],
@@ -37,8 +37,8 @@
     { "key": "stat_value", "default": "8.1B" },
     { "key": "stat_unit", "default": "people" },
     { "key": "accent_color", "default": "#3b82f6" },
-    { "key": "color_low", "default": "#eff6ff" },
-    { "key": "color_mid", "default": "#3b82f6" },
-    { "key": "color_high", "default": "#1e3a8a" }
+    { "key": "color_1", "default": "#eff6ff" },
+    { "key": "color_2", "default": "#3b82f6" },
+    { "key": "color_3", "default": "#1e3a8a" }
   ]
 }

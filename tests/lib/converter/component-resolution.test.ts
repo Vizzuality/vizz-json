@@ -64,16 +64,16 @@ describe('component resolution pipeline', () => {
       {
         '@@type': 'GradientLegend',
         items: [
-          { label: 'Low', value: '@@#params.color_low' },
-          { label: 'High', value: '@@#params.color_high' },
+          { label: 'Low', value: '@@#params.color_1' },
+          { label: 'High', value: '@@#params.color_3' },
         ],
       },
     ]
 
     const wrapped = { components }
     const paramsResolved = resolveParams(wrapped, {
-      color_low: '#ffffff',
-      color_high: '#000000',
+      color_1: '#ffffff',
+      color_3: '#000000',
     })
     const result = converter.resolve(paramsResolved)
 

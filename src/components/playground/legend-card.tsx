@@ -42,8 +42,8 @@ export function LegendCard({
   )
 
   const orphanParams = useMemo(
-    () => getOrphanLegendParams(legendParams, paramMapping),
-    [legendParams, paramMapping],
+    () => getOrphanLegendParams(legendParams, paramMapping, legendConfig?.type),
+    [legendParams, paramMapping, legendConfig?.type],
   )
 
   const hasPreview = legendConfig !== null

@@ -42,7 +42,7 @@ export function serializeGradientToJson(
   const preservedParams = oldParams.filter((p) => {
     if (p.group !== 'legend') return true
     if (newKeysSet.has(p.key)) return false
-    return !/^(color_|stop_|threshold_)/.test(p.key)
+    return !/^(color_|threshold_)/.test(p.key)
   })
 
   const newParams: ParamEntry[] = stopsWithKeys.flatMap((stop) => [
@@ -65,8 +65,8 @@ export function serializeGradientToJson(
 
   const newLegendConfig = {
     type: 'gradient',
-    items: stopsWithKeys.map((stop, i) => ({
-      label: stop.label || `Stop ${i + 1}`,
+    items: stopsWithKeys.map((stop) => ({
+      label: stop.label,
       value: `@@#params.${stop.colorParamKey}`,
     })),
   }
