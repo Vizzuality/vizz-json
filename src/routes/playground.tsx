@@ -91,23 +91,20 @@ function PlaygroundPage() {
   // -------------------------------------------------------------------------
   // Gradient apply handler — updates editor JSON and re-derives param values
   // -------------------------------------------------------------------------
-  const handleGradientApply = useCallback(
-    (updatedJson: string) => {
-      setJsonString(updatedJson)
-      try {
-        const parsed = JSON.parse(updatedJson) as Record<string, unknown>
-        const paramsConfig = parsed.params_config as
-          | readonly ParamConfig[]
-          | undefined
-        if (paramsConfig) {
-          setParamValues(buildDefaultParams(paramsConfig))
-        }
-      } catch {
-        // JSON parse failed — the editor content will show the error
+  const handleGradientApply = useCallback((updatedJson: string) => {
+    setJsonString(updatedJson)
+    try {
+      const parsed = JSON.parse(updatedJson) as Record<string, unknown>
+      const paramsConfig = parsed.params_config as
+        | readonly ParamConfig[]
+        | undefined
+      if (paramsConfig) {
+        setParamValues(buildDefaultParams(paramsConfig))
       }
-    },
-    [],
-  )
+    } catch {
+      // JSON parse failed — the editor content will show the error
+    }
+  }, [])
 
   // -------------------------------------------------------------------------
   // Resolution pipeline

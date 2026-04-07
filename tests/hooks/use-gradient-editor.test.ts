@@ -32,7 +32,10 @@ describe('useGradientEditor', () => {
   })
 
   it('updates a stop immutably', () => {
-    const stops = [makeStop({ id: 'a', color: '#ff0000' }), makeStop({ id: 'b' })]
+    const stops = [
+      makeStop({ id: 'a', color: '#ff0000' }),
+      makeStop({ id: 'b' }),
+    ]
     const { result } = renderHook(() => useGradientEditor(stops))
     const original = result.current.state.stops
 

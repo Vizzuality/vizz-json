@@ -16,8 +16,10 @@ export function initializeGradientStops(
   const thresholdParams = legendParams
     .filter((p) => p.control_type === 'slider' && !colorKeys.has(p.key))
     .sort((a, b) => {
-      const aVal = typeof values[a.key] === 'number' ? (values[a.key] as number) : 0
-      const bVal = typeof values[b.key] === 'number' ? (values[b.key] as number) : 0
+      const aVal =
+        typeof values[a.key] === 'number' ? (values[a.key] as number) : 0
+      const bVal =
+        typeof values[b.key] === 'number' ? (values[b.key] as number) : 0
       return aVal - bVal
     })
 
@@ -26,9 +28,8 @@ export function initializeGradientStops(
   const stops: GradientStop[] = items.map((item, i) => {
     const mapping = paramMapping.get(i)
     const colorParamKey = mapping?.valueParamKey
-    const thresholdParamKey = i < thresholdParams.length
-      ? thresholdParams[i].key
-      : undefined
+    const thresholdParamKey =
+      i < thresholdParams.length ? thresholdParams[i].key : undefined
     const dataValue =
       thresholdParamKey && typeof values[thresholdParamKey] === 'number'
         ? values[thresholdParamKey]

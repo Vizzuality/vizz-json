@@ -27,9 +27,30 @@ const EXAMPLE_JSON = JSON.stringify(
       ],
     },
     params_config: [
-      { key: 'threshold_1', default: 0, min: 0, max: 500000000, step: 1000000, group: 'legend' },
-      { key: 'threshold_2', default: 50000000, min: 0, max: 1000000000, step: 1000000, group: 'legend' },
-      { key: 'threshold_3', default: 500000000, min: 0, max: 2000000000, step: 10000000, group: 'legend' },
+      {
+        key: 'threshold_1',
+        default: 0,
+        min: 0,
+        max: 500000000,
+        step: 1000000,
+        group: 'legend',
+      },
+      {
+        key: 'threshold_2',
+        default: 50000000,
+        min: 0,
+        max: 1000000000,
+        step: 1000000,
+        group: 'legend',
+      },
+      {
+        key: 'threshold_3',
+        default: 500000000,
+        min: 0,
+        max: 2000000000,
+        step: 10000000,
+        group: 'legend',
+      },
       { key: 'color_1', default: '#eff6ff', group: 'legend' },
       { key: 'color_2', default: '#3b82f6', group: 'legend' },
       { key: 'color_3', default: '#1e3a8a', group: 'legend' },
@@ -51,9 +72,33 @@ const EXAMPLE_JSON = JSON.stringify(
 describe('serializeGradientToJson', () => {
   it('preserves existing stops with their original keys', () => {
     const stops: GradientStop[] = [
-      { id: '1', color: '#ff0000', position: 0, dataValue: 0, label: 'Low', colorParamKey: 'color_1', thresholdParamKey: 'threshold_1' },
-      { id: '2', color: '#00ff00', position: 0.5, dataValue: 250000000, label: 'Mid', colorParamKey: 'color_2', thresholdParamKey: 'threshold_2' },
-      { id: '3', color: '#0000ff', position: 1, dataValue: 500000000, label: 'High', colorParamKey: 'color_3', thresholdParamKey: 'threshold_3' },
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'Low',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+      {
+        id: '2',
+        color: '#00ff00',
+        position: 0.5,
+        dataValue: 250000000,
+        label: 'Mid',
+        colorParamKey: 'color_2',
+        thresholdParamKey: 'threshold_2',
+      },
+      {
+        id: '3',
+        color: '#0000ff',
+        position: 1,
+        dataValue: 500000000,
+        label: 'High',
+        colorParamKey: 'color_3',
+        thresholdParamKey: 'threshold_3',
+      },
     ]
 
     const result = JSON.parse(serializeGradientToJson(EXAMPLE_JSON, stops))
@@ -71,9 +116,31 @@ describe('serializeGradientToJson', () => {
 
   it('generates new keys for added stops', () => {
     const stops: GradientStop[] = [
-      { id: '1', color: '#ff0000', position: 0, dataValue: 0, label: 'Low', colorParamKey: 'color_1', thresholdParamKey: 'threshold_1' },
-      { id: 'new', color: '#ffff00', position: 0.25, dataValue: 125000000, label: '' },
-      { id: '3', color: '#0000ff', position: 1, dataValue: 500000000, label: 'High', colorParamKey: 'color_3', thresholdParamKey: 'threshold_3' },
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'Low',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+      {
+        id: 'new',
+        color: '#ffff00',
+        position: 0.25,
+        dataValue: 125000000,
+        label: '',
+      },
+      {
+        id: '3',
+        color: '#0000ff',
+        position: 1,
+        dataValue: 500000000,
+        label: 'High',
+        colorParamKey: 'color_3',
+        thresholdParamKey: 'threshold_3',
+      },
     ]
 
     const result = JSON.parse(serializeGradientToJson(EXAMPLE_JSON, stops))
@@ -93,8 +160,24 @@ describe('serializeGradientToJson', () => {
 
   it('preserves non-legend params', () => {
     const stops: GradientStop[] = [
-      { id: '1', color: '#ff0000', position: 0, dataValue: 0, label: 'Low', colorParamKey: 'color_1', thresholdParamKey: 'threshold_1' },
-      { id: '2', color: '#0000ff', position: 1, dataValue: 500000000, label: 'High', colorParamKey: 'color_3', thresholdParamKey: 'threshold_3' },
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'Low',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+      {
+        id: '2',
+        color: '#0000ff',
+        position: 1,
+        dataValue: 500000000,
+        label: 'High',
+        colorParamKey: 'color_3',
+        thresholdParamKey: 'threshold_3',
+      },
     ]
 
     const result = JSON.parse(serializeGradientToJson(EXAMPLE_JSON, stops))
@@ -108,8 +191,24 @@ describe('serializeGradientToJson', () => {
 
   it('removes params for deleted stops', () => {
     const stops: GradientStop[] = [
-      { id: '1', color: '#ff0000', position: 0, dataValue: 0, label: 'Low', colorParamKey: 'color_1', thresholdParamKey: 'threshold_1' },
-      { id: '3', color: '#0000ff', position: 1, dataValue: 500000000, label: 'High', colorParamKey: 'color_3', thresholdParamKey: 'threshold_3' },
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'Low',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+      {
+        id: '3',
+        color: '#0000ff',
+        position: 1,
+        dataValue: 500000000,
+        label: 'High',
+        colorParamKey: 'color_3',
+        thresholdParamKey: 'threshold_3',
+      },
     ]
 
     const result = JSON.parse(serializeGradientToJson(EXAMPLE_JSON, stops))
@@ -121,8 +220,24 @@ describe('serializeGradientToJson', () => {
 
   it('rebuilds interpolate expression in correct position order', () => {
     const stops: GradientStop[] = [
-      { id: '3', color: '#0000ff', position: 1, dataValue: 500000000, label: 'High', colorParamKey: 'color_3', thresholdParamKey: 'threshold_3' },
-      { id: '1', color: '#ff0000', position: 0, dataValue: 0, label: 'Low', colorParamKey: 'color_1', thresholdParamKey: 'threshold_1' },
+      {
+        id: '3',
+        color: '#0000ff',
+        position: 1,
+        dataValue: 500000000,
+        label: 'High',
+        colorParamKey: 'color_3',
+        thresholdParamKey: 'threshold_3',
+      },
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'Low',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
     ]
 
     const result = JSON.parse(serializeGradientToJson(EXAMPLE_JSON, stops))
@@ -136,15 +251,27 @@ describe('serializeGradientToJson', () => {
     const jsonWithoutInterpolate = JSON.stringify({
       config: { styles: [{ paint: { 'fill-color': '#ff0000' } }] },
       params_config: [{ key: 'color_a', default: '#ff0000', group: 'legend' }],
-      legend_config: { type: 'gradient', items: [{ label: 'A', value: '@@#params.color_a' }] },
+      legend_config: {
+        type: 'gradient',
+        items: [{ label: 'A', value: '@@#params.color_a' }],
+      },
     })
 
     const stops: GradientStop[] = [
-      { id: '1', color: '#ff0000', position: 0, dataValue: 0, label: 'A', colorParamKey: 'color_a' },
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'A',
+        colorParamKey: 'color_a',
+      },
       { id: '2', color: '#0000ff', position: 1, dataValue: 100, label: 'B' },
     ]
 
-    const result = JSON.parse(serializeGradientToJson(jsonWithoutInterpolate, stops))
+    const result = JSON.parse(
+      serializeGradientToJson(jsonWithoutInterpolate, stops),
+    )
 
     expect(result.legend_config.items).toHaveLength(2)
     expect(result.config.styles[0].paint['fill-color']).toBe('#ff0000')

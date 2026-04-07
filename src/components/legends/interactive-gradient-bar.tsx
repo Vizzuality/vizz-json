@@ -40,7 +40,9 @@ export function InteractiveGradientBar({
         Math.min(1, (e.clientX - rect.left) / rect.width),
       )
 
-      const left = [...sortedStops].reverse().find((s) => s.position <= position)
+      const left = [...sortedStops]
+        .reverse()
+        .find((s) => s.position <= position)
       const right = sortedStops.find((s) => s.position >= position)
       let color = '#808080'
       if (left && right && left.id !== right.id) {
@@ -78,7 +80,10 @@ export function InteractiveGradientBar({
         const currentRect = bar.getBoundingClientRect()
         const position = Math.max(
           0,
-          Math.min(1, (moveEvent.clientX - currentRect.left) / currentRect.width),
+          Math.min(
+            1,
+            (moveEvent.clientX - currentRect.left) / currentRect.width,
+          ),
         )
         const dataValue = positionToDataValue(position, rangeMin, rangeMax)
         onUpdateStop(stopId, { position, dataValue })

@@ -16,12 +16,51 @@ describe('initializeGradientStops', () => {
       [2, { valueParamKey: 'color_3' }],
     ])
     const legendParams: InferredParam[] = [
-      { key: 'threshold_1', value: 0, control_type: 'slider', group: 'legend', min: 0, max: 500000000, step: 1000000 },
-      { key: 'threshold_2', value: 50000000, control_type: 'slider', group: 'legend', min: 0, max: 1000000000, step: 1000000 },
-      { key: 'threshold_3', value: 500000000, control_type: 'slider', group: 'legend', min: 0, max: 2000000000, step: 10000000 },
-      { key: 'color_1', value: '#eff6ff', control_type: 'color_picker', group: 'legend' },
-      { key: 'color_2', value: '#3b82f6', control_type: 'color_picker', group: 'legend' },
-      { key: 'color_3', value: '#1e3a8a', control_type: 'color_picker', group: 'legend' },
+      {
+        key: 'threshold_1',
+        value: 0,
+        control_type: 'slider',
+        group: 'legend',
+        min: 0,
+        max: 500000000,
+        step: 1000000,
+      },
+      {
+        key: 'threshold_2',
+        value: 50000000,
+        control_type: 'slider',
+        group: 'legend',
+        min: 0,
+        max: 1000000000,
+        step: 1000000,
+      },
+      {
+        key: 'threshold_3',
+        value: 500000000,
+        control_type: 'slider',
+        group: 'legend',
+        min: 0,
+        max: 2000000000,
+        step: 10000000,
+      },
+      {
+        key: 'color_1',
+        value: '#eff6ff',
+        control_type: 'color_picker',
+        group: 'legend',
+      },
+      {
+        key: 'color_2',
+        value: '#3b82f6',
+        control_type: 'color_picker',
+        group: 'legend',
+      },
+      {
+        key: 'color_3',
+        value: '#1e3a8a',
+        control_type: 'color_picker',
+        group: 'legend',
+      },
     ]
     const values: Record<string, unknown> = {
       threshold_1: 0,
@@ -32,7 +71,12 @@ describe('initializeGradientStops', () => {
       color_3: '#1e3a8a',
     }
 
-    const stops = initializeGradientStops(items, paramMapping, legendParams, values)
+    const stops = initializeGradientStops(
+      items,
+      paramMapping,
+      legendParams,
+      values,
+    )
 
     expect(stops).toHaveLength(3)
     expect(stops[0].color).toBe('#eff6ff')
@@ -61,9 +105,24 @@ describe('initializeGradientStops', () => {
       [2, { valueParamKey: 'color_c' }],
     ])
     const legendParams: InferredParam[] = [
-      { key: 'color_a', value: '#ff0000', control_type: 'color_picker', group: 'legend' },
-      { key: 'color_b', value: '#00ff00', control_type: 'color_picker', group: 'legend' },
-      { key: 'color_c', value: '#0000ff', control_type: 'color_picker', group: 'legend' },
+      {
+        key: 'color_a',
+        value: '#ff0000',
+        control_type: 'color_picker',
+        group: 'legend',
+      },
+      {
+        key: 'color_b',
+        value: '#00ff00',
+        control_type: 'color_picker',
+        group: 'legend',
+      },
+      {
+        key: 'color_c',
+        value: '#0000ff',
+        control_type: 'color_picker',
+        group: 'legend',
+      },
     ]
     const values: Record<string, unknown> = {
       color_a: '#ff0000',
@@ -71,7 +130,12 @@ describe('initializeGradientStops', () => {
       color_c: '#0000ff',
     }
 
-    const stops = initializeGradientStops(items, paramMapping, legendParams, values)
+    const stops = initializeGradientStops(
+      items,
+      paramMapping,
+      legendParams,
+      values,
+    )
 
     expect(stops[0].position).toBe(0)
     expect(stops[1].position).toBe(0.5)

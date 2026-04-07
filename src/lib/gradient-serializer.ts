@@ -29,7 +29,8 @@ export function serializeGradientToJson(
 
   const stopsWithKeys = sortedStops.map((stop) => {
     const colorParamKey = stop.colorParamKey ?? `color_${colorIdx++}`
-    const thresholdParamKey = stop.thresholdParamKey ?? `threshold_${thresholdIdx++}`
+    const thresholdParamKey =
+      stop.thresholdParamKey ?? `threshold_${thresholdIdx++}`
     return { ...stop, colorParamKey, thresholdParamKey }
   })
 

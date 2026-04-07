@@ -143,9 +143,7 @@ describe('getOrphanLegendParams', () => {
         group: 'legend',
       },
     ]
-    const mapping = new Map([
-      [0, { valueParamKey: 'color_1' }],
-    ])
+    const mapping = new Map([[0, { valueParamKey: 'color_1' }]])
     const orphans = getOrphanLegendParams(params, mapping, 'gradient')
     expect(orphans).toEqual([])
   })
@@ -167,9 +165,7 @@ describe('getOrphanLegendParams', () => {
         group: 'legend',
       },
     ]
-    const mapping = new Map([
-      [0, { valueParamKey: 'color_1' }],
-    ])
+    const mapping = new Map([[0, { valueParamKey: 'color_1' }]])
     const orphans = getOrphanLegendParams(params, mapping, 'choropleth')
     expect(orphans).toEqual([
       {

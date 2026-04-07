@@ -149,9 +149,7 @@ export function StopList({
             <input
               type="text"
               value={stop.label}
-              onChange={(e) =>
-                onUpdateStop(stop.id, { label: e.target.value })
-              }
+              onChange={(e) => onUpdateStop(stop.id, { label: e.target.value })}
               onClick={(e) => {
                 e.stopPropagation()
                 onSelectStop(stop.id)
