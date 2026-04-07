@@ -5,7 +5,7 @@ hooks = [
     id = "lint-fix",
     name = "lint & format (auto-fix)",
     language = "system",
-    entry = "pnpm -r check",
+    entry = "sh -c 'pnpm -r check && git add -u'",
     pass_filenames = false,
   },
   {
