@@ -1,12 +1,22 @@
-import type { LegendItem } from '#/lib/types'
+// src/components/legends/gradient-legend.tsx
+import { useState } from 'react'
+import type { LegendItem, InferredParam } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
-import { Input } from '#/components/ui/input'
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from '#/components/ui/popover'
+import { GradientEditorPopover } from '#/components/legends/gradient-editor-popover'
 
 type GradientLegendProps = {
   readonly items: readonly LegendItem[]
   readonly paramMapping?: ReadonlyMap<number, ItemParamMapping>
   readonly values?: Record<string, unknown>
   readonly onChange?: (key: string, value: unknown) => void
+  readonly legendParams?: readonly InferredParam[]
+  readonly currentJson?: string
+  readonly onApply?: (updatedJson: string) => void
 }
 
 function GradientBar({ items }: { readonly items: readonly LegendItem[] }) {
@@ -31,84 +41,46 @@ function GradientBar({ items }: { readonly items: readonly LegendItem[] }) {
   )
 }
 
-function EditableGradient({
-  items,
-  paramMapping,
-  values,
-  onChange,
-}: {
-  readonly items: readonly LegendItem[]
-  readonly paramMapping: ReadonlyMap<number, ItemParamMapping>
-  readonly values: Record<string, unknown>
-  readonly onChange: (key: string, value: unknown) => void
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <GradientBar items={items} />
-      {items.map((item, i) => {
-        const mapping = paramMapping.get(i)
-        if (!mapping) return null
-
-        const colorValue = mapping.valueParamKey
-          ? String(values[mapping.valueParamKey] ?? item.value)
-          : undefined
-        const labelValue = mapping.labelParamKey
-          ? String(values[mapping.labelParamKey] ?? item.label)
-          : undefined
-
-        return (
-          <div key={i} className="flex items-center gap-2">
-            {colorValue !== undefined && mapping.valueParamKey && (
-              <label
-                className="w-6 h-4 rounded-sm shrink-0 cursor-pointer"
-                style={{ backgroundColor: colorValue }}
-              >
-                <input
-                  type="color"
-                  value={colorValue}
-                  onChange={(e) =>
-                    onChange(mapping.valueParamKey!, e.target.value)
-                  }
-                  className="sr-only"
-                />
-              </label>
-            )}
-            {labelValue !== undefined && mapping.labelParamKey && (
-              <Input
-                type="text"
-                value={labelValue}
-                onChange={(e) =>
-                  onChange(mapping.labelParamKey!, e.target.value)
-                }
-                className="h-7 flex-1 text-xs"
-              />
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
 export function GradientLegend({
   items,
   paramMapping,
   values,
   onChange,
+  legendParams,
+  currentJson,
+  onApply,
 }: GradientLegendProps) {
-  const hasEditableItems =
-    paramMapping && values && onChange && paramMapping.size > 0
+  const [open, setOpen] = useState(false)
 
-  if (hasEditableItems) {
-    return (
-      <EditableGradient
-        items={items}
-        paramMapping={paramMapping}
-        values={values}
-        onChange={onChange}
-      />
-    )
+  const hasEditor =
+    paramMapping &&
+    values &&
+    onChange &&
+    legendParams &&
+    currentJson &&
+    onApply &&
+    paramMapping.size > 0
+
+  if (!hasEditor) {
+    return <GradientBar items={items} />
   }
 
-  return <GradientBar items={items} />
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger className="w-full cursor-pointer text-left">
+        <GradientBar items={items} />
+      </PopoverTrigger>
+      <PopoverContent align="start" sideOffset={8} className="w-auto p-0">
+        <GradientEditorPopover
+          items={items}
+          paramMapping={paramMapping}
+          legendParams={legendParams}
+          values={values}
+          currentJson={currentJson}
+          onApply={onApply}
+          onClose={() => setOpen(false)}
+        />
+      </PopoverContent>
+    </Popover>
+  )
 }

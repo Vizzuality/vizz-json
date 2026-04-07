@@ -23,6 +23,8 @@ type LegendCardProps = {
   readonly legendParams: readonly InferredParam[]
   readonly values: Record<string, unknown>
   readonly onChange: (key: string, value: unknown) => void
+  readonly currentJson?: string
+  readonly onApply?: (updatedJson: string) => void
 }
 
 export function LegendCard({
@@ -31,6 +33,8 @@ export function LegendCard({
   legendParams,
   values,
   onChange,
+  currentJson,
+  onApply,
 }: LegendCardProps) {
   const paramMapping = useMemo(
     () => extractLegendParamKeys(rawLegendConfig),
@@ -38,8 +42,8 @@ export function LegendCard({
   )
 
   const orphanParams = useMemo(
-    () => getOrphanLegendParams(legendParams, paramMapping),
-    [legendParams, paramMapping],
+    () => getOrphanLegendParams(legendParams, paramMapping, legendConfig?.type),
+    [legendParams, paramMapping, legendConfig?.type],
   )
 
   const hasPreview = legendConfig !== null
@@ -59,6 +63,9 @@ export function LegendCard({
           paramMapping={paramMapping}
           values={values}
           onChange={onChange}
+          {...(legendConfig.type === 'gradient'
+            ? { legendParams, currentJson, onApply }
+            : {})}
         />
       )}
       {hasOrphans && (

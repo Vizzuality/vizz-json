@@ -118,6 +118,67 @@ describe('getOrphanLegendParams', () => {
     expect(orphans).toEqual(legendParams)
   })
 
+  it('excludes gradient threshold params (slider non-color) for gradient legends', () => {
+    const params: readonly InferredParam[] = [
+      {
+        key: 'color_1',
+        value: '#ff0000',
+        control_type: 'color_picker',
+        group: 'legend',
+      },
+      {
+        key: 'threshold_1',
+        value: 0,
+        control_type: 'slider',
+        min: 0,
+        max: 1000,
+        group: 'legend',
+      },
+      {
+        key: 'threshold_3',
+        value: 1000,
+        control_type: 'slider',
+        min: 0,
+        max: 1000,
+        group: 'legend',
+      },
+    ]
+    const mapping = new Map([[0, { valueParamKey: 'color_1' }]])
+    const orphans = getOrphanLegendParams(params, mapping, 'gradient')
+    expect(orphans).toEqual([])
+  })
+
+  it('keeps slider orphans for non-gradient legends', () => {
+    const params: readonly InferredParam[] = [
+      {
+        key: 'color_1',
+        value: '#ff0000',
+        control_type: 'color_picker',
+        group: 'legend',
+      },
+      {
+        key: 'threshold_1',
+        value: 0,
+        control_type: 'slider',
+        min: 0,
+        max: 1000,
+        group: 'legend',
+      },
+    ]
+    const mapping = new Map([[0, { valueParamKey: 'color_1' }]])
+    const orphans = getOrphanLegendParams(params, mapping, 'choropleth')
+    expect(orphans).toEqual([
+      {
+        key: 'threshold_1',
+        value: 0,
+        control_type: 'slider',
+        min: 0,
+        max: 1000,
+        group: 'legend',
+      },
+    ])
+  })
+
   it('considers both valueParamKey and labelParamKey references', () => {
     const params: readonly InferredParam[] = [
       {

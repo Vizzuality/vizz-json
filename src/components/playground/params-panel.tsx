@@ -16,6 +16,8 @@ type ParamsPanelProps = {
   readonly rawLegendConfig: RawLegendConfig | null
   readonly values: ResolvedParams
   readonly onChange: (key: string, value: unknown) => void
+  readonly currentJson?: string
+  readonly onApply?: (updatedJson: string) => void
 }
 
 const HEADER_KEYS = new Set(['opacity', 'visibility'])
@@ -27,6 +29,8 @@ export function ParamsPanel({
   rawLegendConfig,
   values,
   onChange,
+  currentJson,
+  onApply,
 }: ParamsPanelProps) {
   const opacityParam = paramsConfig.find((p) => p.key === 'opacity')
   const visibilityParam = paramsConfig.find((p) => p.key === 'visibility')
@@ -54,6 +58,8 @@ export function ParamsPanel({
           legendParams={legendParams}
           values={values}
           onChange={onChange}
+          currentJson={currentJson}
+          onApply={onApply}
         />
         {remainingParams.length > 0 && (
           <div className="flex flex-col gap-3 px-3">

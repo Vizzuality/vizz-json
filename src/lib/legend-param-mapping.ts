@@ -41,11 +41,25 @@ export function extractLegendParamKeys(
 export function getOrphanLegendParams(
   legendParams: readonly InferredParam[],
   paramMapping: ReadonlyMap<number, ItemParamMapping>,
+  legendType?: string,
 ): readonly InferredParam[] {
   const referencedKeys = new Set<string>()
+  const colorKeys = new Set<string>()
   for (const mapping of paramMapping.values()) {
-    if (mapping.valueParamKey) referencedKeys.add(mapping.valueParamKey)
+    if (mapping.valueParamKey) {
+      referencedKeys.add(mapping.valueParamKey)
+      colorKeys.add(mapping.valueParamKey)
+    }
     if (mapping.labelParamKey) referencedKeys.add(mapping.labelParamKey)
   }
-  return legendParams.filter((p) => !referencedKeys.has(p.key))
+  return legendParams.filter((p) => {
+    if (referencedKeys.has(p.key)) return false
+    if (
+      legendType === 'gradient' &&
+      p.control_type === 'slider' &&
+      !colorKeys.has(p.key)
+    )
+      return false
+    return true
+  })
 }
