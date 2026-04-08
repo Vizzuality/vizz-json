@@ -46,7 +46,7 @@ describe('ifParam', () => {
 describe('buildColormap', () => {
   const fn = registeredFunctions.buildColormap
 
-  it('produces a 32-entry interval colormap from two stops', () => {
+  it('produces a 16-entry interval colormap from two stops', () => {
     const result = fn({
       stops: [
         [0, '#000000'],
@@ -54,10 +54,10 @@ describe('buildColormap', () => {
       ],
     }) as unknown[][]
 
-    expect(result).toHaveLength(32)
+    expect(result).toHaveLength(16)
     expect(result[0][0]).toEqual([0, expect.any(Number)])
     expect(result[0][1]).toEqual([0, 0, 0, 255])
-    expect(result[31][1]).toEqual([255, 255, 255, 255])
+    expect(result[15][1]).toEqual([255, 255, 255, 255])
   })
 
   it('sorts stops by data value', () => {
@@ -69,7 +69,7 @@ describe('buildColormap', () => {
     }) as unknown[][]
 
     expect(result[0][1]).toEqual([0, 0, 0, 255])
-    expect(result[31][1]).toEqual([255, 255, 255, 255])
+    expect(result[15][1]).toEqual([255, 255, 255, 255])
   })
 
   it('returns empty array for empty stops', () => {

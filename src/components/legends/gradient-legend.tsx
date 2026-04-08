@@ -19,6 +19,11 @@ type GradientLegendProps = {
   readonly onApply?: (updatedJson: string) => void
 }
 
+const CHECKERBOARD_BG = [
+  'repeating-conic-gradient(oklch(0.7 0 0) 0% 25%, oklch(0.85 0 0) 0% 50%)',
+  '0 0 / 8px 8px',
+].join(' ')
+
 function GradientBar({ items }: { readonly items: readonly LegendItem[] }) {
   const colors = items
     .map((item) => (typeof item.value === 'string' ? item.value : '#000'))
@@ -27,9 +32,14 @@ function GradientBar({ items }: { readonly items: readonly LegendItem[] }) {
   return (
     <div>
       <div
-        className="h-4 w-full rounded-sm"
-        style={{ background: `linear-gradient(to right, ${colors})` }}
-      />
+        className="relative h-4 w-full overflow-hidden rounded-sm"
+        style={{ background: CHECKERBOARD_BG }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{ background: `linear-gradient(to right, ${colors})` }}
+        />
+      </div>
       <div className="flex justify-between mt-1">
         {items.map((item, i) => (
           <span key={i} className="text-[10px] text-muted-foreground">
