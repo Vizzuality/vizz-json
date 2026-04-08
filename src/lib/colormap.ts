@@ -13,7 +13,7 @@ export function hexToRgba(hex: string): Rgba {
   ]
 }
 
-const GRADIENT_STEPS = 32
+const GRADIENT_STEPS = 16
 
 export function interpolateColormap(
   stops: readonly ColormapStop[],
@@ -32,7 +32,13 @@ export function interpolateColormap(
 
   const minVal = rgbaStops[0][0]
   const maxVal = rgbaStops[rgbaStops.length - 1][0]
-  const range = maxVal - minVal || 1
+
+  if (minVal === maxVal) {
+    const rgba = rgbaStops[rgbaStops.length - 1][1]
+    return [[[minVal, maxVal], rgba]]
+  }
+
+  const range = maxVal - minVal
   const step = range / GRADIENT_STEPS
 
   return Array.from({ length: GRADIENT_STEPS }, (_, i) => {
