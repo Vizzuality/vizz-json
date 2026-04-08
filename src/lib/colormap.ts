@@ -13,7 +13,17 @@ export function hexToRgba(hex: string): Rgba {
   ]
 }
 
-const GRADIENT_STEPS = 16
+function lerpRgba(a: Rgba, b: Rgba, t: number): Rgba {
+  const c = Math.max(0, Math.min(1, t))
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * c),
+    Math.round(a[1] + (b[1] - a[1]) * c),
+    Math.round(a[2] + (b[2] - a[2]) * c),
+    255,
+  ]
+}
+
+const STEPS_PER_SEGMENT = 4
 
 export function interpolateColormap(
   stops: readonly ColormapStop[],
@@ -30,44 +40,32 @@ export function interpolateColormap(
     return [[[value, value], rgba]]
   }
 
-  const minVal = rgbaStops[0][0]
-  const maxVal = rgbaStops[rgbaStops.length - 1][0]
-
-  if (minVal === maxVal) {
+  if (rgbaStops[0][0] === rgbaStops[rgbaStops.length - 1][0]) {
     const rgba = rgbaStops[rgbaStops.length - 1][1]
-    return [[[minVal, maxVal], rgba]]
+    return [[[rgbaStops[0][0], rgbaStops[0][0]], rgba]]
   }
 
-  const range = maxVal - minVal
-  const step = range / GRADIENT_STEPS
+  const intervals: IntervalEntry[] = []
 
-  return Array.from({ length: GRADIENT_STEPS }, (_, i) => {
-    const lower = minVal + i * step
-    const upper = i === GRADIENT_STEPS - 1 ? maxVal : minVal + (i + 1) * step
-    const dataValue = i === GRADIENT_STEPS - 1 ? maxVal : lower
+  for (let seg = 0; seg < rgbaStops.length - 1; seg++) {
+    const [startVal, startRgba] = rgbaStops[seg]
+    const [endVal, endRgba] = rgbaStops[seg + 1]
+    const segRange = endVal - startVal
 
-    let lowerIdx = rgbaStops.length - 2
-    for (let s = 0; s < rgbaStops.length - 1; s++) {
-      if (rgbaStops[s + 1][0] >= dataValue) {
-        lowerIdx = s
-        break
-      }
+    if (segRange <= 0) continue
+
+    for (let i = 0; i < STEPS_PER_SEGMENT; i++) {
+      const t = i / STEPS_PER_SEGMENT
+      const tNext = (i + 1) / STEPS_PER_SEGMENT
+      const lower = startVal + segRange * t
+      const upper =
+        seg === rgbaStops.length - 2 && i === STEPS_PER_SEGMENT - 1
+          ? endVal
+          : startVal + segRange * tNext
+      const rgba = lerpRgba(startRgba, endRgba, t)
+      intervals.push([[lower, upper], rgba])
     }
-    const upperIdx = Math.min(lowerIdx + 1, rgbaStops.length - 1)
+  }
 
-    const [lowerVal, lowerRgba] = rgbaStops[lowerIdx]
-    const [upperVal, upperRgba] = rgbaStops[upperIdx]
-
-    const segmentRange = upperVal - lowerVal || 1
-    const t = Math.max(0, Math.min(1, (dataValue - lowerVal) / segmentRange))
-
-    const rgba: Rgba = [
-      Math.round(lowerRgba[0] + t * (upperRgba[0] - lowerRgba[0])),
-      Math.round(lowerRgba[1] + t * (upperRgba[1] - lowerRgba[1])),
-      Math.round(lowerRgba[2] + t * (upperRgba[2] - lowerRgba[2])),
-      255,
-    ]
-
-    return [[lower, upper], rgba] as IntervalEntry
-  })
+  return intervals
 }

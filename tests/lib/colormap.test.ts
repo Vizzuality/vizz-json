@@ -21,24 +21,21 @@ describe('hexToRgba', () => {
 })
 
 describe('interpolateColormap', () => {
-  it('interpolates two stops into 16 interval entries', () => {
+  it('produces 4 intervals per segment between stops', () => {
     const stops: ColormapStop[] = [
       [0, '#000000'],
       [100, '#ffffff'],
     ]
     const result = interpolateColormap(stops)
 
-    expect(result).toHaveLength(16)
+    expect(result).toHaveLength(4)
     expect(result[0][0][0]).toBe(0)
-    expect(result[15][0][1]).toBe(100)
+    expect(result[3][0][1]).toBe(100)
     expect(result[0][1]).toEqual([0, 0, 0, 255])
-    expect(result[15][1]).toEqual([255, 255, 255, 255])
-    const midColor = result[8][1][0]
-    expect(midColor).toBeGreaterThanOrEqual(126)
-    expect(midColor).toBeLessThanOrEqual(130)
+    expect(result[3][1]).toEqual([191, 191, 191, 255])
   })
 
-  it('interpolates three stops correctly', () => {
+  it('produces intervals for each segment independently', () => {
     const stops: ColormapStop[] = [
       [0, '#ff0000'],
       [50, '#00ff00'],
@@ -46,10 +43,21 @@ describe('interpolateColormap', () => {
     ]
     const result = interpolateColormap(stops)
 
-    expect(result).toHaveLength(16)
+    expect(result).toHaveLength(8)
     expect(result[0][1]).toEqual([255, 0, 0, 255])
-    expect(result[15][1]).toEqual([0, 0, 255, 255])
-    expect(result[8][1][1]).toBeGreaterThanOrEqual(250)
+    expect(result[4][1]).toEqual([0, 255, 0, 255])
+  })
+
+  it('preserves sharp breaks between adjacent stops', () => {
+    const stops: ColormapStop[] = [
+      [-500, '#0000ff'],
+      [-499, '#00ff00'],
+    ]
+    const result = interpolateColormap(stops)
+
+    expect(result).toHaveLength(4)
+    expect(result[0][0][0]).toBe(-500)
+    expect(result[0][1]).toEqual([0, 0, 255, 255])
   })
 
   it('handles single stop by returning one interval', () => {
@@ -73,7 +81,6 @@ describe('interpolateColormap', () => {
     const result = interpolateColormap(stops)
 
     expect(result[0][1]).toEqual([0, 0, 0, 255])
-    expect(result[15][1]).toEqual([255, 255, 255, 255])
   })
 
   it('returns single interval when all stops have the same value', () => {
