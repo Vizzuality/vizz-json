@@ -11,6 +11,43 @@ function findNextAvailableIndex(
   return n
 }
 
+function syncBuildColormapStops(
+  node: unknown,
+  stopsWithKeys: readonly { colorParamKey: string; thresholdParamKey: string }[],
+): unknown {
+  if (Array.isArray(node)) {
+    return node.map((item) =>
+      syncBuildColormapStops(item, stopsWithKeys),
+    )
+  }
+
+  if (node !== null && typeof node === 'object') {
+    const obj = node as Record<string, unknown>
+
+    if (
+      obj['@@function'] === 'buildColormap' &&
+      Array.isArray(obj.stops)
+    ) {
+      return {
+        ...obj,
+        stops: stopsWithKeys.map((stop) => [
+          `@@#params.${stop.thresholdParamKey}`,
+          `@@#params.${stop.colorParamKey}`,
+        ]),
+      }
+    }
+
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [
+        key,
+        syncBuildColormapStops(value, stopsWithKeys),
+      ]),
+    )
+  }
+
+  return node
+}
+
 type ParamEntry = Record<string, unknown> & { key: string; group?: string }
 
 export function serializeGradientToJson(
@@ -101,9 +138,14 @@ export function serializeGradientToJson(
     }
   }
 
+  const syncedConfig = syncBuildColormapStops(
+    newConfig ?? config,
+    stopsWithKeys,
+  )
+
   const result = {
     ...parsed,
-    ...(newConfig !== config ? { config: newConfig } : {}),
+    config: syncedConfig,
     params_config: newParamsConfig,
     legend_config: newLegendConfig,
   }
