@@ -69,14 +69,16 @@ function getFullRange(
     if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
   }
 
-  const defaults = legendParams
-    .filter((p) => p.control_type === 'slider' && !colorKeys.has(p.key))
-    .map((p) => (typeof p.value === 'number' ? p.value : undefined))
-    .filter((v) => v != null)
+  const thresholdParams = legendParams.filter(
+    (p) => p.control_type === 'slider' && !colorKeys.has(p.key),
+  )
+  if (thresholdParams.length < 2) return undefined
 
-  if (defaults.length < 2) return undefined
+  const mins = thresholdParams.map((p) => p.min).filter((v) => v != null)
+  const maxs = thresholdParams.map((p) => p.max).filter((v) => v != null)
+  if (mins.length === 0 || maxs.length === 0) return undefined
 
-  return [Math.min(...defaults), Math.max(...defaults)] as const
+  return [Math.min(...mins), Math.max(...maxs)] as const
 }
 
 export function GradientLegend({
