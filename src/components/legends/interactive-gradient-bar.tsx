@@ -18,7 +18,7 @@ type InteractiveGradientBarProps = {
     updates: Partial<Omit<GradientStop, 'id'>>,
   ) => void
   readonly onAddStop: (position: number, color: string) => void
-  readonly defaultRange?: readonly [number, number]
+  readonly fullRange?: readonly [number, number]
 }
 
 export function InteractiveGradientBar({
@@ -27,7 +27,7 @@ export function InteractiveGradientBar({
   onSelectStop,
   onUpdateStop,
   onAddStop,
-  defaultRange,
+  fullRange,
 }: InteractiveGradientBarProps) {
   const barRef = useRef<HTMLDivElement>(null)
 
@@ -38,12 +38,12 @@ export function InteractiveGradientBar({
     .join(', ')
 
   const gradientCss = useMemo(() => {
-    if (!defaultRange) return fallbackGradient
+    if (!fullRange) return fallbackGradient
     return (
-      buildTransparencyGradient(stops, defaultRange[0], defaultRange[1]) ??
+      buildTransparencyGradient(stops, fullRange[0], fullRange[1]) ??
       fallbackGradient
     )
-  }, [stops, defaultRange, fallbackGradient])
+  }, [stops, fullRange, fallbackGradient])
 
   const handleBarClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {

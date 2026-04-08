@@ -18,7 +18,7 @@ type GradientEditorPopoverProps = {
   readonly currentJson: string
   readonly onApply: (updatedJson: string) => void
   readonly onClose: () => void
-  readonly defaultRange?: readonly [number, number]
+  readonly fullRange?: readonly [number, number]
 }
 
 export function GradientEditorPopover({
@@ -29,7 +29,7 @@ export function GradientEditorPopover({
   currentJson,
   onApply,
   onClose,
-  defaultRange,
+  fullRange,
 }: GradientEditorPopoverProps) {
   const initialStops = useMemo(
     () => initializeGradientStops(items, paramMapping, legendParams, values),
@@ -61,7 +61,7 @@ export function GradientEditorPopover({
         onSelectStop={selectStop}
         onUpdateStop={updateStop}
         onAddStop={addStop}
-        defaultRange={defaultRange}
+        fullRange={fullRange}
       />
 
       <StopList

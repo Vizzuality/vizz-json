@@ -60,7 +60,7 @@ function GradientBar({ items, gradientCss }: GradientBarProps) {
   )
 }
 
-function getDefaultRange(
+function getFullRange(
   legendParams: readonly InferredParam[],
   paramMapping: ReadonlyMap<number, ItemParamMapping>,
 ): readonly [number, number] | undefined {
@@ -69,14 +69,16 @@ function getDefaultRange(
     if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
   }
 
-  const defaults = legendParams
-    .filter((p) => p.control_type === 'slider' && !colorKeys.has(p.key))
-    .map((p) => (typeof p.value === 'number' ? p.value : undefined))
-    .filter((v) => v != null)
+  const thresholdParams = legendParams.filter(
+    (p) => p.control_type === 'slider' && !colorKeys.has(p.key),
+  )
+  if (thresholdParams.length < 2) return undefined
 
-  if (defaults.length < 2) return undefined
+  const mins = thresholdParams.map((p) => p.min).filter((v) => v != null)
+  const maxs = thresholdParams.map((p) => p.max).filter((v) => v != null)
+  if (mins.length === 0 || maxs.length === 0) return undefined
 
-  return [Math.min(...defaults), Math.max(...defaults)] as const
+  return [Math.min(...mins), Math.max(...maxs)] as const
 }
 
 export function GradientLegend({
@@ -99,21 +101,21 @@ export function GradientLegend({
     onApply &&
     paramMapping.size > 0
 
-  const defaultRange = useMemo(
-    () => (hasEditor ? getDefaultRange(legendParams, paramMapping) : undefined),
+  const fullRange = useMemo(
+    () => (hasEditor ? getFullRange(legendParams, paramMapping) : undefined),
     [hasEditor, legendParams, paramMapping],
   )
 
   const gradientCss = useMemo(() => {
-    if (!hasEditor || !defaultRange) return undefined
+    if (!hasEditor || !fullRange) return undefined
     const stops = initializeGradientStops(
       items,
       paramMapping,
       legendParams,
       values,
     )
-    return buildTransparencyGradient(stops, defaultRange[0], defaultRange[1])
-  }, [hasEditor, defaultRange, items, paramMapping, legendParams, values])
+    return buildTransparencyGradient(stops, fullRange[0], fullRange[1])
+  }, [hasEditor, fullRange, items, paramMapping, legendParams, values])
 
   if (!hasEditor) {
     return <GradientBar items={items} />
@@ -133,7 +135,7 @@ export function GradientLegend({
           currentJson={currentJson}
           onApply={onApply}
           onClose={() => setOpen(false)}
-          defaultRange={defaultRange}
+          fullRange={fullRange}
         />
       </PopoverContent>
     </Popover>
