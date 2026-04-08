@@ -107,10 +107,10 @@
     "type": "gradient",
     "items": [
       { "label": "Deep ocean", "value": "@@#params.color_1" },
-      { "label": "Mid ocean", "value": "@@#params.color_2" },
-      { "label": "Sea level", "value": "@@#params.color_3" },
-      { "label": "Lowland", "value": "@@#params.color_4" },
-      { "label": "Highland", "value": "@@#params.color_5" },
+      { "label": "", "value": "@@#params.color_2" },
+      { "label": "", "value": "@@#params.color_3" },
+      { "label": "", "value": "@@#params.color_4" },
+      { "label": "", "value": "@@#params.color_5" },
       { "label": "Peak", "value": "@@#params.color_6" }
     ]
   }
