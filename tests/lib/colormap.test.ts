@@ -21,19 +21,19 @@ describe('hexToRgba', () => {
 })
 
 describe('interpolateColormap', () => {
-  it('interpolates two stops into 128 interval entries', () => {
+  it('interpolates two stops into 32 interval entries', () => {
     const stops: ColormapStop[] = [
       [0, '#000000'],
       [100, '#ffffff'],
     ]
     const result = interpolateColormap(stops)
 
-    expect(result).toHaveLength(128)
+    expect(result).toHaveLength(32)
     expect(result[0][0][0]).toBe(0)
-    expect(result[127][0][1]).toBe(100)
+    expect(result[31][0][1]).toBe(100)
     expect(result[0][1]).toEqual([0, 0, 0, 255])
-    expect(result[127][1]).toEqual([255, 255, 255, 255])
-    const midColor = result[64][1][0]
+    expect(result[31][1]).toEqual([255, 255, 255, 255])
+    const midColor = result[16][1][0]
     expect(midColor).toBeGreaterThanOrEqual(126)
     expect(midColor).toBeLessThanOrEqual(130)
   })
@@ -46,10 +46,10 @@ describe('interpolateColormap', () => {
     ]
     const result = interpolateColormap(stops)
 
-    expect(result).toHaveLength(128)
+    expect(result).toHaveLength(32)
     expect(result[0][1]).toEqual([255, 0, 0, 255])
-    expect(result[127][1]).toEqual([0, 0, 255, 255])
-    expect(result[64][1][1]).toBeGreaterThanOrEqual(250)
+    expect(result[31][1]).toEqual([0, 0, 255, 255])
+    expect(result[16][1][1]).toBeGreaterThanOrEqual(250)
   })
 
   it('handles single stop by returning one interval', () => {
@@ -73,6 +73,6 @@ describe('interpolateColormap', () => {
     const result = interpolateColormap(stops)
 
     expect(result[0][1]).toEqual([0, 0, 0, 255])
-    expect(result[127][1]).toEqual([255, 255, 255, 255])
+    expect(result[31][1]).toEqual([255, 255, 255, 255])
   })
 })

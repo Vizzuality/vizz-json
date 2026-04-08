@@ -13,7 +13,7 @@ export function hexToRgba(hex: string): Rgba {
   ]
 }
 
-const GRADIENT_STEPS = 128
+const GRADIENT_STEPS = 32
 
 export function interpolateColormap(
   stops: readonly ColormapStop[],
