@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "title": "@@function — Dynamic URLs",
-    "description": "Dynamic tile URL construction via @@function using a TiTiler COG endpoint",
+    "title": "@@function — Interactive Raster Colormap",
+    "description": "Edit the gradient legend to change how TiTiler renders this COG",
     "tier": "advanced"
   },
   "config": {
@@ -13,8 +13,13 @@
           "url": "https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png",
           "query": {
             "url": "https://data.source.coop/alexgleith/gebco-2024/GEBCO_2024.tif",
-            "colormap_name": "@@#params.colormap",
-            "rescale": "@@#params.rescale"
+            "colormap": {
+              "@@function": "buildColormap",
+              "stops": [
+                ["@@#params.threshold_1", "@@#params.color_1"],
+                ["@@#params.threshold_2", "@@#params.color_2"]
+              ]
+            }
           }
         }
       ],
@@ -34,11 +39,23 @@
   },
   "params_config": [
     {
-      "key": "colormap",
-      "default": "viridis",
-      "options": ["viridis", "plasma", "inferno", "magma", "cividis"]
+      "key": "threshold_1",
+      "default": -10000,
+      "min": -11000,
+      "max": 6000,
+      "step": 100,
+      "group": "legend"
     },
-    { "key": "rescale", "default": "-10000,6000" },
+    { "key": "color_1", "default": "#440154", "group": "legend" },
+    {
+      "key": "threshold_2",
+      "default": 6000,
+      "min": -10000,
+      "max": 7000,
+      "step": 100,
+      "group": "legend"
+    },
+    { "key": "color_2", "default": "#fde725", "group": "legend" },
     { "key": "opacity", "default": 1.0, "min": 0, "max": 1, "step": 0.05 },
     {
       "key": "visibility",
@@ -49,8 +66,8 @@
   "legend_config": {
     "type": "gradient",
     "items": [
-      { "label": "Deep ocean", "value": "#440154" },
-      { "label": "Peak", "value": "#fde725" }
+      { "label": "Deep ocean", "value": "@@#params.color_1" },
+      { "label": "Peak", "value": "@@#params.color_2" }
     ]
   }
 }
