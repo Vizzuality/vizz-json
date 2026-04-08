@@ -144,7 +144,9 @@ export function InteractiveGradientBar({
               : 'border-white',
           )}
           style={{
-            left: `${stop.position * 100}%`,
+            left: fullRange
+              ? `${(((stop.dataValue - fullRange[0]) / (fullRange[1] - fullRange[0])) * 100).toFixed(1)}%`
+              : `${stop.position * 100}%`,
             backgroundColor: stop.color,
           }}
           onPointerDown={handlePointerDown}
