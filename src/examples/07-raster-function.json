@@ -1,7 +1,7 @@
 {
   "metadata": {
     "title": "@@function — Dynamic URLs",
-    "description": "Dynamic tile URL construction via @@function",
+    "description": "Dynamic tile URL construction via @@function using a TiTiler COG endpoint",
     "tier": "advanced"
   },
   "config": {
@@ -10,9 +10,10 @@
       "tiles": [
         {
           "@@function": "setQueryParams",
-          "url": "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg",
+          "url": "https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png",
           "query": {
-            "colormap": "@@#params.colormap",
+            "url": "https://data.source.coop/alexgleith/gebco-2024/GEBCO_2024.tif",
+            "colormap_name": "@@#params.colormap",
             "rescale": "@@#params.rescale"
           }
         }
@@ -37,7 +38,7 @@
       "default": "viridis",
       "options": ["viridis", "plasma", "inferno", "magma", "cividis"]
     },
-    { "key": "rescale", "default": "0,3000" },
+    { "key": "rescale", "default": "-10000,6000" },
     { "key": "opacity", "default": 1.0, "min": 0, "max": 1, "step": 0.05 },
     {
       "key": "visibility",
@@ -48,8 +49,8 @@
   "legend_config": {
     "type": "gradient",
     "items": [
-      { "label": "Low", "value": "#440154" },
-      { "label": "High", "value": "#fde725" }
+      { "label": "Deep ocean", "value": "#440154" },
+      { "label": "Peak", "value": "#fde725" }
     ]
   }
 }
