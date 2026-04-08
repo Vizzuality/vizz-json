@@ -101,13 +101,16 @@ export function GradientLegend({
     onApply &&
     paramMapping.size > 0
 
+  const hasBuildColormap = hasEditor && currentJson.includes('buildColormap')
+
   const fullRange = useMemo(
-    () => (hasEditor ? getFullRange(legendParams, paramMapping) : undefined),
-    [hasEditor, legendParams, paramMapping],
+    () =>
+      hasBuildColormap ? getFullRange(legendParams, paramMapping) : undefined,
+    [hasBuildColormap, legendParams, paramMapping],
   )
 
   const gradientCss = useMemo(() => {
-    if (!hasEditor || !fullRange) return undefined
+    if (!hasBuildColormap || !fullRange) return undefined
     const stops = initializeGradientStops(
       items,
       paramMapping,
@@ -115,7 +118,7 @@ export function GradientLegend({
       values,
     )
     return buildTransparencyGradient(stops, fullRange[0], fullRange[1])
-  }, [hasEditor, fullRange, items, paramMapping, legendParams, values])
+  }, [hasBuildColormap, fullRange, items, paramMapping, legendParams, values])
 
   if (!hasEditor) {
     return <GradientBar items={items} />
@@ -135,7 +138,7 @@ export function GradientLegend({
           currentJson={currentJson}
           onApply={onApply}
           onClose={() => setOpen(false)}
-          fullRange={fullRange}
+          fullRange={hasBuildColormap ? fullRange : undefined}
         />
       </PopoverContent>
     </Popover>
