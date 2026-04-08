@@ -81,13 +81,18 @@ export function serializeGradientToJson(
     return !/^(color_|threshold_)/.test(p.key)
   })
 
+  const allDataValues = stopsWithKeys.map((s) => s.dataValue)
+  const dataMin = Math.min(...allDataValues)
+  const dataMax = Math.max(...allDataValues)
+  const dataRange = dataMax - dataMin || 1
+
   const newParams: ParamEntry[] = stopsWithKeys.flatMap((stop) => [
     {
       key: stop.thresholdParamKey,
       default: stop.dataValue,
-      min: 0,
-      max: Math.max(stop.dataValue * 2, 1),
-      step: Math.max(Math.round(stop.dataValue / 100), 1),
+      min: Math.floor(dataMin - dataRange * 0.1),
+      max: Math.ceil(dataMax + dataRange * 0.1),
+      step: Math.max(Math.round(dataRange / 100), 1),
       group: 'legend',
     },
     {
