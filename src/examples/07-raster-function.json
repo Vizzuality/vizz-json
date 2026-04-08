@@ -40,17 +40,17 @@
   "params_config": [
     {
       "key": "threshold_1",
-      "default": -10000,
+      "default": -11000,
       "min": -11000,
-      "max": 6000,
+      "max": 7000,
       "step": 100,
       "group": "legend"
     },
     { "key": "color_1", "default": "#440154", "group": "legend" },
     {
       "key": "threshold_2",
-      "default": 6000,
-      "min": -10000,
+      "default": 7000,
+      "min": -11000,
       "max": 7000,
       "step": 100,
       "group": "legend"
