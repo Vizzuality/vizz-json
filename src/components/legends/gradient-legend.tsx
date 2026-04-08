@@ -8,6 +8,8 @@ import {
   PopoverContent,
 } from '#/components/ui/popover'
 import { GradientEditorPopover } from '#/components/legends/gradient-editor-popover'
+import { initializeGradientStops } from '#/lib/gradient-stops-init'
+import { buildTransparencyGradient } from '#/lib/gradient-css'
 
 type GradientLegendProps = {
   readonly items: readonly LegendItem[]
@@ -58,68 +60,23 @@ function GradientBar({ items, gradientCss }: GradientBarProps) {
   )
 }
 
-function buildGradientCss(
+function getDefaultRange(
   legendParams: readonly InferredParam[],
   paramMapping: ReadonlyMap<number, ItemParamMapping>,
-  values: Record<string, unknown>,
-  items: readonly LegendItem[],
-): string | undefined {
+): readonly [number, number] | undefined {
   const colorKeys = new Set<string>()
   for (const mapping of paramMapping.values()) {
     if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
   }
 
-  const thresholdParams = legendParams
+  const defaults = legendParams
     .filter((p) => p.control_type === 'slider' && !colorKeys.has(p.key))
-    .sort((a, b) => {
-      const av =
-        typeof values[a.key] === 'number' ? (values[a.key] as number) : 0
-      const bv =
-        typeof values[b.key] === 'number' ? (values[b.key] as number) : 0
-      return av - bv
-    })
-  if (thresholdParams.length < 2) return undefined
+    .map((p) => (typeof p.value === 'number' ? p.value : undefined))
+    .filter((v) => v != null)
 
-  const mins = thresholdParams.map((p) => p.min).filter((v) => v != null)
-  const maxs = thresholdParams.map((p) => p.max).filter((v) => v != null)
-  if (mins.length === 0 || maxs.length === 0) return undefined
+  if (defaults.length < 2) return undefined
 
-  const rangeMin = Math.min(...mins)
-  const rangeMax = Math.max(...maxs)
-  const fullRange = rangeMax - rangeMin
-  if (fullRange === 0) return undefined
-
-  const colors = items.map((item) =>
-    typeof item.value === 'string' ? item.value : '#000',
-  )
-  if (colors.length !== thresholdParams.length) return undefined
-
-  const colorStops = thresholdParams.map((p, i) => {
-    const val =
-      typeof values[p.key] === 'number' ? (values[p.key] as number) : 0
-    const pct = (((val - rangeMin) / fullRange) * 100).toFixed(1)
-    return `${colors[i]} ${pct}%`
-  })
-
-  const firstVal =
-    typeof values[thresholdParams[0].key] === 'number'
-      ? (values[thresholdParams[0].key] as number)
-      : 0
-  const lastVal =
-    typeof values[thresholdParams[thresholdParams.length - 1].key] === 'number'
-      ? (values[thresholdParams[thresholdParams.length - 1].key] as number)
-      : 0
-
-  const firstPct = (((firstVal - rangeMin) / fullRange) * 100).toFixed(1)
-  const lastPct = (((lastVal - rangeMin) / fullRange) * 100).toFixed(1)
-
-  return [
-    'transparent 0%',
-    `transparent ${firstPct}%`,
-    ...colorStops,
-    `transparent ${lastPct}%`,
-    'transparent 100%',
-  ].join(', ')
+  return [Math.min(...defaults), Math.max(...defaults)] as const
 }
 
 export function GradientLegend({
@@ -142,10 +99,21 @@ export function GradientLegend({
     onApply &&
     paramMapping.size > 0
 
+  const defaultRange = useMemo(
+    () => (hasEditor ? getDefaultRange(legendParams, paramMapping) : undefined),
+    [hasEditor, legendParams, paramMapping],
+  )
+
   const gradientCss = useMemo(() => {
-    if (!hasEditor) return undefined
-    return buildGradientCss(legendParams, paramMapping, values, items)
-  }, [hasEditor, legendParams, paramMapping, values, items])
+    if (!hasEditor || !defaultRange) return undefined
+    const stops = initializeGradientStops(
+      items,
+      paramMapping,
+      legendParams,
+      values,
+    )
+    return buildTransparencyGradient(stops, defaultRange[0], defaultRange[1])
+  }, [hasEditor, defaultRange, items, paramMapping, legendParams, values])
 
   if (!hasEditor) {
     return <GradientBar items={items} />
@@ -165,6 +133,7 @@ export function GradientLegend({
           currentJson={currentJson}
           onApply={onApply}
           onClose={() => setOpen(false)}
+          defaultRange={defaultRange}
         />
       </PopoverContent>
     </Popover>
