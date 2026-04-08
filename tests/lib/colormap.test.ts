@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { hexToRgba, interpolateColormap, type ColormapStop } from '#/lib/colormap'
+import type { ColormapStop } from '#/lib/colormap'
+import { hexToRgba, interpolateColormap } from '#/lib/colormap'
 
 describe('hexToRgba', () => {
   it('converts a hex color with hash to RGBA tuple', () => {

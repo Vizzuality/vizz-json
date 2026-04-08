@@ -1,4 +1,5 @@
-import { interpolateColormap, type ColormapStop } from '#/lib/colormap'
+import type { ColormapStop } from '#/lib/colormap'
+import { interpolateColormap } from '#/lib/colormap'
 
 type SetQueryParamsProps = {
   readonly url: string
