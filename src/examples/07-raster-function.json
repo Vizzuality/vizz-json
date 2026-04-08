@@ -62,7 +62,7 @@
     { "key": "color_2", "default": "#2171b5", "group": "legend" },
     {
       "key": "threshold_3",
-      "default": 0,
+      "default": -100,
       "min": -11000,
       "max": 7000,
       "step": 100,
