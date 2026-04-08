@@ -8,7 +8,6 @@ import {
   PopoverContent,
 } from '#/components/ui/popover'
 import { GradientEditorPopover } from '#/components/legends/gradient-editor-popover'
-import { initializeGradientStops } from '#/lib/gradient-stops-init'
 
 type GradientLegendProps = {
   readonly items: readonly LegendItem[]
@@ -60,53 +59,59 @@ function GradientBar({ items, gradientCss }: GradientBarProps) {
 }
 
 function buildGradientCss(
-  items: readonly LegendItem[],
-  paramMapping: ReadonlyMap<number, ItemParamMapping>,
   legendParams: readonly InferredParam[],
+  paramMapping: ReadonlyMap<number, ItemParamMapping>,
   values: Record<string, unknown>,
+  items: readonly LegendItem[],
 ): string | undefined {
-  const stops = initializeGradientStops(
-    items,
-    paramMapping,
-    legendParams,
-    values,
-  )
-  if (stops.length === 0) return undefined
-
   const colorKeys = new Set<string>()
   for (const mapping of paramMapping.values()) {
     if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
   }
 
-  const thresholdParams = legendParams.filter(
-    (p) => p.control_type === 'slider' && !colorKeys.has(p.key),
-  )
-  if (thresholdParams.length === 0) return undefined
+  const thresholdParams = legendParams
+    .filter((p) => p.control_type === 'slider' && !colorKeys.has(p.key))
+    .sort((a, b) => {
+      const av =
+        typeof values[a.key] === 'number' ? (values[a.key] as number) : 0
+      const bv =
+        typeof values[b.key] === 'number' ? (values[b.key] as number) : 0
+      return av - bv
+    })
+  if (thresholdParams.length < 2) return undefined
 
-  const defaults = thresholdParams
-    .map((p) => (typeof p.value === 'number' ? p.value : undefined))
-    .filter((v) => v != null)
-  if (defaults.length < 2) return undefined
+  const mins = thresholdParams.map((p) => p.min).filter((v) => v != null)
+  const maxs = thresholdParams.map((p) => p.max).filter((v) => v != null)
+  if (mins.length === 0 || maxs.length === 0) return undefined
 
-  const fullMin = Math.min(...defaults)
-  const fullMax = Math.max(...defaults)
-  const fullRange = fullMax - fullMin
+  const rangeMin = Math.min(...mins)
+  const rangeMax = Math.max(...maxs)
+  const fullRange = rangeMax - rangeMin
   if (fullRange === 0) return undefined
 
-  const sorted = [...stops].sort((a, b) => a.dataValue - b.dataValue)
-  const firstPct = (
-    ((sorted[0].dataValue - fullMin) / fullRange) *
-    100
-  ).toFixed(1)
-  const lastPct = (
-    ((sorted[sorted.length - 1].dataValue - fullMin) / fullRange) *
-    100
-  ).toFixed(1)
+  const colors = items.map((item) =>
+    typeof item.value === 'string' ? item.value : '#000',
+  )
+  if (colors.length !== thresholdParams.length) return undefined
 
-  const colorStops = sorted.map((s) => {
-    const pct = (((s.dataValue - fullMin) / fullRange) * 100).toFixed(1)
-    return `${s.color} ${pct}%`
+  const colorStops = thresholdParams.map((p, i) => {
+    const val =
+      typeof values[p.key] === 'number' ? (values[p.key] as number) : 0
+    const pct = (((val - rangeMin) / fullRange) * 100).toFixed(1)
+    return `${colors[i]} ${pct}%`
   })
+
+  const firstVal =
+    typeof values[thresholdParams[0].key] === 'number'
+      ? (values[thresholdParams[0].key] as number)
+      : 0
+  const lastVal =
+    typeof values[thresholdParams[thresholdParams.length - 1].key] === 'number'
+      ? (values[thresholdParams[thresholdParams.length - 1].key] as number)
+      : 0
+
+  const firstPct = (((firstVal - rangeMin) / fullRange) * 100).toFixed(1)
+  const lastPct = (((lastVal - rangeMin) / fullRange) * 100).toFixed(1)
 
   return [
     'transparent 0%',
@@ -139,8 +144,8 @@ export function GradientLegend({
 
   const gradientCss = useMemo(() => {
     if (!hasEditor) return undefined
-    return buildGradientCss(items, paramMapping, legendParams, values)
-  }, [hasEditor, items, paramMapping, legendParams, values])
+    return buildGradientCss(legendParams, paramMapping, values, items)
+  }, [hasEditor, legendParams, paramMapping, values, items])
 
   if (!hasEditor) {
     return <GradientBar items={items} />
