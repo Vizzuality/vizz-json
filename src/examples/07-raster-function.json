@@ -60,7 +60,7 @@
       "step": 100,
       "group": "legend"
     },
-    { "key": "color_2", "default": "#1d4877", "group": "legend" },
+    { "key": "color_2", "default": "#08519c", "group": "legend" },
     {
       "key": "threshold_3",
       "default": -6,
@@ -69,7 +69,7 @@
       "step": 1,
       "group": "legend"
     },
-    { "key": "color_3", "default": "#6baed6", "group": "legend" },
+    { "key": "color_3", "default": "#2171b5", "group": "legend" },
     {
       "key": "threshold_4",
       "default": -5,
