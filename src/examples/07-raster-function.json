@@ -17,7 +17,11 @@
               "@@function": "buildColormap",
               "stops": [
                 ["@@#params.threshold_1", "@@#params.color_1"],
-                ["@@#params.threshold_2", "@@#params.color_2"]
+                ["@@#params.threshold_2", "@@#params.color_2"],
+                ["@@#params.threshold_3", "@@#params.color_3"],
+                ["@@#params.threshold_4", "@@#params.color_4"],
+                ["@@#params.threshold_5", "@@#params.color_5"],
+                ["@@#params.threshold_6", "@@#params.color_6"]
               ]
             }
           }
@@ -46,16 +50,52 @@
       "step": 100,
       "group": "legend"
     },
-    { "key": "color_1", "default": "#440154", "group": "legend" },
+    { "key": "color_1", "default": "#08306b", "group": "legend" },
     {
       "key": "threshold_2",
+      "default": -4000,
+      "min": -11000,
+      "max": 7000,
+      "step": 100,
+      "group": "legend"
+    },
+    { "key": "color_2", "default": "#2171b5", "group": "legend" },
+    {
+      "key": "threshold_3",
+      "default": 0,
+      "min": -11000,
+      "max": 7000,
+      "step": 100,
+      "group": "legend"
+    },
+    { "key": "color_3", "default": "#238b45", "group": "legend" },
+    {
+      "key": "threshold_4",
+      "default": 1000,
+      "min": -11000,
+      "max": 7000,
+      "step": 100,
+      "group": "legend"
+    },
+    { "key": "color_4", "default": "#74c476", "group": "legend" },
+    {
+      "key": "threshold_5",
+      "default": 3000,
+      "min": -11000,
+      "max": 7000,
+      "step": 100,
+      "group": "legend"
+    },
+    { "key": "color_5", "default": "#8b6914", "group": "legend" },
+    {
+      "key": "threshold_6",
       "default": 7000,
       "min": -11000,
       "max": 7000,
       "step": 100,
       "group": "legend"
     },
-    { "key": "color_2", "default": "#fde725", "group": "legend" },
+    { "key": "color_6", "default": "#f7f7f7", "group": "legend" },
     { "key": "opacity", "default": 1.0, "min": 0, "max": 1, "step": 0.05 },
     {
       "key": "visibility",
@@ -67,7 +107,11 @@
     "type": "gradient",
     "items": [
       { "label": "Deep ocean", "value": "@@#params.color_1" },
-      { "label": "Peak", "value": "@@#params.color_2" }
+      { "label": "Mid ocean", "value": "@@#params.color_2" },
+      { "label": "Sea level", "value": "@@#params.color_3" },
+      { "label": "Lowland", "value": "@@#params.color_4" },
+      { "label": "Highland", "value": "@@#params.color_5" },
+      { "label": "Peak", "value": "@@#params.color_6" }
     ]
   }
 }
