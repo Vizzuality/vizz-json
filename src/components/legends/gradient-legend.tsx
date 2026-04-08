@@ -69,16 +69,14 @@ function getFullRange(
     if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
   }
 
-  const thresholdParams = legendParams.filter(
-    (p) => p.control_type === 'slider' && !colorKeys.has(p.key),
-  )
-  if (thresholdParams.length < 2) return undefined
+  const defaults = legendParams
+    .filter((p) => p.control_type === 'slider' && !colorKeys.has(p.key))
+    .map((p) => (typeof p.value === 'number' ? p.value : undefined))
+    .filter((v) => v != null)
 
-  const mins = thresholdParams.map((p) => p.min).filter((v) => v != null)
-  const maxs = thresholdParams.map((p) => p.max).filter((v) => v != null)
-  if (mins.length === 0 || maxs.length === 0) return undefined
+  if (defaults.length < 2) return undefined
 
-  return [Math.min(...mins), Math.max(...maxs)] as const
+  return [Math.min(...defaults), Math.max(...defaults)] as const
 }
 
 export function GradientLegend({
@@ -101,16 +99,13 @@ export function GradientLegend({
     onApply &&
     paramMapping.size > 0
 
-  const hasBuildColormap = hasEditor && currentJson.includes('buildColormap')
-
   const fullRange = useMemo(
-    () =>
-      hasBuildColormap ? getFullRange(legendParams, paramMapping) : undefined,
-    [hasBuildColormap, legendParams, paramMapping],
+    () => (hasEditor ? getFullRange(legendParams, paramMapping) : undefined),
+    [hasEditor, legendParams, paramMapping],
   )
 
   const gradientCss = useMemo(() => {
-    if (!hasBuildColormap || !fullRange) return undefined
+    if (!hasEditor || !fullRange) return undefined
     const stops = initializeGradientStops(
       items,
       paramMapping,
@@ -118,7 +113,7 @@ export function GradientLegend({
       values,
     )
     return buildTransparencyGradient(stops, fullRange[0], fullRange[1])
-  }, [hasBuildColormap, fullRange, items, paramMapping, legendParams, values])
+  }, [hasEditor, fullRange, items, paramMapping, legendParams, values])
 
   if (!hasEditor) {
     return <GradientBar items={items} />
@@ -138,7 +133,7 @@ export function GradientLegend({
           currentJson={currentJson}
           onApply={onApply}
           onClose={() => setOpen(false)}
-          fullRange={hasBuildColormap ? fullRange : undefined}
+          fullRange={fullRange}
         />
       </PopoverContent>
     </Popover>
