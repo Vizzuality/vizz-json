@@ -1,7 +1,13 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useMemo } from 'react'
 import { cn } from '#/lib/utils'
 import { interpolateHexColor, positionToDataValue } from '#/lib/gradient-types'
 import type { GradientStop } from '#/lib/gradient-types'
+import { buildTransparencyGradient } from '#/lib/gradient-css'
+
+const CHECKERBOARD_BG = [
+  'repeating-conic-gradient(oklch(0.7 0 0) 0% 25%, oklch(0.85 0 0) 0% 50%)',
+  '0 0 / 8px 8px',
+].join(' ')
 
 type InteractiveGradientBarProps = {
   readonly stops: readonly GradientStop[]
@@ -12,6 +18,7 @@ type InteractiveGradientBarProps = {
     updates: Partial<Omit<GradientStop, 'id'>>,
   ) => void
   readonly onAddStop: (position: number, color: string) => void
+  readonly fullRange?: readonly [number, number]
 }
 
 export function InteractiveGradientBar({
@@ -20,14 +27,23 @@ export function InteractiveGradientBar({
   onSelectStop,
   onUpdateStop,
   onAddStop,
+  fullRange,
 }: InteractiveGradientBarProps) {
   const barRef = useRef<HTMLDivElement>(null)
 
   const sortedStops = [...stops].sort((a, b) => a.position - b.position)
 
-  const gradientCss = sortedStops
+  const fallbackGradient = sortedStops
     .map((s) => `${s.color} ${(s.position * 100).toFixed(1)}%`)
     .join(', ')
+
+  const gradientCss = useMemo(() => {
+    if (!fullRange) return fallbackGradient
+    return (
+      buildTransparencyGradient(stops, fullRange[0], fullRange[1]) ??
+      fallbackGradient
+    )
+  }, [stops, fullRange, fallbackGradient])
 
   const handleBarClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -73,8 +89,10 @@ export function InteractiveGradientBar({
       const bar = barRef.current
       if (!bar) return
       const sorted = [...stops].sort((a, b) => a.position - b.position)
-      const rangeMin = sorted[0]?.dataValue ?? 0
-      const rangeMax = sorted[sorted.length - 1]?.dataValue ?? 0
+      const rangeMin = fullRange ? fullRange[0] : (sorted[0]?.dataValue ?? 0)
+      const rangeMax = fullRange
+        ? fullRange[1]
+        : (sorted[sorted.length - 1]?.dataValue ?? 0)
 
       const handleMove = (moveEvent: PointerEvent) => {
         const currentRect = bar.getBoundingClientRect()
@@ -104,10 +122,14 @@ export function InteractiveGradientBar({
     <div className="relative mb-6">
       <div
         ref={barRef}
-        className="group/bar relative h-7 w-full cursor-crosshair rounded-md"
-        style={{ background: `linear-gradient(to right, ${gradientCss})` }}
+        className="group/bar relative h-7 w-full cursor-crosshair overflow-hidden rounded-md"
+        style={{ background: CHECKERBOARD_BG }}
         onClick={handleBarClick}
       >
+        <div
+          className="absolute inset-0"
+          style={{ background: `linear-gradient(to right, ${gradientCss})` }}
+        />
         <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white opacity-0 mix-blend-difference transition-opacity duration-300 group-hover/bar:opacity-100">
           Click to add stop
         </span>
@@ -124,7 +146,9 @@ export function InteractiveGradientBar({
               : 'border-white',
           )}
           style={{
-            left: `${stop.position * 100}%`,
+            left: fullRange
+              ? `${(((stop.dataValue - fullRange[0]) / (fullRange[1] - fullRange[0])) * 100).toFixed(1)}%`
+              : `${stop.position * 100}%`,
             backgroundColor: stop.color,
           }}
           onPointerDown={handlePointerDown}

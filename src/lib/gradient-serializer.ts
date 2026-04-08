@@ -81,13 +81,47 @@ export function serializeGradientToJson(
     return !/^(color_|threshold_)/.test(p.key)
   })
 
+  const oldParamsByKey = new Map(oldParams.map((p) => [p.key, p]))
+
+  const allDataValues = stopsWithKeys.map((s) => s.dataValue)
+  const dataMin = Math.min(...allDataValues)
+  const dataMax = Math.max(...allDataValues)
+  const dataRange = dataMax - dataMin || 1
+
+  const existingThresholds = stopsWithKeys
+    .map((s) => oldParamsByKey.get(s.thresholdParamKey))
+    .filter((p) => p != null)
+
+  const sharedMin =
+    existingThresholds.length > 0
+      ? Math.min(
+          ...existingThresholds
+            .map((p) => p.min as number | undefined)
+            .filter((v) => v != null),
+        )
+      : Math.floor(dataMin - dataRange * 0.1)
+
+  const sharedMax =
+    existingThresholds.length > 0
+      ? Math.max(
+          ...existingThresholds
+            .map((p) => p.max as number | undefined)
+            .filter((v) => v != null),
+        )
+      : Math.ceil(dataMax + dataRange * 0.1)
+
+  const sharedStep =
+    existingThresholds.length > 0 && existingThresholds[0].step != null
+      ? (existingThresholds[0].step as number)
+      : Math.max(Math.round(dataRange / 100), 1)
+
   const newParams: ParamEntry[] = stopsWithKeys.flatMap((stop) => [
     {
       key: stop.thresholdParamKey,
       default: stop.dataValue,
-      min: 0,
-      max: Math.max(stop.dataValue * 2, 1),
-      step: Math.max(Math.round(stop.dataValue / 100), 1),
+      min: sharedMin,
+      max: sharedMax,
+      step: sharedStep,
       group: 'legend',
     },
     {

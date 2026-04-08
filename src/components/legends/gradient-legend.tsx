@@ -1,5 +1,5 @@
 // src/components/legends/gradient-legend.tsx
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { LegendItem, InferredParam } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
 import {
@@ -8,6 +8,8 @@ import {
   PopoverContent,
 } from '#/components/ui/popover'
 import { GradientEditorPopover } from '#/components/legends/gradient-editor-popover'
+import { initializeGradientStops } from '#/lib/gradient-stops-init'
+import { buildTransparencyGradient } from '#/lib/gradient-css'
 
 type GradientLegendProps = {
   readonly items: readonly LegendItem[]
@@ -19,18 +21,35 @@ type GradientLegendProps = {
   readonly onApply?: (updatedJson: string) => void
 }
 
-function GradientBar({ items }: { readonly items: readonly LegendItem[] }) {
-  const colors = items
+const CHECKERBOARD_BG = [
+  'repeating-conic-gradient(oklch(0.7 0 0) 0% 25%, oklch(0.85 0 0) 0% 50%)',
+  '0 0 / 8px 8px',
+].join(' ')
+
+type GradientBarProps = {
+  readonly items: readonly LegendItem[]
+  readonly gradientCss?: string
+}
+
+function GradientBar({ items, gradientCss }: GradientBarProps) {
+  const fallbackCss = items
     .map((item) => (typeof item.value === 'string' ? item.value : '#000'))
     .join(', ')
+
+  const css = gradientCss ?? fallbackCss
 
   return (
     <div>
       <div
-        className="h-4 w-full rounded-sm"
-        style={{ background: `linear-gradient(to right, ${colors})` }}
-      />
-      <div className="flex justify-between mt-1">
+        className="relative h-4 w-full overflow-hidden rounded-sm"
+        style={{ background: CHECKERBOARD_BG }}
+      >
+        <div
+          className="absolute inset-0"
+          style={{ background: `linear-gradient(to right, ${css})` }}
+        />
+      </div>
+      <div className="mt-1 flex justify-between">
         {items.map((item, i) => (
           <span key={i} className="text-[10px] text-muted-foreground">
             {item.label}
@@ -39,6 +58,27 @@ function GradientBar({ items }: { readonly items: readonly LegendItem[] }) {
       </div>
     </div>
   )
+}
+
+function getFullRange(
+  legendParams: readonly InferredParam[],
+  paramMapping: ReadonlyMap<number, ItemParamMapping>,
+): readonly [number, number] | undefined {
+  const colorKeys = new Set<string>()
+  for (const mapping of paramMapping.values()) {
+    if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
+  }
+
+  const thresholdParams = legendParams.filter(
+    (p) => p.control_type === 'slider' && !colorKeys.has(p.key),
+  )
+  if (thresholdParams.length < 2) return undefined
+
+  const mins = thresholdParams.map((p) => p.min).filter((v) => v != null)
+  const maxs = thresholdParams.map((p) => p.max).filter((v) => v != null)
+  if (mins.length === 0 || maxs.length === 0) return undefined
+
+  return [Math.min(...mins), Math.max(...maxs)] as const
 }
 
 export function GradientLegend({
@@ -61,6 +101,22 @@ export function GradientLegend({
     onApply &&
     paramMapping.size > 0
 
+  const fullRange = useMemo(
+    () => (hasEditor ? getFullRange(legendParams, paramMapping) : undefined),
+    [hasEditor, legendParams, paramMapping],
+  )
+
+  const gradientCss = useMemo(() => {
+    if (!hasEditor || !fullRange) return undefined
+    const stops = initializeGradientStops(
+      items,
+      paramMapping,
+      legendParams,
+      values,
+    )
+    return buildTransparencyGradient(stops, fullRange[0], fullRange[1])
+  }, [hasEditor, fullRange, items, paramMapping, legendParams, values])
+
   if (!hasEditor) {
     return <GradientBar items={items} />
   }
@@ -68,7 +124,7 @@ export function GradientLegend({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="w-full cursor-pointer text-left">
-        <GradientBar items={items} />
+        <GradientBar items={items} gradientCss={gradientCss} />
       </PopoverTrigger>
       <PopoverContent align="start" sideOffset={8} className="w-auto p-0">
         <GradientEditorPopover
@@ -79,6 +135,7 @@ export function GradientLegend({
           currentJson={currentJson}
           onApply={onApply}
           onClose={() => setOpen(false)}
+          fullRange={fullRange}
         />
       </PopoverContent>
     </Popover>
