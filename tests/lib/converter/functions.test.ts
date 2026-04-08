@@ -55,7 +55,7 @@ describe('buildColormap', () => {
     }) as unknown[][]
 
     expect(result).toHaveLength(16)
-    expect(result[0][0]).toEqual([0, expect.any(Number)])
+    expect(result[0][0]).toEqual([-1e10, expect.any(Number)])
     expect(result[0][1]).toEqual([0, 0, 0, 255])
     expect(result[15][1]).toEqual([255, 255, 255, 255])
   })
@@ -70,6 +70,18 @@ describe('buildColormap', () => {
 
     expect(result[0][1]).toEqual([0, 0, 0, 255])
     expect(result[15][1]).toEqual([255, 255, 255, 255])
+  })
+
+  it('clamps first interval to -1e10 and last to 1e10', () => {
+    const result = fn({
+      stops: [
+        [0, '#000000'],
+        [100, '#ffffff'],
+      ],
+    }) as [number[], number[]][]
+
+    expect(result[0][0][0]).toBe(-1e10)
+    expect(result[result.length - 1][0][1]).toBe(1e10)
   })
 
   it('returns empty array for empty stops', () => {
