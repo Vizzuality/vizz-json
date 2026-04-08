@@ -3,11 +3,6 @@ import { cn } from '#/lib/utils'
 import { interpolateHexColor, positionToDataValue } from '#/lib/gradient-types'
 import type { GradientStop } from '#/lib/gradient-types'
 
-const CHECKERBOARD_BG = [
-  'repeating-conic-gradient(oklch(0.7 0 0) 0% 25%, oklch(0.85 0 0) 0% 50%)',
-  '0 0 / 8px 8px',
-].join(' ')
-
 type InteractiveGradientBarProps = {
   readonly stops: readonly GradientStop[]
   readonly selectedStopId: string | null
@@ -109,14 +104,10 @@ export function InteractiveGradientBar({
     <div className="relative mb-6">
       <div
         ref={barRef}
-        className="group/bar relative h-7 w-full cursor-crosshair overflow-hidden rounded-md"
-        style={{ background: CHECKERBOARD_BG }}
+        className="group/bar relative h-7 w-full cursor-crosshair rounded-md"
+        style={{ background: `linear-gradient(to right, ${gradientCss})` }}
         onClick={handleBarClick}
       >
-        <div
-          className="absolute inset-0"
-          style={{ background: `linear-gradient(to right, ${gradientCss})` }}
-        />
         <span className="pointer-events-none absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white opacity-0 mix-blend-difference transition-opacity duration-300 group-hover/bar:opacity-100">
           Click to add stop
         </span>

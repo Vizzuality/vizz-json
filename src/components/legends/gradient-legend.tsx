@@ -83,12 +83,13 @@ function buildGradientCss(
   )
   if (thresholdParams.length === 0) return undefined
 
-  const mins = thresholdParams.map((p) => p.min).filter((v) => v != null)
-  const maxs = thresholdParams.map((p) => p.max).filter((v) => v != null)
-  if (mins.length === 0 || maxs.length === 0) return undefined
+  const defaults = thresholdParams
+    .map((p) => (typeof p.value === 'number' ? p.value : undefined))
+    .filter((v) => v != null)
+  if (defaults.length < 2) return undefined
 
-  const fullMin = Math.min(...mins)
-  const fullMax = Math.max(...maxs)
+  const fullMin = Math.min(...defaults)
+  const fullMax = Math.max(...defaults)
   const fullRange = fullMax - fullMin
   if (fullRange === 0) return undefined
 
