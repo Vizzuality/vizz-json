@@ -22,7 +22,9 @@
                 ["@@#params.threshold_4", "@@#params.color_4"],
                 ["@@#params.threshold_5", "@@#params.color_5"],
                 ["@@#params.threshold_6", "@@#params.color_6"],
-                ["@@#params.threshold_7", "@@#params.color_7"]
+                ["@@#params.threshold_7", "@@#params.color_7"],
+                ["@@#params.threshold_8", "@@#params.color_8"],
+                ["@@#params.threshold_9", "@@#params.color_9"]
               ]
             }
           }
@@ -78,34 +80,52 @@
       "step": 1,
       "group": "legend"
     },
-    { "key": "color_4", "default": "#238b45", "group": "legend" },
+    { "key": "color_4", "default": "#1a9641", "group": "legend" },
     {
       "key": "threshold_5",
-      "default": 1000,
+      "default": 200,
       "min": -11000,
       "max": 7000,
       "step": 100,
       "group": "legend"
     },
-    { "key": "color_5", "default": "#74c476", "group": "legend" },
+    { "key": "color_5", "default": "#a6d96a", "group": "legend" },
     {
       "key": "threshold_6",
-      "default": 3000,
+      "default": 800,
       "min": -11000,
       "max": 7000,
       "step": 100,
       "group": "legend"
     },
-    { "key": "color_6", "default": "#8b6914", "group": "legend" },
+    { "key": "color_6", "default": "#ffffbf", "group": "legend" },
     {
       "key": "threshold_7",
+      "default": 2000,
+      "min": -11000,
+      "max": 7000,
+      "step": 100,
+      "group": "legend"
+    },
+    { "key": "color_7", "default": "#a87832", "group": "legend" },
+    {
+      "key": "threshold_8",
+      "default": 4000,
+      "min": -11000,
+      "max": 7000,
+      "step": 100,
+      "group": "legend"
+    },
+    { "key": "color_8", "default": "#6e512b", "group": "legend" },
+    {
+      "key": "threshold_9",
       "default": 7000,
       "min": -11000,
       "max": 7000,
       "step": 100,
       "group": "legend"
     },
-    { "key": "color_7", "default": "#f7f7f7", "group": "legend" },
+    { "key": "color_9", "default": "#f5f5f5", "group": "legend" },
     { "key": "opacity", "default": 1.0, "min": 0, "max": 1, "step": 0.05 },
     {
       "key": "visibility",
@@ -122,7 +142,9 @@
       { "label": "", "value": "@@#params.color_4" },
       { "label": "", "value": "@@#params.color_5" },
       { "label": "", "value": "@@#params.color_6" },
-      { "label": "Peak", "value": "@@#params.color_7" }
+      { "label": "", "value": "@@#params.color_7" },
+      { "label": "", "value": "@@#params.color_8" },
+      { "label": "Peak", "value": "@@#params.color_9" }
     ]
   }
 }
