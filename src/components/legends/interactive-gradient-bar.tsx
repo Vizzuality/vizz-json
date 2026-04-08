@@ -89,8 +89,10 @@ export function InteractiveGradientBar({
       const bar = barRef.current
       if (!bar) return
       const sorted = [...stops].sort((a, b) => a.position - b.position)
-      const rangeMin = sorted[0]?.dataValue ?? 0
-      const rangeMax = sorted[sorted.length - 1]?.dataValue ?? 0
+      const rangeMin = fullRange ? fullRange[0] : (sorted[0]?.dataValue ?? 0)
+      const rangeMax = fullRange
+        ? fullRange[1]
+        : (sorted[sorted.length - 1]?.dataValue ?? 0)
 
       const handleMove = (moveEvent: PointerEvent) => {
         const currentRect = bar.getBoundingClientRect()
