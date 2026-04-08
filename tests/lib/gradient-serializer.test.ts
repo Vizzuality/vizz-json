@@ -2,6 +2,48 @@ import { describe, it, expect } from 'vitest'
 import { serializeGradientToJson } from '#/lib/gradient-serializer'
 import type { GradientStop } from '#/lib/gradient-types'
 
+const RASTER_JSON = JSON.stringify(
+  {
+    config: {
+      source: {
+        type: 'raster',
+        tiles: [
+          {
+            '@@function': 'setQueryParams',
+            url: 'https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png',
+            query: {
+              url: 'https://example.com/data.tif',
+              colormap: {
+                '@@function': 'buildColormap',
+                stops: [
+                  ['@@#params.threshold_1', '@@#params.color_1'],
+                  ['@@#params.threshold_2', '@@#params.color_2'],
+                ],
+              },
+            },
+          },
+        ],
+      },
+      styles: [{ type: 'raster', paint: { 'raster-opacity': 0.8 } }],
+    },
+    params_config: [
+      { key: 'threshold_1', default: -10000, group: 'legend' },
+      { key: 'color_1', default: '#440154', group: 'legend' },
+      { key: 'threshold_2', default: 6000, group: 'legend' },
+      { key: 'color_2', default: '#fde725', group: 'legend' },
+    ],
+    legend_config: {
+      type: 'gradient',
+      items: [
+        { label: 'Deep ocean', value: '@@#params.color_1' },
+        { label: 'Peak', value: '@@#params.color_2' },
+      ],
+    },
+  },
+  null,
+  2,
+)
+
 const EXAMPLE_JSON = JSON.stringify(
   {
     config: {
@@ -275,5 +317,136 @@ describe('serializeGradientToJson', () => {
 
     expect(result.legend_config.items).toHaveLength(2)
     expect(result.config.styles[0].paint['fill-color']).toBe('#ff0000')
+  })
+})
+
+describe('serializeGradientToJson with buildColormap', () => {
+  it('syncs buildColormap.stops when stops are preserved', () => {
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#440154',
+        position: 0,
+        dataValue: -10000,
+        label: 'Deep ocean',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+      {
+        id: '2',
+        color: '#fde725',
+        position: 1,
+        dataValue: 6000,
+        label: 'Peak',
+        colorParamKey: 'color_2',
+        thresholdParamKey: 'threshold_2',
+      },
+    ]
+
+    const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
+
+    const colormapFn = result.config.source.tiles[0].query.colormap
+    expect(colormapFn['@@function']).toBe('buildColormap')
+    expect(colormapFn.stops).toEqual([
+      ['@@#params.threshold_1', '@@#params.color_1'],
+      ['@@#params.threshold_2', '@@#params.color_2'],
+    ])
+  })
+
+  it('adds new stop to buildColormap.stops when a stop is added', () => {
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#440154',
+        position: 0,
+        dataValue: -10000,
+        label: 'Deep ocean',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+      {
+        id: 'new',
+        color: '#21918c',
+        position: 0.5,
+        dataValue: -2000,
+        label: 'Shelf',
+      },
+      {
+        id: '2',
+        color: '#fde725',
+        position: 1,
+        dataValue: 6000,
+        label: 'Peak',
+        colorParamKey: 'color_2',
+        thresholdParamKey: 'threshold_2',
+      },
+    ]
+
+    const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
+
+    const colormapFn = result.config.source.tiles[0].query.colormap
+    expect(colormapFn.stops).toHaveLength(3)
+    expect(colormapFn.stops[0]).toEqual([
+      '@@#params.threshold_1',
+      '@@#params.color_1',
+    ])
+    expect(colormapFn.stops[1][0]).toMatch(/^@@#params\.threshold_\d+$/)
+    expect(colormapFn.stops[1][1]).toMatch(/^@@#params\.color_\d+$/)
+    expect(colormapFn.stops[2]).toEqual([
+      '@@#params.threshold_2',
+      '@@#params.color_2',
+    ])
+  })
+
+  it('removes stop from buildColormap.stops when a stop is deleted', () => {
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#440154',
+        position: 0,
+        dataValue: -10000,
+        label: 'Deep ocean',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+    ]
+
+    const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
+
+    const colormapFn = result.config.source.tiles[0].query.colormap
+    expect(colormapFn.stops).toHaveLength(1)
+    expect(colormapFn.stops[0]).toEqual([
+      '@@#params.threshold_1',
+      '@@#params.color_1',
+    ])
+  })
+
+  it('leaves config unchanged when no buildColormap exists', () => {
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'Low',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+      {
+        id: '3',
+        color: '#0000ff',
+        position: 1,
+        dataValue: 500000000,
+        label: 'High',
+        colorParamKey: 'color_3',
+        thresholdParamKey: 'threshold_3',
+      },
+    ]
+
+    const result = JSON.parse(serializeGradientToJson(EXAMPLE_JSON, stops))
+
+    // Should still have interpolate expression, no buildColormap
+    const interpolate = result.config.styles[0].paint['fill-color']
+    expect(interpolate[0]).toBe('interpolate')
   })
 })
