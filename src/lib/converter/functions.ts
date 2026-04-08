@@ -37,17 +37,7 @@ function ifParam({
 }
 
 function buildColormap({ stops }: BuildColormapProps): unknown {
-  const intervals = interpolateColormap(stops)
-  if (intervals.length === 0) return intervals
-
-  const first = intervals[0]
-  const last = intervals[intervals.length - 1]
-
-  return [
-    [[-1e10, first[0][1]], first[1]],
-    ...intervals.slice(1, -1),
-    [[last[0][0], 1e10], last[1]],
-  ]
+  return interpolateColormap(stops)
 }
 
 export const registeredFunctions: Readonly<
