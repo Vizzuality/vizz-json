@@ -13,21 +13,19 @@ function findNextAvailableIndex(
 
 function syncBuildColormapStops(
   node: unknown,
-  stopsWithKeys: readonly { colorParamKey: string; thresholdParamKey: string }[],
+  stopsWithKeys: readonly {
+    colorParamKey: string
+    thresholdParamKey: string
+  }[],
 ): unknown {
   if (Array.isArray(node)) {
-    return node.map((item) =>
-      syncBuildColormapStops(item, stopsWithKeys),
-    )
+    return node.map((item) => syncBuildColormapStops(item, stopsWithKeys))
   }
 
   if (node !== null && typeof node === 'object') {
     const obj = node as Record<string, unknown>
 
-    if (
-      obj['@@function'] === 'buildColormap' &&
-      Array.isArray(obj.stops)
-    ) {
+    if (obj['@@function'] === 'buildColormap' && Array.isArray(obj.stops)) {
       return {
         ...obj,
         stops: stopsWithKeys.map((stop) => [

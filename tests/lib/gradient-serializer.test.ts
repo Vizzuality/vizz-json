@@ -345,8 +345,7 @@ describe('serializeGradientToJson with buildColormap', () => {
 
     const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
 
-    const colormapFn =
-      result.config.source.tiles[0].query.colormap
+    const colormapFn = result.config.source.tiles[0].query.colormap
     expect(colormapFn['@@function']).toBe('buildColormap')
     expect(colormapFn.stops).toEqual([
       ['@@#params.threshold_1', '@@#params.color_1'],
@@ -385,8 +384,7 @@ describe('serializeGradientToJson with buildColormap', () => {
 
     const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
 
-    const colormapFn =
-      result.config.source.tiles[0].query.colormap
+    const colormapFn = result.config.source.tiles[0].query.colormap
     expect(colormapFn.stops).toHaveLength(3)
     expect(colormapFn.stops[0]).toEqual([
       '@@#params.threshold_1',
@@ -415,8 +413,7 @@ describe('serializeGradientToJson with buildColormap', () => {
 
     const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
 
-    const colormapFn =
-      result.config.source.tiles[0].query.colormap
+    const colormapFn = result.config.source.tiles[0].query.colormap
     expect(colormapFn.stops).toHaveLength(1)
     expect(colormapFn.stops[0]).toEqual([
       '@@#params.threshold_1',

@@ -37,8 +37,7 @@ export function interpolateColormap(
 
   return Array.from({ length: GRADIENT_STEPS }, (_, i) => {
     const lower = minVal + i * step
-    const upper =
-      i === GRADIENT_STEPS - 1 ? maxVal : minVal + (i + 1) * step
+    const upper = i === GRADIENT_STEPS - 1 ? maxVal : minVal + (i + 1) * step
     const dataValue = i === GRADIENT_STEPS - 1 ? maxVal : lower
 
     let lowerIdx = rgbaStops.length - 2
@@ -54,10 +53,7 @@ export function interpolateColormap(
     const [upperVal, upperRgba] = rgbaStops[upperIdx]
 
     const segmentRange = upperVal - lowerVal || 1
-    const t = Math.max(
-      0,
-      Math.min(1, (dataValue - lowerVal) / segmentRange),
-    )
+    const t = Math.max(0, Math.min(1, (dataValue - lowerVal) / segmentRange))
 
     const rgba: Rgba = [
       Math.round(lowerRgba[0] + t * (upperRgba[0] - lowerRgba[0])),
