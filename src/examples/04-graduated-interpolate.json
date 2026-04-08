@@ -12,6 +12,11 @@
     "styles": [
       {
         "type": "fill",
+        "filter": [
+          "all",
+          [">=", ["get", "pop_est"], "@@#params.threshold_1"],
+          ["<=", ["get", "pop_est"], "@@#params.threshold_3"]
+        ],
         "paint": {
           "fill-color": [
             "interpolate",
