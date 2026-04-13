@@ -8,6 +8,7 @@
     "dev": "concurrently \"pnpm dev:ui\" \"pnpm dev:main\"",
     "dev:ui": "vite build -c vite.config.ui.ts --watch",
     "dev:main": "vite build -c vite.config.main.ts --watch",
+    "preview": "vite -c vite.config.preview.ts",
     "build": "pnpm build:ui && pnpm build:main && pnpm copy:manifest",
     "build:ui": "vite build -c vite.config.ui.ts",
     "build:main": "vite build -c vite.config.main.ts",
