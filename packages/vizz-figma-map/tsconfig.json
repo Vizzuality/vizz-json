@@ -10,5 +10,6 @@
     "vite.config.ui.ts",
     "vite.config.main.ts",
     "vitest.config.ts"
-  ]
+  ],
+  "exclude": []
 }
