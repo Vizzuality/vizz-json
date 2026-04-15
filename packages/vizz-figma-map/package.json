@@ -1,0 +1,42 @@
+{
+  "name": "vizz-figma-map",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Figma plugin that renders vizz-json MapLibre maps and inserts them as images into Figma documents",
+  "scripts": {
+    "dev": "concurrently \"pnpm dev:ui\" \"pnpm dev:main\"",
+    "dev:ui": "vite build -c vite.config.ui.ts --watch",
+    "dev:main": "vite build -c vite.config.main.ts --watch",
+    "preview": "vite -c vite.config.preview.ts",
+    "build": "pnpm build:ui && pnpm build:main && pnpm copy:manifest",
+    "build:ui": "vite build -c vite.config.ui.ts",
+    "build:main": "vite build -c vite.config.main.ts",
+    "copy:manifest": "cp manifest.json dist/manifest.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vizzuality/vizz-json": "workspace:*",
+    "@vizzuality/vizz-map": "workspace:*",
+    "maplibre-gl": "^5.20.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-map-gl": "^8.1.0"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.108.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.0.0",
+    "vite-plugin-singlefile": "^2.1.0",
+    "vitest": "^3.0.5"
+  }
+}

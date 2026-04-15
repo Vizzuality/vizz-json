@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "deniedMcpServers": [
+    { "serverName": "figma" },
+    { "serverName": "mcp-atlassian" },
+    { "serverName": "sonarqube" },
+    { "serverUrl": "https://hub.vizzuality.com/*" }
+  ]
+}

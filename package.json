@@ -42,6 +42,7 @@
     "@tanstack/react-table": "latest",
     "@tanstack/router-plugin": "^1.132.0",
     "@vizzuality/vizz-json": "workspace:*",
+    "@vizzuality/vizz-map": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.545.0",

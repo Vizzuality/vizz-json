@@ -6,6 +6,7 @@
     "declaration": true,
     "noEmit": false,
     "allowImportingTsExtensions": false,
+    "jsx": "react-jsx",
     "paths": {},
     "types": []
   },

@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.figma-dark, .figma-dark *));
+
+@theme inline {
+  --color-bg: var(--figma-color-bg);
+  --color-bg-secondary: var(--figma-color-bg-secondary);
+  --color-text: var(--figma-color-text);
+  --color-text-secondary: var(--figma-color-text-secondary);
+  --color-border: var(--figma-color-border);
+  --color-brand: var(--figma-color-bg-brand);
+  --color-brand-text: var(--figma-color-text-onbrand);
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}

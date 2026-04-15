@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["vite/client", "@figma/plugin-typings"],
+    "paths": {}
+  },
+  "include": [
+    "src",
+    "tests",
+    "vite.config.ui.ts",
+    "vite.config.main.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": []
+}

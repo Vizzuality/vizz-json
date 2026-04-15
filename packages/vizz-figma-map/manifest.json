@@ -1,0 +1,17 @@
+{
+  "name": "Vizz Map",
+  "id": "vizz-map-internal-dev",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "index.html",
+  "editorType": ["figma", "dev"],
+  "networkAccess": {
+    "allowedDomains": [
+      "https://d2ad6b4ur7yvpq.cloudfront.net",
+      "https://tiles.openfreemap.org",
+      "https://*.openfreemap.org",
+      "https://basemaps.cartocdn.com",
+      "https://*.cartocdn.com"
+    ]
+  }
+}
