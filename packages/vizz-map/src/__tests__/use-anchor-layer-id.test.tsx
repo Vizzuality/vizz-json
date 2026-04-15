@@ -75,5 +75,8 @@ describe('useAnchorLayerId', () => {
     const { unmount } = renderHook(() => useAnchorLayerId(), { wrapper })
     unmount()
     expect(fakeMap.off).toHaveBeenCalledWith('styledata', expect.any(Function))
+    const onHandler = fakeMap.on.mock.calls[0][1]
+    const offHandler = fakeMap.off.mock.calls[0][1]
+    expect(offHandler).toBe(onHandler)
   })
 })
