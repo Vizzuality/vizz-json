@@ -20,9 +20,11 @@
   },
   "dependencies": {
     "@vizzuality/vizz-json": "workspace:*",
+    "@vizzuality/vizz-map": "workspace:*",
     "maplibre-gl": "^5.20.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-map-gl": "^8.1.0"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.108.0",

@@ -14,7 +14,7 @@ import { ParamControls } from './components/param-controls'
 import { StylePicker } from './components/style-picker'
 import { rasterizeMap } from './lib/rasterize'
 import { onMessageFromMain, postToMain } from './lib/messaging'
-import type { ResolvedVizzConfig } from './lib/build-style'
+import type { ResolvedVizzConfig } from './components/map-preview'
 
 const example = exampleJson as unknown as ExampleConfig
 
