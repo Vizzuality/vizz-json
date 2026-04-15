@@ -94,9 +94,9 @@ export function App() {
 
   return (
     <div className="flex flex-col h-screen w-screen">
-      <header className="p-3 border-b border-neutral-200">
+      <header className="p-3 border-b border-border">
         <h1 className="text-sm font-semibold">{example.metadata.title}</h1>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-text-secondary">
           {example.metadata.description}
         </p>
       </header>
@@ -118,8 +118,8 @@ export function App() {
         />
       </div>
 
-      <footer className="p-3 border-t border-neutral-200 flex items-center justify-between gap-2">
-        <div className="text-xs text-neutral-500 min-h-[1em]">
+      <footer className="p-3 border-t border-border flex items-center justify-between gap-2">
+        <div className="text-xs text-text-secondary min-h-[1em]">
           {status.kind === 'inserting' && 'Inserting…'}
           {status.kind === 'done' && 'Inserted.'}
           {status.kind === 'error' && `Error: ${status.message}`}
@@ -127,7 +127,7 @@ export function App() {
         <button
           onClick={handleInsert}
           disabled={status.kind === 'inserting'}
-          className="h-8 px-4 rounded bg-neutral-900 text-white text-sm disabled:opacity-50"
+          className="h-8 px-4 rounded bg-brand text-brand-text text-sm disabled:opacity-50"
         >
           Insert into Figma
         </button>

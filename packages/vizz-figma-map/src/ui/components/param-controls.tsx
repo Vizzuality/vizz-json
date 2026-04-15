@@ -34,7 +34,7 @@ interface ParamRowProps {
 function ParamRow({ param, value, onChange }: ParamRowProps) {
   return (
     <label className="flex flex-col gap-1 text-xs">
-      <span className="font-medium text-neutral-700">{param.key}</span>
+      <span className="font-medium text-text">{param.key}</span>
       <Control param={param} value={value} onChange={onChange} />
     </label>
   )
@@ -48,7 +48,7 @@ function Control({ param, value, onChange }: ParamRowProps) {
           type="color"
           value={String(value ?? '#000000')}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8 w-full rounded border border-neutral-300"
+          className="h-8 w-full rounded border border-border"
         />
       )
     case 'slider':
@@ -82,7 +82,7 @@ function Control({ param, value, onChange }: ParamRowProps) {
         <select
           value={String(value ?? param.options?.[0] ?? '')}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8 rounded border border-neutral-300 px-2"
+          className="h-8 rounded border border-border px-2"
         >
           {(param.options ?? []).map((opt) => (
             <option key={opt} value={opt}>
@@ -98,7 +98,7 @@ function Control({ param, value, onChange }: ParamRowProps) {
           type="text"
           value={String(value ?? '')}
           onChange={(e) => onChange(e.target.value)}
-          className="h-8 rounded border border-neutral-300 px-2"
+          className="h-8 rounded border border-border px-2"
         />
       )
   }
