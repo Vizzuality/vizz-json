@@ -9,7 +9,9 @@
     "allowedDomains": [
       "https://d2ad6b4ur7yvpq.cloudfront.net",
       "https://tiles.openfreemap.org",
-      "https://*.openfreemap.org"
+      "https://*.openfreemap.org",
+      "https://basemaps.cartocdn.com",
+      "https://*.cartocdn.com"
     ]
   }
 }

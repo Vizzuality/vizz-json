@@ -59,6 +59,7 @@ export const BASEMAP_OPTIONS: readonly BasemapOption[] = [
   {
     id: 'dark',
     label: 'Dark Matter',
-    styleUrl: 'https://tiles.openfreemap.org/styles/dark-matter',
+    styleUrl:
+      'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
   },
 ] as const

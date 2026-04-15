@@ -9,7 +9,7 @@ type MainToUI =
   | { type: 'INSERT_DONE' }
   | { type: 'INSERT_ERROR'; error: string }
 
-figma.showUI(__html__, { width: 500, height: 700, themeColors: true })
+figma.showUI(__html__, { width: 1200, height: 800, themeColors: true })
 
 function postToUI(message: MainToUI): void {
   figma.ui.postMessage(message)

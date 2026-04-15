@@ -93,15 +93,8 @@ export function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen">
-      <header className="p-3 border-b border-border">
-        <h1 className="text-sm font-semibold">{example.metadata.title}</h1>
-        <p className="text-xs text-text-secondary">
-          {example.metadata.description}
-        </p>
-      </header>
-
-      <div className="relative" style={{ height: 300 }}>
+    <div className="flex h-screen w-screen">
+      <div className="relative flex-1 min-w-0">
         <MapPreview
           ref={previewRef}
           basemapStyleUrl={basemap.styleUrl}
@@ -109,29 +102,38 @@ export function App() {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-4">
-        <StylePicker value={basemapId} onChange={setBasemapId} />
-        <ParamControls
-          params={inferred}
-          values={values}
-          onChange={handleParamChange}
-        />
-      </div>
+      <aside className="flex flex-col w-[320px] shrink-0 border-l border-border">
+        <header className="p-3 border-b border-border">
+          <h1 className="text-sm font-semibold">{example.metadata.title}</h1>
+          <p className="text-xs text-text-secondary">
+            {example.metadata.description}
+          </p>
+        </header>
 
-      <footer className="p-3 border-t border-border flex items-center justify-between gap-2">
-        <div className="text-xs text-text-secondary min-h-[1em]">
-          {status.kind === 'inserting' && 'Inserting…'}
-          {status.kind === 'done' && 'Inserted.'}
-          {status.kind === 'error' && `Error: ${status.message}`}
+        <div className="flex-1 overflow-y-auto p-3 flex flex-col gap-4">
+          <StylePicker value={basemapId} onChange={setBasemapId} />
+          <ParamControls
+            params={inferred}
+            values={values}
+            onChange={handleParamChange}
+          />
         </div>
-        <button
-          onClick={handleInsert}
-          disabled={status.kind === 'inserting'}
-          className="h-8 px-4 rounded bg-brand text-brand-text text-sm disabled:opacity-50"
-        >
-          Insert into Figma
-        </button>
-      </footer>
+
+        <footer className="p-3 border-t border-border flex flex-col gap-2">
+          <div className="text-xs text-text-secondary min-h-[1em]">
+            {status.kind === 'inserting' && 'Inserting…'}
+            {status.kind === 'done' && 'Inserted.'}
+            {status.kind === 'error' && `Error: ${status.message}`}
+          </div>
+          <button
+            onClick={handleInsert}
+            disabled={status.kind === 'inserting'}
+            className="h-8 px-4 rounded bg-brand text-brand-text text-sm disabled:opacity-50"
+          >
+            Insert into Figma
+          </button>
+        </footer>
+      </aside>
     </div>
   )
 }
