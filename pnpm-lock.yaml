@@ -89,6 +89,9 @@ importers:
       '@vizzuality/vizz-json':
         specifier: workspace:*
         version: link:packages/vizz-json
+      '@vizzuality/vizz-map':
+        specifier: workspace:*
+        version: link:packages/vizz-map
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
