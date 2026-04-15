@@ -94,12 +94,17 @@ export function App() {
 
   return (
     <div className="flex h-screen w-screen">
-      <div className="relative flex-1 min-w-0">
+      <div className="relative flex-1 min-w-0 overflow-hidden">
         <MapPreview
           ref={previewRef}
           basemapStyleUrl={basemap.styleUrl}
           resolved={resolved}
         />
+        {status.kind === 'inserting' && (
+          <div className="absolute inset-0 bg-background/80 flex items-center justify-center text-sm text-text-secondary z-10">
+            Inserting…
+          </div>
+        )}
       </div>
 
       <aside className="flex flex-col w-[320px] shrink-0 border-l border-border">

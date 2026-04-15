@@ -23,8 +23,20 @@ export async function rasterizeMap(
   const original = {
     width: container.style.width,
     height: container.style.height,
+    position: container.style.position,
+    left: container.style.left,
+    top: container.style.top,
+    zIndex: container.style.zIndex,
+    pointerEvents: container.style.pointerEvents,
   }
 
+  // Move offscreen so the enlarged canvas is not visible in the plugin viewport
+  // while we resize to export dimensions.
+  container.style.position = 'fixed'
+  container.style.left = '-100000px'
+  container.style.top = '0'
+  container.style.zIndex = '-1'
+  container.style.pointerEvents = 'none'
   container.style.width = `${width}px`
   container.style.height = `${height}px`
   map.resize()
@@ -43,6 +55,11 @@ export async function rasterizeMap(
 
   container.style.width = original.width
   container.style.height = original.height
+  container.style.position = original.position
+  container.style.left = original.left
+  container.style.top = original.top
+  container.style.zIndex = original.zIndex
+  container.style.pointerEvents = original.pointerEvents
   map.resize()
 
   const buffer = await blob.arrayBuffer()
