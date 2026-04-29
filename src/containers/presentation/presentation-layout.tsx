@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { FluidBackground } from '#/components/landing/fluid-background'
+import { FluidBackground } from '#/containers/landing/fluid-background'
 import { SectionIndicator } from './section-indicator'
 import './presentation.css'
 

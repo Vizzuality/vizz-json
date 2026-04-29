@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { ComponentPreview } from '#/components/playground/component-preview'
+import { ComponentPreview } from '#/containers/playground/component-preview'
 
 // Mock $$component descriptors (what @@type resolves to)
 function MockPanel({ title }: { title: string }) {

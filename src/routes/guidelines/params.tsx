@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { SectionHeader } from '#/components/guidelines/section-header'
-import { CodeBlock } from '#/components/guidelines/code-block'
-import { InteractiveExample } from '#/components/guidelines/interactive-example'
-import { LiveExample } from '#/components/guidelines/live-example'
-import { Callout } from '#/components/guidelines/callout'
+import { SectionHeader } from '#/containers/guidelines/section-header'
+import { CodeBlock } from '#/containers/guidelines/code-block'
+import { InteractiveExample } from '#/containers/guidelines/interactive-example'
+import { LiveExample } from '#/containers/guidelines/live-example'
+import { Callout } from '#/containers/guidelines/callout'
 
 export const Route = createFileRoute('/guidelines/params')({
   component: GuidelinesParams,

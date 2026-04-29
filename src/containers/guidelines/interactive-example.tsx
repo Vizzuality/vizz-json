@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import type { ParamConfig, ResolvedParams } from '#/lib/types'
 import { inferParamControl } from '#/lib/param-inference'
 import { resolveConfig } from '#/lib/converter'
-import { ParamControl } from '#/components/playground/param-control'
+import { ParamControl } from '#/containers/playground/param-control'
 import { CodeBlock } from './code-block'
 
 type InteractiveExampleProps = {

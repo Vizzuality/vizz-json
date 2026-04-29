@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
-import { PresentationLayout } from '#/components/presentation/presentation-layout'
+import { PresentationLayout } from '#/containers/presentation/presentation-layout'
 import { useSlideNavigation } from '#/hooks/use-slide-navigation'
-import { SLIDES } from '#/components/presentation/slide-registry'
+import { SLIDES } from '#/containers/presentation/slide-registry'
 
 const searchSchema = z.object({
   slide: z.number().int().min(1).catch(1),

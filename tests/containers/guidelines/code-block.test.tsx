@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { CodeBlock } from '#/components/guidelines/code-block'
+import { CodeBlock } from '#/containers/guidelines/code-block'
 
 describe('CodeBlock', () => {
   it('renders JSON content in a pre element', () => {

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { InteractiveExample } from '#/components/guidelines/interactive-example'
+import { InteractiveExample } from '#/containers/guidelines/interactive-example'
 
 // Mock ParamControl to avoid @base-ui/react hook issues in jsdom
-vi.mock('#/components/playground/param-control', () => ({
+vi.mock('#/containers/playground/param-control', () => ({
   ParamControl: ({ inferred }: { inferred: { key: string } }) => (
     <div data-testid={`param-control-${inferred.key}`} />
   ),

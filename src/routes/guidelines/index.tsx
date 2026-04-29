@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { SectionHeader } from '#/components/guidelines/section-header'
-import { InteractiveExample } from '#/components/guidelines/interactive-example'
+import { SectionHeader } from '#/containers/guidelines/section-header'
+import { InteractiveExample } from '#/containers/guidelines/interactive-example'
 
 export const Route = createFileRoute('/guidelines/')({
   component: GuidelinesOverview,
