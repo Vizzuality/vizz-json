@@ -101,13 +101,17 @@ src/
 ├── lib/types.ts             # Core types (LayerSchema, ParamConfig, etc.)
 ├── examples/                # 9 progressive JSON configs (basic → advanced)
 ├── hooks/use-converter.ts   # React hook wrapping resolveConfig()
-├── components/
-│   ├── playground/          # Monaco editor, map, param controls, legend
-│   ├── presentation/        # Slide deck components
-│   ├── legends/             # Basic, choropleth, gradient legend components
-│   ├── landing/             # Landing page sections
-│   └── resolver-components/ # React components registered as @@type targets
-└── routes/                  # File-based routing (TanStack Router)
+├── components/                 # Pure UI / cross-cutting
+│   ├── ui/                     #   shadcn primitives
+│   ├── legends/                #   Basic, choropleth, gradient legend components
+│   └── resolver/               #   React components registered as @@type targets
+├── containers/                 # Feature/business components
+│   ├── layout/                 #   Header, footer, theme + locale switchers
+│   ├── landing/                #   Landing page sections
+│   ├── playground/             #   Monaco editor, map, param controls, legend
+│   ├── presentation/           #   Slide deck components
+│   └── guidelines/             #   Guidelines page sections
+└── routes/                     # File-based routing (TanStack Router)
 ```
 
 ## Tech Stack
