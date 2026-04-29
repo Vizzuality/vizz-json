@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { InfoPanel } from '#/components/resolver-components/info-panel'
+import { InfoPanel } from '#/components/resolver/info-panel'
 
 describe('InfoPanel', () => {
   it('renders title as a heading', () => {
