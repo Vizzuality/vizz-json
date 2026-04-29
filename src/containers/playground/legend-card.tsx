@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { BasicLegend } from '#/components/legends/basic-legend'
 import { ChoroplethLegend } from '#/components/legends/choropleth-legend'
 import { GradientLegend } from '#/components/legends/gradient-legend'
-import { ParamControl } from '#/components/playground/param-control'
+import { ParamControl } from './param-control'
 import type { LegendConfig, InferredParam } from '#/lib/types'
 import type { RawLegendConfig } from '#/lib/legend-param-mapping'
 import {

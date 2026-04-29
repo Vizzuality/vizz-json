@@ -1,5 +1,5 @@
 import type { ParamConfig } from '#/lib/types'
-import { MapRenderer } from '#/components/playground/map-renderer'
+import { MapRenderer } from '#/containers/playground/map-renderer'
 import { InteractiveExample } from './interactive-example'
 
 type LiveExampleProps = {

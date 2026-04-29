@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { FluidBackground } from '#/components/landing/fluid-background'
-import { HeroSection } from '#/components/landing/hero-section'
-import { ProblemSection } from '#/components/landing/problem-section'
-import { PrefixFamilySection } from '#/components/landing/prefix-family-section'
-import { HowItWorksSection } from '#/components/landing/how-it-works-section'
-import { ShowcaseSection } from '#/components/landing/showcase-section'
+import { FluidBackground } from '#/containers/landing/fluid-background'
+import { HeroSection } from '#/containers/landing/hero-section'
+import { ProblemSection } from '#/containers/landing/problem-section'
+import { PrefixFamilySection } from '#/containers/landing/prefix-family-section'
+import { HowItWorksSection } from '#/containers/landing/how-it-works-section'
+import { ShowcaseSection } from '#/containers/landing/showcase-section'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,

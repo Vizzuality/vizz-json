@@ -7,8 +7,8 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import Footer from '../components/footer'
-import Header from '../components/header'
+import Footer from '#/containers/layout/footer'
+import Header from '#/containers/layout/header'
 
 import TanStackQueryProvider from '../integrations/tanstack-query/root-provider'
 

@@ -20,12 +20,6 @@ import { Route as GuidelinesParamsRouteImport } from './routes/guidelines/params
 import { Route as GuidelinesLegendsRouteImport } from './routes/guidelines/legends'
 import { Route as GuidelinesFunctionsRouteImport } from './routes/guidelines/functions'
 import { Route as GuidelinesExpressionsRouteImport } from './routes/guidelines/expressions'
-import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
-import { Route as DemoTableRouteImport } from './routes/demo/table'
-import { Route as DemoOrpcTodoRouteImport } from './routes/demo/orpc-todo'
-import { Route as DemoI18nRouteImport } from './routes/demo.i18n'
-import { Route as ApiSplatRouteImport } from './routes/api.$'
-import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
 
 const PresentationRoute = PresentationRouteImport.update({
   id: '/presentation',
@@ -82,36 +76,6 @@ const GuidelinesExpressionsRoute = GuidelinesExpressionsRouteImport.update({
   path: '/expressions',
   getParentRoute: () => GuidelinesRoute,
 } as any)
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: '/demo/tanstack-query',
-  path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoTableRoute = DemoTableRouteImport.update({
-  id: '/demo/table',
-  path: '/demo/table',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoOrpcTodoRoute = DemoOrpcTodoRouteImport.update({
-  id: '/demo/orpc-todo',
-  path: '/demo/orpc-todo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoI18nRoute = DemoI18nRouteImport.update({
-  id: '/demo/i18n',
-  path: '/demo/i18n',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiSplatRoute = ApiSplatRouteImport.update({
-  id: '/api/$',
-  path: '/api/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
-  id: '/api/rpc/$',
-  path: '/api/rpc/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -119,36 +83,24 @@ export interface FileRoutesByFullPath {
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
-  '/api/$': typeof ApiSplatRoute
-  '/demo/i18n': typeof DemoI18nRoute
-  '/demo/orpc-todo': typeof DemoOrpcTodoRoute
-  '/demo/table': typeof DemoTableRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
   '/guidelines/': typeof GuidelinesIndexRoute
-  '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
-  '/api/$': typeof ApiSplatRoute
-  '/demo/i18n': typeof DemoI18nRoute
-  '/demo/orpc-todo': typeof DemoOrpcTodoRoute
-  '/demo/table': typeof DemoTableRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
   '/guidelines': typeof GuidelinesIndexRoute
-  '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -157,18 +109,12 @@ export interface FileRoutesById {
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
-  '/api/$': typeof ApiSplatRoute
-  '/demo/i18n': typeof DemoI18nRoute
-  '/demo/orpc-todo': typeof DemoOrpcTodoRoute
-  '/demo/table': typeof DemoTableRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
   '/guidelines/params': typeof GuidelinesParamsRoute
   '/guidelines/types': typeof GuidelinesTypesRoute
   '/guidelines/': typeof GuidelinesIndexRoute
-  '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -178,36 +124,24 @@ export interface FileRouteTypes {
     | '/guidelines'
     | '/playground'
     | '/presentation'
-    | '/api/$'
-    | '/demo/i18n'
-    | '/demo/orpc-todo'
-    | '/demo/table'
-    | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
     | '/guidelines/'
-    | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/playground'
     | '/presentation'
-    | '/api/$'
-    | '/demo/i18n'
-    | '/demo/orpc-todo'
-    | '/demo/table'
-    | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
     | '/guidelines'
-    | '/api/rpc/$'
   id:
     | '__root__'
     | '/'
@@ -215,18 +149,12 @@ export interface FileRouteTypes {
     | '/guidelines'
     | '/playground'
     | '/presentation'
-    | '/api/$'
-    | '/demo/i18n'
-    | '/demo/orpc-todo'
-    | '/demo/table'
-    | '/demo/tanstack-query'
     | '/guidelines/expressions'
     | '/guidelines/functions'
     | '/guidelines/legends'
     | '/guidelines/params'
     | '/guidelines/types'
     | '/guidelines/'
-    | '/api/rpc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,12 +163,6 @@ export interface RootRouteChildren {
   GuidelinesRoute: typeof GuidelinesRouteWithChildren
   PlaygroundRoute: typeof PlaygroundRoute
   PresentationRoute: typeof PresentationRoute
-  ApiSplatRoute: typeof ApiSplatRoute
-  DemoI18nRoute: typeof DemoI18nRoute
-  DemoOrpcTodoRoute: typeof DemoOrpcTodoRoute
-  DemoTableRoute: typeof DemoTableRoute
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
-  ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -322,48 +244,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidelinesExpressionsRouteImport
       parentRoute: typeof GuidelinesRoute
     }
-    '/demo/tanstack-query': {
-      id: '/demo/tanstack-query'
-      path: '/demo/tanstack-query'
-      fullPath: '/demo/tanstack-query'
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/table': {
-      id: '/demo/table'
-      path: '/demo/table'
-      fullPath: '/demo/table'
-      preLoaderRoute: typeof DemoTableRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/orpc-todo': {
-      id: '/demo/orpc-todo'
-      path: '/demo/orpc-todo'
-      fullPath: '/demo/orpc-todo'
-      preLoaderRoute: typeof DemoOrpcTodoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/i18n': {
-      id: '/demo/i18n'
-      path: '/demo/i18n'
-      fullPath: '/demo/i18n'
-      preLoaderRoute: typeof DemoI18nRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/$': {
-      id: '/api/$'
-      path: '/api/$'
-      fullPath: '/api/$'
-      preLoaderRoute: typeof ApiSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/rpc/$': {
-      id: '/api/rpc/$'
-      path: '/api/rpc/$'
-      fullPath: '/api/rpc/$'
-      preLoaderRoute: typeof ApiRpcSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -395,12 +275,6 @@ const rootRouteChildren: RootRouteChildren = {
   GuidelinesRoute: GuidelinesRouteWithChildren,
   PlaygroundRoute: PlaygroundRoute,
   PresentationRoute: PresentationRoute,
-  ApiSplatRoute: ApiSplatRoute,
-  DemoI18nRoute: DemoI18nRoute,
-  DemoOrpcTodoRoute: DemoOrpcTodoRoute,
-  DemoTableRoute: DemoTableRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
-  ApiRpcSplatRoute: ApiRpcSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
