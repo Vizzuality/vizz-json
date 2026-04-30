@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { chat, toServerSentEventsResponse } from '@tanstack/ai'
 import { openaiText } from '@tanstack/ai-openai'
-import { aiGenerateInputSchema } from '#/server/ai-generate'
+import { aiGenerateInputSchema } from '#/lib/ai/input-schema'
 import { buildSystemPrompts } from '#/lib/ai/system-prompt'
 import { aiOutputSchema } from '#/lib/ai/output-schema'
 

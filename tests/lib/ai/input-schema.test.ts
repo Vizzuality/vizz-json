@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { aiGenerateInputSchema } from '#/server/ai-generate'
+import { aiGenerateInputSchema } from '#/lib/ai/input-schema'
 
 describe('aiGenerateInputSchema', () => {
   it('accepts a maplibre body without mapbox fields', () => {
