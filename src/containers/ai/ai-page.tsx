@@ -106,6 +106,7 @@ export function AiPage() {
           <ExportMenu
             schemaJson={schemaJson}
             filename={buildFilename(schema?.metadata.title)}
+            onError={setChatError}
           />
         </div>
       }

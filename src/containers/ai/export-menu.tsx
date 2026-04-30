@@ -3,13 +3,18 @@ import { Button } from '#/components/ui/button'
 type Props = {
   readonly schemaJson: string
   readonly filename: string
+  readonly onError?: (message: string) => void
 }
 
-export function ExportMenu({ schemaJson, filename }: Props) {
+export function ExportMenu({ schemaJson, filename, onError }: Props) {
   const disabled = schemaJson.length === 0
 
   async function copy() {
-    await navigator.clipboard.writeText(schemaJson)
+    try {
+      await navigator.clipboard.writeText(schemaJson)
+    } catch (err) {
+      onError?.(err instanceof Error ? err.message : String(err))
+    }
   }
 
   function download() {
