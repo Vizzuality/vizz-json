@@ -1,0 +1,47 @@
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '#/components/ui/resizable'
+
+type AiLayoutProps = {
+  readonly viewMode: 'chat' | 'json'
+  readonly chat: React.ReactNode
+  readonly viewer: React.ReactNode
+  readonly map: React.ReactNode
+  readonly params: React.ReactNode
+  readonly toolbar: React.ReactNode
+}
+
+export function AiLayout({
+  viewMode,
+  chat,
+  viewer,
+  map,
+  params,
+  toolbar,
+}: AiLayoutProps) {
+  return (
+    <div className="flex h-[calc(100vh-3.5rem)] bg-background">
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel defaultSize={40} minSize={25}>
+          <div className="flex h-full flex-col">
+            {toolbar}
+            <div className="relative min-h-0 flex-1">
+              {viewMode === 'chat' ? chat : viewer}
+            </div>
+          </div>
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize={60} minSize={30}>
+          <div className="relative h-full">
+            {map}
+            <div className="absolute bottom-4 left-4 z-10 max-h-[60%] w-80 overflow-y-auto rounded-lg border bg-background/95 shadow-lg backdrop-blur">
+              {params}
+            </div>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
+  )
+}
