@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useChat, fetchServerSentEvents } from '@tanstack/ai-react'
+import type { UIMessage } from '@tanstack/ai-react'
 import { Button } from '#/components/ui/button'
 import { Textarea } from '#/components/ui/textarea'
 import type { RendererControls } from '#/lib/ai/types'
@@ -13,12 +14,17 @@ type AiChatProps = {
   readonly promptChips: readonly string[]
 }
 
-function extractTextContent(
-  parts: Array<{ type: string; content?: string }>,
-): string {
+type MessagePart = UIMessage['parts'][number]
+type TextPart = Extract<MessagePart, { type: 'text' }>
+
+function isTextPart(part: MessagePart): part is TextPart {
+  return part.type === 'text'
+}
+
+function extractTextContent(parts: ReadonlyArray<MessagePart>): string {
   return parts
-    .filter((p) => p.type === 'text' && typeof p.content === 'string')
-    .map((p) => p.content as string)
+    .filter(isTextPart)
+    .map((p) => p.content)
     .join('')
 }
 
@@ -40,9 +46,7 @@ export function AiChat({
     }),
     onFinish: (msg) => {
       try {
-        const text = extractTextContent(
-          msg.parts as Array<{ type: string; content?: string }>,
-        )
+        const text = extractTextContent(msg.parts)
         const parsed = aiOutputSchema.parse(JSON.parse(text))
         onResult(parsed)
       } catch (err) {
@@ -77,9 +81,7 @@ export function AiChat({
           </div>
         )}
         {messages.map((m) => {
-          const textContent = extractTextContent(
-            m.parts as Array<{ type: string; content?: string }>,
-          )
+          const textContent = extractTextContent(m.parts)
           return (
             <div
               key={m.id}
