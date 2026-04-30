@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
+import { Route as AiRouteImport } from './routes/ai'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuidelinesIndexRouteImport } from './routes/guidelines/index'
@@ -34,6 +35,11 @@ const PlaygroundRoute = PlaygroundRouteImport.update({
 const GuidelinesRoute = GuidelinesRouteImport.update({
   id: '/guidelines',
   path: '/guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiRoute = AiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -80,6 +86,7 @@ const GuidelinesExpressionsRoute = GuidelinesExpressionsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/ai'
     | '/guidelines'
     | '/playground'
     | '/presentation'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/ai'
     | '/playground'
     | '/presentation'
     | '/guidelines/expressions'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/ai'
     | '/guidelines'
     | '/playground'
     | '/presentation'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AiRoute: typeof AiRoute
   GuidelinesRoute: typeof GuidelinesRouteWithChildren
   PlaygroundRoute: typeof PlaygroundRoute
   PresentationRoute: typeof PresentationRoute
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       path: '/guidelines'
       fullPath: '/guidelines'
       preLoaderRoute: typeof GuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai': {
+      id: '/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -272,6 +292,7 @@ const GuidelinesRouteWithChildren = GuidelinesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AiRoute: AiRoute,
   GuidelinesRoute: GuidelinesRouteWithChildren,
   PlaygroundRoute: PlaygroundRoute,
   PresentationRoute: PresentationRoute,
