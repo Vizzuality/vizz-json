@@ -46,8 +46,8 @@ export function AiChat({
     setError(null)
   }
 
-  async function submit() {
-    const trimmed = draft.trim()
+  async function submit(overridePrompt?: string) {
+    const trimmed = (overridePrompt ?? draft).trim()
     if (!trimmed || isLoading) return
 
     const userMsg: ChatMessage = {
@@ -114,20 +114,25 @@ export function AiChat({
   return (
     <div className="flex h-full flex-col">
       <div className="flex-1 space-y-2 overflow-y-auto p-3 text-sm">
-        {messages.length === 0 && promptChips.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {promptChips.map((chip) => (
-              <button
-                key={chip}
-                type="button"
-                onClick={() => setDraft(chip)}
-                className="rounded-full border px-3 py-1 text-xs hover:bg-muted"
-              >
-                {chip}
-              </button>
-            ))}
-          </div>
-        )}
+        {!messages.some((m) => m.role === 'assistant') &&
+          promptChips.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {promptChips.map((chip) => (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => {
+                    setDraft(chip)
+                    submit(chip)
+                  }}
+                  disabled={isLoading}
+                  className="rounded-full border px-3 py-1 text-xs hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+          )}
         {messages.map((m) => (
           <div
             key={m.id}
@@ -173,7 +178,7 @@ export function AiChat({
         <div className="mt-2 flex gap-2">
           <Button
             size="sm"
-            onClick={submit}
+            onClick={() => submit()}
             disabled={isLoading || !draft.trim()}
           >
             Send

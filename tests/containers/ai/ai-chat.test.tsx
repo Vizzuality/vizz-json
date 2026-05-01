@@ -76,4 +76,41 @@ describe('AiChat', () => {
     fireEvent.keyDown(textarea, { key: 'Enter' })
     expect(fetchSpy).not.toHaveBeenCalled()
   })
+
+  it('submits immediately when a prompt chip is clicked', async () => {
+    const fetchSpy = mockFetchOnce(SUCCESS_BODY)
+    render(<AiChat {...baseProps} />)
+    fireEvent.click(screen.getByText('Show Sentinel-2'))
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
+    const [, init] = fetchSpy.mock.calls[0]
+    const body = JSON.parse(init!.body as string)
+    expect(body.messages.at(-1).parts[0].content).toBe('Show Sentinel-2')
+  })
+
+  it('replaces the current draft when a chip is clicked', async () => {
+    const fetchSpy = mockFetchOnce(SUCCESS_BODY)
+    render(<AiChat {...baseProps} />)
+    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
+      target: { value: 'previous draft' },
+    })
+    fireEvent.click(screen.getByText('Show Sentinel-2'))
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
+    const body = JSON.parse(fetchSpy.mock.calls[0][1]!.body as string)
+    expect(body.messages.at(-1).parts[0].content).toBe('Show Sentinel-2')
+  })
+
+  it('disables prompt chips while loading', async () => {
+    // Never-resolving fetch keeps the component in `isLoading`.
+    vi.spyOn(global, 'fetch').mockImplementation(() => new Promise(() => {}))
+    render(<AiChat {...baseProps} />)
+    const textarea = screen.getByPlaceholderText(/describe a map/i)
+    fireEvent.change(textarea, { target: { value: 'kick off' } })
+    fireEvent.keyDown(textarea, { key: 'Enter' })
+    // Chips remain in the DOM until the first message lands; while loading they
+    // must be disabled.
+    await waitFor(() => {
+      const chip = screen.getByRole('button', { name: 'Show Sentinel-2' })
+      expect(chip).toBeDisabled()
+    })
+  })
 })
