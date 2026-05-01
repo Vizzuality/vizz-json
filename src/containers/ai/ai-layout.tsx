@@ -36,9 +36,7 @@ export function AiLayout({
               <div className={viewMode === 'chat' ? 'h-full' : 'hidden'}>
                 {chat}
               </div>
-              <div className={viewMode === 'json' ? 'h-full' : 'hidden'}>
-                {viewer}
-              </div>
+              {viewMode === 'json' && <div className="h-full">{viewer}</div>}
               <div className={viewMode === 'config' ? 'h-full' : 'hidden'}>
                 {config}
               </div>
