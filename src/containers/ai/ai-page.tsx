@@ -86,6 +86,12 @@ export function AiPage() {
     setParamValues((prev) => ({ ...prev, [key]: value }))
   }, [])
 
+  const handleClear = useCallback(() => {
+    setSchema(null)
+    setParamValues({})
+    setChatError(null)
+  }, [])
+
   return (
     <AiLayout
       viewMode={viewMode}
@@ -104,7 +110,9 @@ export function AiPage() {
               renderer={renderer}
               onResult={handleResult}
               onError={setChatError}
+              onClear={handleClear}
               promptChips={PROMPT_CHIPS}
+              hasSchema={schema !== null}
             />
           </div>
           {chatError && (

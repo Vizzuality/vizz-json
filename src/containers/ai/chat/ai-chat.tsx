@@ -1,6 +1,17 @@
 import { useRef, useState } from 'react'
 import { Button } from '#/components/ui/button'
 import { Textarea } from '#/components/ui/textarea'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '#/components/ui/alert-dialog'
 import type { RendererControls } from '#/lib/ai/types'
 import type { AiOutput } from '#/lib/ai/output-schema'
 import { aiResponseSchema } from '#/lib/ai/output-schema'
@@ -9,7 +20,9 @@ type AiChatProps = {
   readonly renderer: RendererControls
   readonly onResult: (output: AiOutput) => void
   readonly onError: (message: string) => void
+  readonly onClear: () => void
   readonly promptChips: readonly string[]
+  readonly hasSchema: boolean
 }
 
 type ChatMessage = {
@@ -26,12 +39,15 @@ export function AiChat({
   renderer,
   onResult,
   onError,
+  onClear,
   promptChips,
+  hasSchema,
 }: AiChatProps) {
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<ReadonlyArray<ChatMessage>>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
   function stop() {
@@ -44,6 +60,8 @@ export function AiChat({
     stop()
     setMessages([])
     setError(null)
+    setConfirmOpen(false)
+    onClear()
   }
 
   async function submit(overridePrompt?: string) {
@@ -185,10 +203,33 @@ export function AiChat({
               Send
             </Button>
           )}
-          {/* Clear button placeholder — replaced in Task 5 */}
-          <Button size="sm" variant="ghost" onClick={clear} className="ml-auto">
-            New chat
-          </Button>
+          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="ml-auto"
+                  disabled={messages.length === 0 && !hasSchema}
+                >
+                  Clear
+                </Button>
+              }
+            />
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Clear chat?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This removes the conversation and the generated map layer.
+                  Renderer settings stay.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={clear}>Clear</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

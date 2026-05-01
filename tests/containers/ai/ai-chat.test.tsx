@@ -24,9 +24,11 @@ function mockFetchOnce(body: unknown, status = 200) {
 const baseProps = {
   renderer: { renderer: 'maplibre' as const },
   promptChips: ['Show Sentinel-2'],
+  hasSchema: false,
   onResult: vi.fn(),
   onError: vi.fn(),
-} as const
+  onClear: vi.fn(),
+}
 
 describe('AiChat', () => {
   beforeEach(() => {
@@ -145,5 +147,95 @@ describe('AiChat', () => {
     const stopBtn = await screen.findByRole('button', { name: 'Stop' })
     fireEvent.click(stopBtn)
     await waitFor(() => expect(abortedSignal!.aborted).toBe(true))
+  })
+
+  it('disables Clear when no messages and no schema', () => {
+    render(<AiChat {...baseProps} hasSchema={false} />)
+    expect(screen.getByRole('button', { name: 'Clear' })).toBeDisabled()
+  })
+
+  it('enables Clear when schema is present even without messages', () => {
+    render(<AiChat {...baseProps} hasSchema={true} />)
+    expect(screen.getByRole('button', { name: 'Clear' })).toBeEnabled()
+  })
+
+  it('enables Clear after a successful message exchange', async () => {
+    mockFetchOnce(SUCCESS_BODY)
+    const { rerender } = render(<AiChat {...baseProps} hasSchema={false} />)
+    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
+      target: { value: 'hi' },
+    })
+    fireEvent.keyDown(screen.getByPlaceholderText(/describe a map/i), {
+      key: 'Enter',
+    })
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Clear' })).toBeEnabled(),
+    )
+    rerender(<AiChat {...baseProps} hasSchema={false} />)
+    expect(screen.getByRole('button', { name: 'Clear' })).toBeEnabled()
+  })
+
+  it('confirms clear, wipes messages, and calls onClear', async () => {
+    mockFetchOnce(SUCCESS_BODY)
+    const onClear = vi.fn()
+    render(<AiChat {...baseProps} hasSchema={true} onClear={onClear} />)
+    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
+      target: { value: 'hi' },
+    })
+    fireEvent.keyDown(screen.getByPlaceholderText(/describe a map/i), {
+      key: 'Enter',
+    })
+    await waitFor(() => expect(screen.getByText('hi')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
+    expect(await screen.findByText('Clear chat?')).toBeInTheDocument()
+    fireEvent.click(
+      screen.getByRole('button', { name: /^Clear$/, hidden: false }),
+    )
+
+    await waitFor(() => expect(onClear).toHaveBeenCalledTimes(1))
+    expect(screen.queryByText('hi')).not.toBeInTheDocument()
+  })
+
+  it('cancel keeps messages and does not call onClear', async () => {
+    mockFetchOnce(SUCCESS_BODY)
+    const onClear = vi.fn()
+    render(<AiChat {...baseProps} hasSchema={true} onClear={onClear} />)
+    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
+      target: { value: 'hi' },
+    })
+    fireEvent.keyDown(screen.getByPlaceholderText(/describe a map/i), {
+      key: 'Enter',
+    })
+    await waitFor(() => expect(screen.getByText('hi')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }))
+
+    expect(onClear).not.toHaveBeenCalled()
+    expect(screen.getByText('hi')).toBeInTheDocument()
+  })
+
+  it('Clear during loading aborts the request', async () => {
+    let abortedSignal: AbortSignal | null = null
+    vi.spyOn(global, 'fetch').mockImplementation((_, init) => {
+      abortedSignal = init!.signal!
+      return new Promise(() => {})
+    })
+    const onClear = vi.fn()
+    render(<AiChat {...baseProps} hasSchema={true} onClear={onClear} />)
+    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
+      target: { value: 'hi' },
+    })
+    fireEvent.keyDown(screen.getByPlaceholderText(/describe a map/i), {
+      key: 'Enter',
+    })
+    await screen.findByRole('button', { name: 'Stop' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
+    fireEvent.click(await screen.findByRole('button', { name: /^Clear$/ }))
+
+    await waitFor(() => expect(abortedSignal!.aborted).toBe(true))
+    expect(onClear).toHaveBeenCalledTimes(1)
   })
 })
