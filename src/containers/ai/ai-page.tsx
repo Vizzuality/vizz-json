@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react'
 import { AiLayout } from './ai-layout'
 import { AiChat } from './ai-chat'
 import { JsonViewer } from './json-viewer'
-import { RendererControls } from './renderer-controls'
+import { MapConfigPopover } from './map-config-popover'
 import { RendererSwitch } from './renderer-switch'
 import { ExportMenu, buildFilename } from './export-menu'
 import { ParamsPanel } from '#/containers/playground/params-panel'
@@ -103,11 +103,14 @@ export function AiPage() {
               {viewMode === 'chat' ? 'Show JSON' : 'Show chat'}
             </button>
           </div>
-          <ExportMenu
-            schemaJson={schemaJson}
-            filename={buildFilename(schema?.metadata.title)}
-            onError={setChatError}
-          />
+          <div className="flex items-center gap-2">
+            <ExportMenu
+              schemaJson={schemaJson}
+              filename={buildFilename(schema?.metadata.title)}
+              onError={setChatError}
+            />
+            <MapConfigPopover value={renderer} onChange={setRenderer} />
+          </div>
         </div>
       }
       chat={
@@ -120,7 +123,6 @@ export function AiPage() {
               promptChips={PROMPT_CHIPS}
             />
           </div>
-          <RendererControls value={renderer} onChange={setRenderer} />
           {chatError && (
             <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
               {chatError}

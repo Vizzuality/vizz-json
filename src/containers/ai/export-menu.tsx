@@ -1,4 +1,10 @@
+import { Copy, Download } from 'lucide-react'
 import { Button } from '#/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '#/components/ui/tooltip'
 
 type Props = {
   readonly schemaJson: string
@@ -28,19 +34,40 @@ export function ExportMenu({ schemaJson, filename, onError }: Props) {
   }
 
   return (
-    <div className="flex gap-2">
-      <Button size="sm" variant="outline" disabled={disabled} onClick={copy}>
-        Copy
-      </Button>
-      <Button
-        size="sm"
-        variant="outline"
-        disabled={disabled}
-        onClick={download}
-      >
-        Download
-      </Button>
-    </div>
+    <>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              size="icon-sm"
+              variant="outline"
+              disabled={disabled}
+              onClick={copy}
+              aria-label="Copy JSON"
+            >
+              <Copy />
+            </Button>
+          }
+        />
+        <TooltipContent>Copy JSON</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              size="icon-sm"
+              variant="outline"
+              disabled={disabled}
+              onClick={download}
+              aria-label="Download JSON"
+            >
+              <Download />
+            </Button>
+          }
+        />
+        <TooltipContent>Download JSON</TooltipContent>
+      </Tooltip>
+    </>
   )
 }
 

@@ -17,6 +17,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { getLocale } from '#/paraglide/runtime'
 import { m } from '#/paraglide/messages'
 import { buttonVariants } from '#/components/ui/button'
+import { TooltipProvider } from '#/components/ui/tooltip'
 
 import appCss from '../styles.css?url'
 
@@ -90,9 +91,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-primary/20">
         <TanStackQueryProvider>
-          {!isPresentation && <Header />}
-          {children}
-          {!isPlayground && !isPresentation && !isAi && <Footer />}
+          <TooltipProvider>
+            {!isPresentation && <Header />}
+            {children}
+            {!isPlayground && !isPresentation && !isAi && <Footer />}
+          </TooltipProvider>
           <TanStackDevtools
             config={{
               position: 'bottom-right',
