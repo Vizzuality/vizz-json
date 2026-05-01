@@ -3,25 +3,30 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '#/components/ui/resizable'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '#/components/ui/tabs'
+
+export type AiViewMode = 'chat' | 'json' | 'config'
 
 type AiLayoutProps = {
-  readonly viewMode: 'chat' | 'json' | 'config'
+  readonly viewMode: AiViewMode
+  readonly onViewModeChange: (value: AiViewMode) => void
   readonly chat: React.ReactNode
   readonly viewer: React.ReactNode
   readonly config: React.ReactNode
   readonly map: React.ReactNode
   readonly params: React.ReactNode
-  readonly toolbar: React.ReactNode
+  readonly toolbarActions?: React.ReactNode
 }
 
 export function AiLayout({
   viewMode,
+  onViewModeChange,
   chat,
   viewer,
   config,
   map,
   params,
-  toolbar,
+  toolbarActions,
 }: AiLayoutProps) {
   return (
     <div className="flex h-[calc(100vh-3.5rem)] bg-background">
@@ -30,18 +35,31 @@ export function AiLayout({
         defaultLayout={{ chat: 40, map: 60 }}
       >
         <ResizablePanel id="chat" minSize="25%">
-          <div className="flex h-full flex-col">
-            {toolbar}
-            <div className="relative min-h-0 flex-1">
-              <div className={viewMode === 'chat' ? 'h-full' : 'hidden'}>
-                {chat}
-              </div>
-              {viewMode === 'json' && <div className="h-full">{viewer}</div>}
-              <div className={viewMode === 'config' ? 'h-full' : 'hidden'}>
-                {config}
-              </div>
+          <Tabs
+            value={viewMode}
+            onValueChange={(value) => onViewModeChange(value as AiViewMode)}
+            className="flex h-full flex-col gap-0"
+          >
+            <div className="flex h-12 items-center justify-between border-b px-4">
+              <TabsList>
+                <TabsTrigger value="chat">Chat</TabsTrigger>
+                <TabsTrigger value="json">JSON</TabsTrigger>
+                <TabsTrigger value="config">Config</TabsTrigger>
+              </TabsList>
+              {toolbarActions ? (
+                <div className="flex items-center gap-2">{toolbarActions}</div>
+              ) : null}
             </div>
-          </div>
+            <TabsContent value="chat" keepMounted className="min-h-0">
+              {chat}
+            </TabsContent>
+            <TabsContent value="json" className="min-h-0">
+              {viewer}
+            </TabsContent>
+            <TabsContent value="config" keepMounted className="min-h-0">
+              {config}
+            </TabsContent>
+          </Tabs>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel id="map" minSize="30%">

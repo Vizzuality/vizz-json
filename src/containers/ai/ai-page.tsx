@@ -1,12 +1,11 @@
 import { useCallback, useMemo, useState } from 'react'
 import { AiLayout } from './ai-layout'
+import type { AiViewMode } from './ai-layout'
 import { AiChat } from './chat/ai-chat'
 import { JsonViewer } from './json/json-viewer'
 import { RendererSwitch } from './map/renderer-switch'
 import { ExportMenu, buildFilename } from './export/export-menu'
 import { ConfigPanel } from './config/config-panel'
-import { Button } from '#/components/ui/button'
-import { ButtonGroup } from '#/components/ui/button-group'
 import { ParamsPanel } from '#/containers/playground/params-panel'
 import { useConverter } from '#/hooks/use-converter'
 import { inferParamControl } from '#/lib/param-inference'
@@ -28,8 +27,6 @@ const PROMPT_CHIPS = [
   'Vector circles sized by magnitude with a color scale',
 ] as const
 
-type ViewMode = 'chat' | 'json' | 'config'
-
 type AiSchema = {
   readonly metadata: ExampleMetadata
   readonly config: Record<string, unknown>
@@ -47,7 +44,7 @@ export function AiPage() {
   const [renderer, setRenderer] = useState<RendererControlsValue>({
     renderer: 'maplibre',
   })
-  const [viewMode, setViewMode] = useState<ViewMode>('chat')
+  const [viewMode, setViewMode] = useState<AiViewMode>('chat')
   const [schema, setSchema] = useState<AiSchema | null>(null)
   const [paramValues, setParamValues] = useState<ResolvedParams>({})
   const [chatError, setChatError] = useState<string | null>(null)
@@ -89,48 +86,16 @@ export function AiPage() {
     setParamValues((prev) => ({ ...prev, [key]: value }))
   }, [])
 
-  const jsonDisabled = !schema
-
   return (
     <AiLayout
       viewMode={viewMode}
-      toolbar={
-        <div className="flex h-12 items-center justify-between border-b px-4">
-          <ButtonGroup>
-            <Button
-              size="sm"
-              variant={viewMode === 'chat' ? 'default' : 'outline'}
-              aria-pressed={viewMode === 'chat'}
-              onClick={() => setViewMode('chat')}
-            >
-              Chat
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'json' ? 'default' : 'outline'}
-              aria-pressed={viewMode === 'json'}
-              onClick={() => setViewMode('json')}
-              disabled={jsonDisabled}
-            >
-              JSON
-            </Button>
-            <Button
-              size="sm"
-              variant={viewMode === 'config' ? 'default' : 'outline'}
-              aria-pressed={viewMode === 'config'}
-              onClick={() => setViewMode('config')}
-            >
-              Config
-            </Button>
-          </ButtonGroup>
-          <div className="flex items-center gap-2">
-            <ExportMenu
-              schemaJson={schemaJson}
-              filename={buildFilename(schema?.metadata.title)}
-              onError={setChatError}
-            />
-          </div>
-        </div>
+      onViewModeChange={setViewMode}
+      toolbarActions={
+        <ExportMenu
+          schemaJson={schemaJson}
+          filename={buildFilename(schema?.metadata.title)}
+          onError={setChatError}
+        />
       }
       chat={
         <div className="flex h-full flex-col">
