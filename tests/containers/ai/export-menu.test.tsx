@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { ExportMenu } from '#/containers/ai/export-menu'
+import { ExportMenu } from '#/containers/ai/export/export-menu'
 
 describe('ExportMenu', () => {
   it('copies JSON to clipboard', async () => {

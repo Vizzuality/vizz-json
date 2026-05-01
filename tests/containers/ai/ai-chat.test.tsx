@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { AiChat } from '#/containers/ai/ai-chat'
+import { AiChat } from '#/containers/ai/chat/ai-chat'
 
 describe('AiChat', () => {
   it('renders prompt input and chip buttons', () => {
