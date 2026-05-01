@@ -113,4 +113,37 @@ describe('AiChat', () => {
       expect(chip).toBeDisabled()
     })
   })
+
+  it('shows Send when idle and Stop when loading', async () => {
+    vi.spyOn(global, 'fetch').mockImplementation(() => new Promise(() => {}))
+    render(<AiChat {...baseProps} />)
+    expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Stop' }),
+    ).not.toBeInTheDocument()
+    const textarea = screen.getByPlaceholderText(/describe a map/i)
+    fireEvent.change(textarea, { target: { value: 'go' } })
+    fireEvent.keyDown(textarea, { key: 'Enter' })
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Stop' })).toBeInTheDocument(),
+    )
+    expect(
+      screen.queryByRole('button', { name: 'Send' }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('Stop button aborts the in-flight request', async () => {
+    let abortedSignal: AbortSignal | null = null
+    vi.spyOn(global, 'fetch').mockImplementation((_, init) => {
+      abortedSignal = init!.signal!
+      return new Promise(() => {})
+    })
+    render(<AiChat {...baseProps} />)
+    const textarea = screen.getByPlaceholderText(/describe a map/i)
+    fireEvent.change(textarea, { target: { value: 'go' } })
+    fireEvent.keyDown(textarea, { key: 'Enter' })
+    const stopBtn = await screen.findByRole('button', { name: 'Stop' })
+    fireEvent.click(stopBtn)
+    await waitFor(() => expect(abortedSignal!.aborted).toBe(true))
+  })
 })

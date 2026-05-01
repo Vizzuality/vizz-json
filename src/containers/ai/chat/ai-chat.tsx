@@ -176,18 +176,16 @@ export function AiChat({
           }}
         />
         <div className="mt-2 flex gap-2">
-          <Button
-            size="sm"
-            onClick={() => submit()}
-            disabled={isLoading || !draft.trim()}
-          >
-            Send
-          </Button>
-          {isLoading && (
+          {isLoading ? (
             <Button size="sm" variant="outline" onClick={stop}>
               Stop
             </Button>
+          ) : (
+            <Button size="sm" onClick={() => submit()} disabled={!draft.trim()}>
+              Send
+            </Button>
           )}
+          {/* Clear button placeholder — replaced in Task 5 */}
           <Button size="sm" variant="ghost" onClick={clear} className="ml-auto">
             New chat
           </Button>
