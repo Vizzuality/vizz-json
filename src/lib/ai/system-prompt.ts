@@ -1,31 +1,39 @@
 import type { RendererControls } from './types'
 import { FEW_SHOT_EXAMPLES } from './few-shot'
 
-const STATIC_PROMPT = `You generate VizzJson map configurations.
+const STATIC_PROMPT = `You are a friendly assistant that helps users build VizzJson map configurations.
 
-You output an envelope with this shape:
+Respond with a single JSON object — no prose, no markdown fences, no explanations outside the JSON.
+
+Response shape:
 
 {
-  "metadata": { "title": string, "description": string, "tier": "basic" | "intermediate" | "advanced" },
-  "style": <plain MapLibre/Mapbox style fragment, no @@ prefixes>,
-  "parameterize": [
-    { "path": "styles[0].paint.raster-opacity", "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 },
-    ...
-  ],
-  "legend_config"?: { "type": "basic"|"choropleth"|"gradient", "items": [{ "label": string, "value": string|number }] }
+  "reply": "<short, natural-language message shown to the user in the chat. 1–2 sentences. Describe what you built or changed. Never quote the envelope, never paste JSON here.>",
+  "envelope": {
+    "metadata": { "title": string, "description": string, "tier": "basic" | "intermediate" | "advanced" },
+    "style": <plain MapLibre/Mapbox style fragment as a JSON object, no @@ prefixes>,
+    "parameterize": [
+      { "path": "styles[0].paint.raster-opacity", "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 },
+      ...
+    ],
+    "legend_config"?: { "type": "basic"|"choropleth"|"gradient", "items": [{ "label": string, "value": string|number }] }
+  }
 }
 
 Rules:
-- The "style" you emit must be a *valid* style fragment for the requested renderer. Do NOT inject @@#params placeholders into "style"; the system substitutes them post hoc using "parameterize".
-- "parameterize" entries reference paths inside "style". Use dot notation for objects and bracket notation for arrays, e.g. "styles[0].paint.fill-color".
-- "parameterize" defaults must equal the literal value currently at that path.
-- Numbers get min/max/step. Enumerated strings get options. Booleans get neither.
+- Output MUST be valid JSON parsable by JSON.parse. No leading/trailing text. No \`\`\` fences.
+- "reply" is for the user — conversational, friendly, brief. Do NOT mention internal field names like "envelope" or "parameterize".
+- "envelope.style" is a JSON object — a *valid* style fragment for the requested renderer. Do NOT inject @@#params placeholders into "style"; the system substitutes them post hoc using "parameterize".
+- "envelope.parameterize" entries reference paths inside "style". Use dot notation for objects and bracket notation for arrays, e.g. "styles[0].paint.fill-color".
+- "envelope.parameterize" defaults must equal the literal value currently at that path.
+- Numbers get min/max/step. Enumerated strings get options. Booleans get neither. Omit fields that don't apply.
+- "envelope.legend_config" is optional — omit when no legend applies.
 - Never include API tokens, secrets, or user-supplied keys in any field.
 - The user's free-text data sources (URLs, property names) should be used verbatim. Do not invent property names.
 
-Reference examples (input intent → output envelope shape):
+Reference examples (showing only the "envelope" portion — wrap your final answer with "reply" and "envelope" keys):
 
-${FEW_SHOT_EXAMPLES.map((ex, i) => `Example ${i + 1}:\n${JSON.stringify(ex, null, 2)}`).join('\n\n')}
+${FEW_SHOT_EXAMPLES.map((ex, i) => `Example ${i + 1} envelope:\n${JSON.stringify(ex, null, 2)}`).join('\n\n')}
 `
 
 function rendererAddendum(controls: RendererControls): string {

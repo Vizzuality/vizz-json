@@ -38,5 +38,11 @@ export const aiOutputSchema = z.object({
   legend_config: legendConfigSchema.optional(),
 })
 
+export const aiResponseSchema = z.object({
+  reply: z.string().min(1),
+  envelope: aiOutputSchema,
+})
+
 export type AiOutput = z.infer<typeof aiOutputSchema>
+export type AiResponse = z.infer<typeof aiResponseSchema>
 export type ParameterizeEntry = z.infer<typeof parameterizeEntrySchema>

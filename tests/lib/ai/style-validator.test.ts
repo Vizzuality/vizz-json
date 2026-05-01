@@ -2,17 +2,45 @@ import { describe, it, expect } from 'vitest'
 import { validateStyle } from '#/lib/ai/style-validator'
 
 describe('validateStyle', () => {
-  it('rejects a totally empty object for maplibre', () => {
-    const errors = validateStyle({}, 'maplibre')
+  it('accepts an empty fragment (treated as no-op)', () => {
+    expect(validateStyle({}, 'maplibre')).toEqual([])
+    expect(validateStyle({}, 'mapbox')).toEqual([])
+  })
+
+  it('accepts a VizzJson-style fragment ({source, styles[]})', () => {
+    const errors = validateStyle(
+      {
+        source: { type: 'raster', tiles: ['x'], tileSize: 256 },
+        styles: [{ type: 'raster' }],
+      },
+      'maplibre',
+    )
+    expect(errors).toEqual([])
+  })
+
+  it('rejects a fragment whose source has an unknown type', () => {
+    const errors = validateStyle(
+      {
+        source: { type: 'definitely-not-a-real-type' },
+        styles: [{ type: 'raster' }],
+      },
+      'maplibre',
+    )
     expect(errors.length).toBeGreaterThan(0)
   })
 
-  it('rejects a totally empty object for mapbox', () => {
-    const errors = validateStyle({}, 'mapbox')
+  it('rejects a fragment whose layer has an unknown type', () => {
+    const errors = validateStyle(
+      {
+        source: { type: 'raster', tiles: ['x'], tileSize: 256 },
+        styles: [{ type: 'definitely-not-a-real-layer-type' }],
+      },
+      'maplibre',
+    )
     expect(errors.length).toBeGreaterThan(0)
   })
 
-  it('accepts a minimal valid style for maplibre', () => {
+  it('accepts a minimal valid full style for maplibre', () => {
     const errors = validateStyle(
       {
         version: 8,
@@ -24,7 +52,7 @@ describe('validateStyle', () => {
     expect(errors).toEqual([])
   })
 
-  it('accepts a minimal valid style for mapbox', () => {
+  it('accepts a minimal valid full style for mapbox', () => {
     const errors = validateStyle(
       {
         version: 8,

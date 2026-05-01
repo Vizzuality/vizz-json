@@ -1,11 +1,9 @@
-import { useState } from 'react'
-import { useChat, fetchServerSentEvents } from '@tanstack/ai-react'
-import type { UIMessage } from '@tanstack/ai-react'
+import { useRef, useState } from 'react'
 import { Button } from '#/components/ui/button'
 import { Textarea } from '#/components/ui/textarea'
 import type { RendererControls } from '#/lib/ai/types'
 import type { AiOutput } from '#/lib/ai/output-schema'
-import { aiOutputSchema } from '#/lib/ai/output-schema'
+import { aiResponseSchema } from '#/lib/ai/output-schema'
 
 type AiChatProps = {
   readonly renderer: RendererControls
@@ -14,18 +12,14 @@ type AiChatProps = {
   readonly promptChips: readonly string[]
 }
 
-type MessagePart = UIMessage['parts'][number]
-type TextPart = Extract<MessagePart, { type: 'text' }>
-
-function isTextPart(part: MessagePart): part is TextPart {
-  return part.type === 'text'
+type ChatMessage = {
+  id: string
+  role: 'user' | 'assistant'
+  text: string
 }
 
-function extractTextContent(parts: ReadonlyArray<MessagePart>): string {
-  return parts
-    .filter(isTextPart)
-    .map((p) => p.content)
-    .join('')
+function nextId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 export function AiChat({
@@ -35,32 +29,86 @@ export function AiChat({
   promptChips,
 }: AiChatProps) {
   const [draft, setDraft] = useState('')
+  const [messages, setMessages] = useState<ReadonlyArray<ChatMessage>>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
 
-  const { messages, sendMessage, isLoading, stop, clear, error } = useChat({
-    connection: fetchServerSentEvents('/api/ai-generate', {
-      body: {
-        renderer: renderer.renderer,
-        mapboxToken: renderer.mapboxToken,
-        mapboxStyleUrl: renderer.mapboxStyleUrl,
-      },
-    }),
-    onFinish: (msg) => {
-      try {
-        const text = extractTextContent(msg.parts)
-        const parsed = aiOutputSchema.parse(JSON.parse(text))
-        onResult(parsed)
-      } catch (err) {
-        onError(err instanceof Error ? err.message : String(err))
-      }
-    },
-    onError: (err) => onError(err.message),
-  })
+  function stop() {
+    abortRef.current?.abort()
+    abortRef.current = null
+    setIsLoading(false)
+  }
 
-  function submit() {
+  function clear() {
+    stop()
+    setMessages([])
+    setError(null)
+  }
+
+  async function submit() {
     const trimmed = draft.trim()
-    if (!trimmed) return
-    sendMessage(trimmed)
+    if (!trimmed || isLoading) return
+
+    const userMsg: ChatMessage = {
+      id: nextId(),
+      role: 'user',
+      text: trimmed,
+    }
+    const history = [...messages, userMsg]
+    setMessages(history)
     setDraft('')
+    setError(null)
+    setIsLoading(true)
+
+    const controller = new AbortController()
+    abortRef.current = controller
+
+    try {
+      const res = await fetch('/api/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          messages: history.map((m) => ({
+            id: m.id,
+            role: m.role,
+            parts: [{ type: 'text', content: m.text }],
+          })),
+          renderer: renderer.renderer,
+          mapboxToken: renderer.mapboxToken,
+          mapboxStyleUrl: renderer.mapboxStyleUrl,
+        }),
+      })
+
+      if (!res.ok) {
+        const detail = await res.text().catch(() => '')
+        throw new Error(
+          `Request failed (${res.status})${detail ? `: ${detail}` : ''}`,
+        )
+      }
+
+      const json = await res.json()
+      const parsed = aiResponseSchema.parse(json)
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: nextId(),
+          role: 'assistant',
+          text: parsed.reply,
+        },
+      ])
+      onResult(parsed.envelope)
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') return
+      const e = err instanceof Error ? err : new Error(String(err))
+      setError(e)
+      onError(e.message)
+    } finally {
+      abortRef.current = null
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -80,26 +128,21 @@ export function AiChat({
             ))}
           </div>
         )}
-        {messages.map((m) => {
-          const textContent = extractTextContent(m.parts)
-          return (
-            <div
-              key={m.id}
-              className={
-                m.role === 'user'
-                  ? 'rounded-md bg-primary/10 p-2'
-                  : 'rounded-md bg-muted p-2'
-              }
-            >
-              <span className="block text-[10px] uppercase text-muted-foreground">
-                {m.role}
-              </span>
-              <span className="whitespace-pre-wrap font-mono text-xs">
-                {textContent}
-              </span>
-            </div>
-          )
-        })}
+        {messages.map((m) => (
+          <div
+            key={m.id}
+            className={
+              m.role === 'user'
+                ? 'rounded-md bg-primary/10 p-2'
+                : 'rounded-md bg-muted p-2'
+            }
+          >
+            <span className="block text-[10px] uppercase text-muted-foreground">
+              {m.role}
+            </span>
+            <span className="whitespace-pre-wrap text-xs">{m.text}</span>
+          </div>
+        ))}
         {isLoading && (
           <div className="rounded-md bg-muted p-2 text-xs italic">
             Generating…
