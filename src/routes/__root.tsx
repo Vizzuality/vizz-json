@@ -80,6 +80,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const location = useRouterState({ select: (s) => s.location })
   const isPlayground = location.pathname === '/playground'
   const isPresentation = location.pathname === '/presentation'
+  const isAi = location.pathname === '/ai'
 
   return (
     <html lang={getLocale()} suppressHydrationWarning>
@@ -91,7 +92,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <TanStackQueryProvider>
           {!isPresentation && <Header />}
           {children}
-          {!isPlayground && !isPresentation && <Footer />}
+          {!isPlayground && !isPresentation && !isAi && <Footer />}
           <TanStackDevtools
             config={{
               position: 'bottom-right',

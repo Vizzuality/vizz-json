@@ -34,6 +34,15 @@ export default function Header() {
             Playground
           </Link>
           <Link
+            to="/ai"
+            className={cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              'no-underline',
+            )}
+          >
+            AI
+          </Link>
+          <Link
             to="/presentation"
             search={{ slide: 1 }}
             className={cn(
