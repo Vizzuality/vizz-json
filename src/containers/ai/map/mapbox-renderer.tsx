@@ -39,6 +39,7 @@ export function MapboxRenderer({
         style={{ width: '100%', height: '100%' }}
         mapStyle={mapboxStyleUrl ?? 'mapbox://styles/mapbox/light-v11'}
         mapboxAccessToken={mapboxToken}
+        projection={{ name: 'mercator' }}
       >
         {source && styles && (
           <Source {...source} id={`${itemId}-source`}>
