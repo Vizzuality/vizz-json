@@ -1,3 +1,4 @@
+import { Braces, MessageSquare, Settings } from 'lucide-react'
 import {
   ResizableHandle,
   ResizablePanel,
@@ -42,9 +43,18 @@ export function AiLayout({
           >
             <div className="flex h-12 items-center justify-between border-b px-4">
               <TabsList>
-                <TabsTrigger value="chat">Chat</TabsTrigger>
-                <TabsTrigger value="json">JSON</TabsTrigger>
-                <TabsTrigger value="config">Config</TabsTrigger>
+                <TabsTrigger value="chat">
+                  <MessageSquare />
+                  Chat
+                </TabsTrigger>
+                <TabsTrigger value="json">
+                  <Braces />
+                  JSON
+                </TabsTrigger>
+                <TabsTrigger value="config">
+                  <Settings />
+                  Config
+                </TabsTrigger>
               </TabsList>
               {toolbarActions ? (
                 <div className="flex items-center gap-2">{toolbarActions}</div>
