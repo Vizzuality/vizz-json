@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { AiChat } from '#/containers/ai/chat/ai-chat'
 
 const ENVELOPE = {
@@ -189,9 +195,8 @@ describe('AiChat', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
     expect(await screen.findByText('Clear chat?')).toBeInTheDocument()
-    fireEvent.click(
-      screen.getByRole('button', { name: /^Clear$/, hidden: false }),
-    )
+    const dialog = await screen.findByRole('alertdialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Clear' }))
 
     await waitFor(() => expect(onClear).toHaveBeenCalledTimes(1))
     expect(screen.queryByText('hi')).not.toBeInTheDocument()
@@ -233,7 +238,8 @@ describe('AiChat', () => {
     await screen.findByRole('button', { name: 'Stop' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
-    fireEvent.click(await screen.findByRole('button', { name: /^Clear$/ }))
+    const dialog = await screen.findByRole('alertdialog')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Clear' }))
 
     await waitFor(() => expect(abortedSignal!.aborted).toBe(true))
     expect(onClear).toHaveBeenCalledTimes(1)

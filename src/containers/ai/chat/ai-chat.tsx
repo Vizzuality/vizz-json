@@ -46,7 +46,6 @@ export function AiChat({
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<ReadonlyArray<ChatMessage>>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
@@ -59,7 +58,6 @@ export function AiChat({
   function clear() {
     stop()
     setMessages([])
-    setError(null)
     setConfirmOpen(false)
     onClear()
   }
@@ -76,7 +74,6 @@ export function AiChat({
     const history = [...messages, userMsg]
     setMessages(history)
     setDraft('')
-    setError(null)
     setIsLoading(true)
 
     const controller = new AbortController()
@@ -121,7 +118,6 @@ export function AiChat({
     } catch (err) {
       if ((err as Error).name === 'AbortError') return
       const e = err instanceof Error ? err : new Error(String(err))
-      setError(e)
       onError(e.message)
     } finally {
       abortRef.current = null
@@ -139,10 +135,7 @@ export function AiChat({
                 <button
                   key={chip}
                   type="button"
-                  onClick={() => {
-                    setDraft(chip)
-                    submit(chip)
-                  }}
+                  onClick={() => submit(chip)}
                   disabled={isLoading}
                   className="rounded-full border px-3 py-1 text-xs hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -169,11 +162,6 @@ export function AiChat({
         {isLoading && (
           <div className="rounded-md bg-muted p-2 text-xs italic">
             Generating…
-          </div>
-        )}
-        {error && (
-          <div className="rounded-md bg-destructive/10 p-2 text-xs text-destructive">
-            {error.message}
           </div>
         )}
       </div>
