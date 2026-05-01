@@ -162,7 +162,12 @@ export function AiChat({
           className="text-sm"
           rows={3}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit()
+            if (e.key !== 'Enter') return
+            if (e.shiftKey) return
+            if (e.nativeEvent.isComposing) return
+            if (isLoading) return
+            e.preventDefault()
+            submit()
           }}
         />
         <div className="mt-2 flex gap-2">
