@@ -42,7 +42,7 @@ export function AiLayout({
             className="flex h-full flex-col gap-0"
           >
             <div className="flex h-12 items-center justify-between border-b px-4">
-              <TabsList>
+              <TabsList size="lg">
                 <TabsTrigger value="chat">
                   <MessageSquare />
                   Chat
