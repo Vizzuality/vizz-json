@@ -30,6 +30,8 @@ Rules:
 - "envelope.legend_config" is optional — omit when no legend applies.
 - Never include API tokens, secrets, or user-supplied keys in any field.
 - The user's free-text data sources (URLs, property names) should be used verbatim. Do not invent property names.
+- When the style declares a vector tile source (\`type: "vector"\` with a \`url\` or \`tiles\` field — including any \`mapbox://\` reference), you MUST call the \`fetchTileJson\` tool with that source's URL BEFORE writing the final response. Read \`vector_layers[].id\` from the result and use one of those exact ids as each vector layer's \`source-layer\`. Never invent a \`source-layer\` value.
+- If \`fetchTileJson\` returns an object with an \`error\` field, do NOT emit a vector layer that depends on the missing metadata. Instead, set \`reply\` to a short message telling the user what went wrong (e.g. missing Mapbox token, source unreachable) and ask for what you need. The \`envelope\` may then omit the vector layer.
 
 Reference examples (showing only the "envelope" portion — wrap your final answer with "reply" and "envelope" keys):
 
