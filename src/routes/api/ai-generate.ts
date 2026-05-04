@@ -1,10 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { chat, convertMessagesToModelMessages } from '@tanstack/ai'
+import {
+  chat,
+  convertMessagesToModelMessages,
+  maxIterations,
+} from '@tanstack/ai'
 import type { UIMessage } from '@tanstack/ai'
 import { openaiText } from '@tanstack/ai-openai'
 import { aiGenerateInputSchema } from '#/lib/ai/input-schema'
 import { buildSystemPrompts } from '#/lib/ai/system-prompt'
 import { aiResponseSchema } from '#/lib/ai/output-schema'
+import { createFetchTileJsonTool } from '#/lib/ai/tools/fetch-tilejson'
 
 function stripCodeFences(text: string): string {
   const trimmed = text.trim()
@@ -18,7 +23,7 @@ export const Route = createFileRoute('/api/ai-generate')({
     handlers: {
       POST: async ({ request }) => {
         const body = await request.json()
-        const { messages, renderer, mapboxStyleUrl } =
+        const { messages, renderer, mapboxToken, mapboxStyleUrl } =
           aiGenerateInputSchema.parse(body)
 
         const systemPrompts = buildSystemPrompts({
@@ -31,10 +36,14 @@ export const Route = createFileRoute('/api/ai-generate')({
           messages as Array<UIMessage>,
         )
 
+        const fetchTileJsonTool = createFetchTileJsonTool({ mapboxToken })
+
         const text = (await chat({
           adapter: openaiText('gpt-5.2'),
           messages: modelMessages as never,
           systemPrompts: [...systemPrompts],
+          tools: [fetchTileJsonTool],
+          agentLoopStrategy: maxIterations(3),
           stream: false,
           maxTokens: 4000,
         })) as string
