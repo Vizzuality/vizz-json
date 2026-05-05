@@ -6,6 +6,11 @@ import {
   TooltipTrigger,
 } from '#/components/ui/tooltip'
 
+// ExportMenu exports only the resolved AiSchema JSON.
+// Any future full-chat export MUST run the chat through
+// stripSensitive() from src/lib/ai/persistence/strip-sensitive.ts
+// to remove mapboxToken before serialization.
+
 type Props = {
   readonly schemaJson: string
   readonly filename: string
