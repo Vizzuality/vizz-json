@@ -1,11 +1,5 @@
 import { Input } from '#/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '#/components/ui/select'
+import { RadioGroup, RadioGroupItem } from '#/components/ui/radio-group'
 import { ConfigSection } from './config-section'
 import type { RendererControls as RendererControlsValue } from '#/lib/ai/types'
 
@@ -14,13 +8,21 @@ type Props = {
   readonly onChange: (next: RendererControlsValue) => void
 }
 
+const RENDERER_OPTIONS: ReadonlyArray<{
+  value: RendererControlsValue['renderer']
+  label: string
+}> = [
+  { value: 'maplibre', label: 'MapLibre' },
+  { value: 'mapbox', label: 'Mapbox' },
+]
+
 export function RendererSection({ value, onChange }: Props) {
   const showMapbox = value.renderer === 'mapbox'
   return (
     <ConfigSection title="Renderer">
-      <label className="grid gap-1 text-xs font-medium">
+      <div className="grid gap-1.5 text-xs font-medium">
         Renderer
-        <Select
+        <RadioGroup
           value={value.renderer}
           onValueChange={(v) =>
             onChange({
@@ -28,16 +30,19 @@ export function RendererSection({ value, onChange }: Props) {
               renderer: v as RendererControlsValue['renderer'],
             })
           }
+          className="grid grid-cols-2 gap-2"
         >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="maplibre">MapLibre</SelectItem>
-            <SelectItem value="mapbox">Mapbox</SelectItem>
-          </SelectContent>
-        </Select>
-      </label>
+          {RENDERER_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 has-data-checked:border-primary has-data-checked:bg-primary/5"
+            >
+              <RadioGroupItem value={opt.value} />
+              {opt.label}
+            </label>
+          ))}
+        </RadioGroup>
+      </div>
       {showMapbox && (
         <>
           <label className="grid gap-1 text-xs font-medium">
