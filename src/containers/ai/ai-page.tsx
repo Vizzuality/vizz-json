@@ -9,6 +9,7 @@ import { ExportMenu, buildFilename } from './export/export-menu'
 import { ConfigPanel } from './config/config-panel'
 import { ChatDrawer } from './sidebar/chat-drawer'
 import { ParamsPanel } from '#/containers/playground/params-panel'
+import { PaneErrorBoundary } from '#/components/pane-error-boundary'
 import { useConverter } from '#/hooks/use-converter'
 import { inferParamControl } from '#/lib/param-inference'
 import { postProcess } from '#/lib/ai/post-process'
@@ -192,64 +193,78 @@ export function AiPage() {
         />
       }
       chat={
-        chat ? (
-          <div className="flex h-full flex-col">
-            <div className="min-h-0 flex-1">
-              <AiChat
-                chat={chat}
-                messages={messages}
-                activeMessageId={chat.activeMessageId}
-                onSelectMessage={handleSelectMessage}
-                onResult={handleResult}
-                onError={setChatError}
-                onClear={handleClear}
-                promptChips={PROMPT_CHIPS}
-              />
-            </div>
-            {chatError && (
-              <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
-                {chatError}
+        <PaneErrorBoundary label="Chat" resetKey={chatId}>
+          {chat ? (
+            <div className="flex h-full flex-col">
+              <div className="min-h-0 flex-1">
+                <AiChat
+                  chat={chat}
+                  messages={messages}
+                  activeMessageId={chat.activeMessageId}
+                  onSelectMessage={handleSelectMessage}
+                  onResult={handleResult}
+                  onError={setChatError}
+                  onClear={handleClear}
+                  promptChips={PROMPT_CHIPS}
+                />
               </div>
-            )}
-          </div>
-        ) : (
-          <div className="p-3 text-xs text-muted-foreground">Loading chat…</div>
-        )
+              {chatError && (
+                <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
+                  {chatError}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="p-3 text-xs text-muted-foreground">
+              Loading chat…
+            </div>
+          )}
+        </PaneErrorBoundary>
       }
-      viewer={<JsonViewer json={schemaJson} />}
+      viewer={
+        <PaneErrorBoundary label="JSON viewer" resetKey={schemaJson}>
+          <JsonViewer json={schemaJson} />
+        </PaneErrorBoundary>
+      }
       config={
-        chat ? (
-          <ConfigPanel
-            renderer={chat.renderer}
-            onRendererChange={(r) => void handleRendererChange(r)}
-          />
-        ) : null
+        <PaneErrorBoundary label="Config" resetKey={chatId}>
+          {chat ? (
+            <ConfigPanel
+              renderer={chat.renderer}
+              onRendererChange={(r) => void handleRendererChange(r)}
+            />
+          ) : null}
+        </PaneErrorBoundary>
       }
       map={
-        <RendererSwitch
-          resolvedConfig={resolved}
-          error={error}
-          renderer={chat?.renderer ?? { renderer: 'maplibre' }}
-        />
+        <PaneErrorBoundary label="Map" resetKey={schemaJson}>
+          <RendererSwitch
+            resolvedConfig={resolved}
+            error={error}
+            renderer={chat?.renderer ?? { renderer: 'maplibre' }}
+          />
+        </PaneErrorBoundary>
       }
       params={
-        activeSnapshot ? (
-          <ParamsPanel
-            metadata={{
-              title: activeSnapshot.metadata.title,
-              tier: activeSnapshot.metadata.tier,
-            }}
-            paramsConfig={inferred}
-            legendConfig={activeSnapshot.legend_config ?? null}
-            rawLegendConfig={null}
-            values={paramValues}
-            onChange={handleParamChange}
-          />
-        ) : (
-          <div className="p-3 text-xs text-muted-foreground">
-            No schema yet — describe a map in the chat.
-          </div>
-        )
+        <PaneErrorBoundary label="Params" resetKey={schemaJson}>
+          {activeSnapshot ? (
+            <ParamsPanel
+              metadata={{
+                title: activeSnapshot.metadata.title,
+                tier: activeSnapshot.metadata.tier,
+              }}
+              paramsConfig={inferred}
+              legendConfig={activeSnapshot.legend_config ?? null}
+              rawLegendConfig={null}
+              values={paramValues}
+              onChange={handleParamChange}
+            />
+          ) : (
+            <div className="p-3 text-xs text-muted-foreground">
+              No schema yet — describe a map in the chat.
+            </div>
+          )}
+        </PaneErrorBoundary>
       }
     />
   )
