@@ -18,6 +18,7 @@ import { useActiveChatId } from '#/hooks/use-active-chat-id'
 import {
   createChat,
   deleteChat,
+  renameChat,
   setActiveMessage,
   setParamValues,
   setRenderer,
@@ -130,12 +131,23 @@ export function AiPage() {
       try {
         const processed = postProcess(output) as AiSchema
         void writeParams(chat.id, buildDefaultParams(processed.params_config))
+        // Auto-title from schema metadata if still default or seeded from first message
+        const firstUserText =
+          messages.find((m) => m.role === 'user')?.text ?? ''
+        const fallback = firstUserText.slice(0, 40)
+        if (
+          chat.title === 'New chat' ||
+          chat.title === fallback ||
+          chat.title === firstUserText
+        ) {
+          void renameChat(chat.id, processed.metadata.title)
+        }
         setChatError(null)
       } catch (err) {
         setChatError(err instanceof Error ? err.message : String(err))
       }
     },
-    [chat, writeParams],
+    [chat, messages, writeParams],
   )
 
   const handleSelectMessage = useCallback(
