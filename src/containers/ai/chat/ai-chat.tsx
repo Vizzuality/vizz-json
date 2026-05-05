@@ -18,6 +18,7 @@ import {
   appendUserMessage,
   appendAssistantMessage,
 } from '#/lib/ai/persistence/messages'
+import { renameChat } from '#/lib/ai/persistence/chats'
 import type { AiSchema, Chat, Message } from '#/lib/ai/persistence/types'
 import type { AiOutput } from '#/lib/ai/output-schema'
 
@@ -59,6 +60,9 @@ export function AiChat({
 
     const chatId = chat.id
     const userMsg = await appendUserMessage(chatId, trimmed)
+    if (messages.length === 0) {
+      void renameChat(chatId, trimmed.slice(0, 40))
+    }
     setDraft('')
     setIsLoading(true)
 
