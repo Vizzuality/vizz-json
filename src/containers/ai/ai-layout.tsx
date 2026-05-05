@@ -16,6 +16,7 @@ type AiLayoutProps = {
   readonly config: React.ReactNode
   readonly map: React.ReactNode
   readonly params: React.ReactNode
+  readonly chatHeaderLeft?: React.ReactNode
   readonly toolbarActions?: React.ReactNode
 }
 
@@ -27,6 +28,7 @@ export function AiLayout({
   config,
   map,
   params,
+  chatHeaderLeft,
   toolbarActions,
 }: AiLayoutProps) {
   return (
@@ -42,20 +44,23 @@ export function AiLayout({
             className="flex h-full flex-col gap-0"
           >
             <div className="flex h-12 items-center justify-between border-b px-4">
-              <TabsList size="lg">
-                <TabsTrigger value="chat">
-                  <MessageSquare />
-                  Chat
-                </TabsTrigger>
-                <TabsTrigger value="json">
-                  <Braces />
-                  JSON
-                </TabsTrigger>
-                <TabsTrigger value="config">
-                  <Settings />
-                  Config
-                </TabsTrigger>
-              </TabsList>
+              <div className="flex items-center gap-2">
+                {chatHeaderLeft}
+                <TabsList size="lg">
+                  <TabsTrigger value="chat">
+                    <MessageSquare />
+                    Chat
+                  </TabsTrigger>
+                  <TabsTrigger value="json">
+                    <Braces />
+                    JSON
+                  </TabsTrigger>
+                  <TabsTrigger value="config">
+                    <Settings />
+                    Config
+                  </TabsTrigger>
+                </TabsList>
+              </div>
               {toolbarActions ? (
                 <div className="flex items-center gap-2">{toolbarActions}</div>
               ) : null}
