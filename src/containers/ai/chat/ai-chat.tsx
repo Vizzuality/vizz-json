@@ -12,39 +12,33 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '#/components/ui/alert-dialog'
-import type { RendererControls } from '#/lib/ai/types'
-import type { AiOutput } from '#/lib/ai/output-schema'
 import { aiResponseSchema } from '#/lib/ai/output-schema'
+import { postProcess } from '#/lib/ai/post-process'
+import {
+  appendUserMessage,
+  appendAssistantMessage,
+} from '#/lib/ai/persistence/messages'
+import type { AiSchema, Chat, Message } from '#/lib/ai/persistence/types'
+import type { AiOutput } from '#/lib/ai/output-schema'
 
-type AiChatProps = {
-  readonly renderer: RendererControls
+type Props = {
+  readonly chat: Chat
+  readonly messages: readonly Message[]
   readonly onResult: (output: AiOutput) => void
   readonly onError: (message: string) => void
   readonly onClear: () => void
   readonly promptChips: readonly string[]
-  readonly hasSchema: boolean
-}
-
-type ChatMessage = {
-  id: string
-  role: 'user' | 'assistant'
-  text: string
-}
-
-function nextId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 export function AiChat({
-  renderer,
+  chat,
+  messages,
   onResult,
   onError,
   onClear,
   promptChips,
-  hasSchema,
-}: AiChatProps) {
+}: Props) {
   const [draft, setDraft] = useState('')
-  const [messages, setMessages] = useState<ReadonlyArray<ChatMessage>>([])
   const [isLoading, setIsLoading] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
@@ -55,29 +49,19 @@ export function AiChat({
     setIsLoading(false)
   }
 
-  function clear() {
-    stop()
-    setMessages([])
-    setConfirmOpen(false)
-    onClear()
-  }
-
   async function submit(overridePrompt?: string) {
     const trimmed = (overridePrompt ?? draft).trim()
     if (!trimmed || isLoading) return
 
-    const userMsg: ChatMessage = {
-      id: nextId(),
-      role: 'user',
-      text: trimmed,
-    }
-    const history = [...messages, userMsg]
-    setMessages(history)
+    const chatId = chat.id
+    const userMsg = await appendUserMessage(chatId, trimmed)
     setDraft('')
     setIsLoading(true)
 
     const controller = new AbortController()
     abortRef.current = controller
+
+    const history = [...messages, userMsg]
 
     try {
       const res = await fetch('/api/ai-generate', {
@@ -90,9 +74,9 @@ export function AiChat({
             role: m.role,
             parts: [{ type: 'text', content: m.text }],
           })),
-          renderer: renderer.renderer,
-          mapboxToken: renderer.mapboxToken,
-          mapboxStyleUrl: renderer.mapboxStyleUrl,
+          renderer: chat.renderer.renderer,
+          mapboxToken: chat.renderer.mapboxToken,
+          mapboxStyleUrl: chat.renderer.mapboxStyleUrl,
         }),
       })
 
@@ -106,14 +90,10 @@ export function AiChat({
       const json = await res.json()
       const parsed = aiResponseSchema.parse(json)
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: nextId(),
-          role: 'assistant',
-          text: parsed.reply,
-        },
-      ])
+      const snapshot = parsed.envelope
+        ? (postProcess(parsed.envelope) as AiSchema)
+        : undefined
+      await appendAssistantMessage(chatId, parsed.reply, snapshot)
       if (parsed.envelope) onResult(parsed.envelope)
     } catch (err) {
       if ((err as Error).name === 'AbortError') return
@@ -125,25 +105,26 @@ export function AiChat({
     }
   }
 
+  const hasAssistant = messages.some((m) => m.role === 'assistant')
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex-1 space-y-2 overflow-y-auto p-3 text-sm">
-        {!messages.some((m) => m.role === 'assistant') &&
-          promptChips.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {promptChips.map((chip) => (
-                <button
-                  key={chip}
-                  type="button"
-                  onClick={() => submit(chip)}
-                  disabled={isLoading}
-                  className="rounded-full border px-3 py-1 text-xs hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
-          )}
+        {!hasAssistant && promptChips.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {promptChips.map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => submit(chip)}
+                disabled={isLoading}
+                className="rounded-full border px-3 py-1 text-xs hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        )}
         {messages.map((m) => (
           <div
             key={m.id}
@@ -198,7 +179,7 @@ export function AiChat({
                   size="sm"
                   variant="ghost"
                   className="ml-auto"
-                  disabled={messages.length === 0 && !hasSchema}
+                  disabled={messages.length === 0}
                 >
                   Clear
                 </Button>
@@ -214,7 +195,15 @@ export function AiChat({
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={clear}>Clear</AlertDialogAction>
+                <AlertDialogAction
+                  onClick={() => {
+                    stop()
+                    setConfirmOpen(false)
+                    onClear()
+                  }}
+                >
+                  Clear
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

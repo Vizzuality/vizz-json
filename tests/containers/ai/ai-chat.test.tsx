@@ -7,11 +7,17 @@ import {
   within,
 } from '@testing-library/react'
 import { AiChat } from '#/containers/ai/chat/ai-chat'
+import { db } from '#/lib/ai/persistence/db'
+import { createChat } from '#/lib/ai/persistence/chats'
+import type { Chat, Message } from '#/lib/ai/persistence/types'
 
 const ENVELOPE = {
   metadata: { title: 'Test', tier: 'basic' as const, description: 'd' },
-  config: {},
-  params_config: [],
+  style: {
+    source: { type: 'geojson', data: 'https://example.com/x.geojson' },
+    styles: [{ id: 'l', type: 'circle' }],
+  },
+  parameterize: [],
 }
 const SUCCESS_BODY = {
   reply: 'ok',
@@ -27,32 +33,55 @@ function mockFetchOnce(body: unknown, status = 200) {
   )
 }
 
-const baseProps = {
-  renderer: { renderer: 'maplibre' as const },
-  promptChips: ['Show Sentinel-2'],
-  hasSchema: false,
-  onResult: vi.fn(),
-  onError: vi.fn(),
-  onClear: vi.fn(),
+let chat: Chat
+
+async function setupChat(): Promise<Chat> {
+  return await createChat()
+}
+
+const PROMPT_CHIPS = ['Show Sentinel-2']
+
+function makeProps(
+  overrides: Partial<{
+    chat: Chat
+    messages: readonly Message[]
+    onResult: (output: unknown) => void
+    onError: (message: string) => void
+    onClear: () => void
+    promptChips: readonly string[]
+  }> = {},
+) {
+  return {
+    chat,
+    messages: [] as readonly Message[],
+    promptChips: PROMPT_CHIPS,
+    onResult: vi.fn(),
+    onError: vi.fn(),
+    onClear: vi.fn(),
+    ...overrides,
+  }
 }
 
 describe('AiChat', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.restoreAllMocks()
+    await db.chats.clear()
+    await db.messages.clear()
+    chat = await setupChat()
   })
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
   it('renders prompt input and chip buttons', () => {
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     expect(screen.getByPlaceholderText(/describe a map/i)).toBeInTheDocument()
     expect(screen.getByText('Show Sentinel-2')).toBeInTheDocument()
   })
 
   it('submits on plain Enter', async () => {
     const fetchSpy = mockFetchOnce(SUCCESS_BODY)
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'hello' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
@@ -61,7 +90,7 @@ describe('AiChat', () => {
 
   it('does NOT submit on Shift+Enter (newline)', () => {
     const fetchSpy = vi.spyOn(global, 'fetch')
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'hello' } })
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: true })
@@ -70,7 +99,7 @@ describe('AiChat', () => {
 
   it('does NOT submit while IME composition is active', () => {
     const fetchSpy = vi.spyOn(global, 'fetch')
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'こんにちは' } })
     fireEvent.keyDown(textarea, { key: 'Enter', isComposing: true })
@@ -79,7 +108,7 @@ describe('AiChat', () => {
 
   it('does NOT submit on Enter when draft is empty', () => {
     const fetchSpy = vi.spyOn(global, 'fetch')
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.keyDown(textarea, { key: 'Enter' })
     expect(fetchSpy).not.toHaveBeenCalled()
@@ -87,7 +116,7 @@ describe('AiChat', () => {
 
   it('submits immediately when a prompt chip is clicked', async () => {
     const fetchSpy = mockFetchOnce(SUCCESS_BODY)
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     fireEvent.click(screen.getByText('Show Sentinel-2'))
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
     const [, init] = fetchSpy.mock.calls[0]
@@ -97,7 +126,7 @@ describe('AiChat', () => {
 
   it('replaces the current draft when a chip is clicked', async () => {
     const fetchSpy = mockFetchOnce(SUCCESS_BODY)
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
       target: { value: 'previous draft' },
     })
@@ -110,12 +139,10 @@ describe('AiChat', () => {
   it('disables prompt chips while loading', async () => {
     // Never-resolving fetch keeps the component in `isLoading`.
     vi.spyOn(global, 'fetch').mockImplementation(() => new Promise(() => {}))
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'kick off' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
-    // Chips remain in the DOM until the first message lands; while loading they
-    // must be disabled.
     await waitFor(() => {
       const chip = screen.getByRole('button', { name: 'Show Sentinel-2' })
       expect(chip).toBeDisabled()
@@ -124,7 +151,7 @@ describe('AiChat', () => {
 
   it('shows Send when idle and Stop when loading', async () => {
     vi.spyOn(global, 'fetch').mockImplementation(() => new Promise(() => {}))
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: 'Stop' }),
@@ -146,7 +173,7 @@ describe('AiChat', () => {
       abortedSignal = init!.signal!
       return new Promise(() => {})
     })
-    render(<AiChat {...baseProps} />)
+    render(<AiChat {...makeProps()} />)
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'go' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
@@ -155,70 +182,86 @@ describe('AiChat', () => {
     await waitFor(() => expect(abortedSignal!.aborted).toBe(true))
   })
 
-  it('disables Clear when no messages and no schema', () => {
-    render(<AiChat {...baseProps} hasSchema={false} />)
+  it('disables Clear when there are no messages', () => {
+    render(<AiChat {...makeProps({ messages: [] })} />)
     expect(screen.getByRole('button', { name: 'Clear' })).toBeDisabled()
   })
 
-  it('enables Clear when schema is present even without messages', () => {
-    render(<AiChat {...baseProps} hasSchema={true} />)
+  it('enables Clear when messages prop has entries', () => {
+    const messages: readonly Message[] = [
+      {
+        id: 'm1',
+        chatId: chat.id,
+        role: 'user',
+        text: 'hi',
+        createdAt: 1,
+        schemaVersion: 1,
+      },
+    ]
+    render(<AiChat {...makeProps({ messages })} />)
     expect(screen.getByRole('button', { name: 'Clear' })).toBeEnabled()
   })
 
-  it('enables Clear after a successful message exchange', async () => {
-    mockFetchOnce(SUCCESS_BODY)
-    const { rerender } = render(<AiChat {...baseProps} hasSchema={false} />)
-    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
-      target: { value: 'hi' },
-    })
-    fireEvent.keyDown(screen.getByPlaceholderText(/describe a map/i), {
-      key: 'Enter',
-    })
-    await waitFor(() =>
-      expect(screen.getByRole('button', { name: 'Clear' })).toBeEnabled(),
-    )
-    rerender(<AiChat {...baseProps} hasSchema={false} />)
-    expect(screen.getByRole('button', { name: 'Clear' })).toBeEnabled()
+  it('renders messages from props', () => {
+    const messages: readonly Message[] = [
+      {
+        id: 'm1',
+        chatId: chat.id,
+        role: 'user',
+        text: 'hi there',
+        createdAt: 1,
+        schemaVersion: 1,
+      },
+      {
+        id: 'm2',
+        chatId: chat.id,
+        role: 'assistant',
+        text: 'hello back',
+        createdAt: 2,
+        schemaVersion: 1,
+      },
+    ]
+    render(<AiChat {...makeProps({ messages })} />)
+    expect(screen.getByText('hi there')).toBeInTheDocument()
+    expect(screen.getByText('hello back')).toBeInTheDocument()
   })
 
-  it('confirms clear, wipes messages, and calls onClear', async () => {
-    mockFetchOnce(SUCCESS_BODY)
+  it('confirms clear and calls onClear', async () => {
     const onClear = vi.fn()
-    render(<AiChat {...baseProps} hasSchema={true} onClear={onClear} />)
-    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
-      target: { value: 'hi' },
-    })
-    fireEvent.keyDown(screen.getByPlaceholderText(/describe a map/i), {
-      key: 'Enter',
-    })
-    await waitFor(() => expect(screen.getByText('hi')).toBeInTheDocument())
-
+    const messages: readonly Message[] = [
+      {
+        id: 'm1',
+        chatId: chat.id,
+        role: 'user',
+        text: 'hi',
+        createdAt: 1,
+        schemaVersion: 1,
+      },
+    ]
+    render(<AiChat {...makeProps({ messages, onClear })} />)
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
     expect(await screen.findByText('Clear chat?')).toBeInTheDocument()
     const dialog = await screen.findByRole('alertdialog')
     fireEvent.click(within(dialog).getByRole('button', { name: 'Clear' }))
-
     await waitFor(() => expect(onClear).toHaveBeenCalledTimes(1))
-    expect(screen.queryByText('hi')).not.toBeInTheDocument()
   })
 
-  it('cancel keeps messages and does not call onClear', async () => {
-    mockFetchOnce(SUCCESS_BODY)
+  it('cancel does not call onClear', async () => {
     const onClear = vi.fn()
-    render(<AiChat {...baseProps} hasSchema={true} onClear={onClear} />)
-    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
-      target: { value: 'hi' },
-    })
-    fireEvent.keyDown(screen.getByPlaceholderText(/describe a map/i), {
-      key: 'Enter',
-    })
-    await waitFor(() => expect(screen.getByText('hi')).toBeInTheDocument())
-
+    const messages: readonly Message[] = [
+      {
+        id: 'm1',
+        chatId: chat.id,
+        role: 'user',
+        text: 'hi',
+        createdAt: 1,
+        schemaVersion: 1,
+      },
+    ]
+    render(<AiChat {...makeProps({ messages, onClear })} />)
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
     fireEvent.click(await screen.findByRole('button', { name: 'Cancel' }))
-
     expect(onClear).not.toHaveBeenCalled()
-    expect(screen.getByText('hi')).toBeInTheDocument()
   })
 
   it('Clear during loading aborts the request', async () => {
@@ -228,13 +271,20 @@ describe('AiChat', () => {
       return new Promise(() => {})
     })
     const onClear = vi.fn()
-    render(<AiChat {...baseProps} hasSchema={true} onClear={onClear} />)
-    fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
-      target: { value: 'hi' },
-    })
-    fireEvent.keyDown(screen.getByPlaceholderText(/describe a map/i), {
-      key: 'Enter',
-    })
+    const messages: readonly Message[] = [
+      {
+        id: 'm1',
+        chatId: chat.id,
+        role: 'user',
+        text: 'hi',
+        createdAt: 1,
+        schemaVersion: 1,
+      },
+    ]
+    render(<AiChat {...makeProps({ messages, onClear })} />)
+    const textarea = screen.getByPlaceholderText(/describe a map/i)
+    fireEvent.change(textarea, { target: { value: 'go' } })
+    fireEvent.keyDown(textarea, { key: 'Enter' })
     await screen.findByRole('button', { name: 'Stop' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))

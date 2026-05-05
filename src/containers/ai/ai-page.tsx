@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { AiLayout } from './ai-layout'
 import type { AiViewMode } from './ai-layout'
-import { AiChat } from './chat/ai-chat'
 import { JsonViewer } from './json/json-viewer'
 import { RendererSwitch } from './map/renderer-switch'
 import { ExportMenu, buildFilename } from './export/export-menu'
@@ -9,9 +8,6 @@ import { ConfigPanel } from './config/config-panel'
 import { ParamsPanel } from '#/containers/playground/params-panel'
 import { useConverter } from '#/hooks/use-converter'
 import { inferParamControl } from '#/lib/param-inference'
-import { postProcess } from '#/lib/ai/post-process'
-import { validateStyle } from '#/lib/ai/style-validator'
-import type { AiOutput } from '#/lib/ai/output-schema'
 import type { RendererControls as RendererControlsValue } from '#/lib/ai/types'
 import type {
   ParamConfig,
@@ -20,13 +16,6 @@ import type {
   ExampleMetadata,
 } from '#/lib/types'
 
-const PROMPT_CHIPS = [
-  'Show Sentinel-2 imagery with an opacity slider',
-  'Heatmap of earthquakes from https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson',
-  'Choropleth of US states by population',
-  'Vector circles sized by magnitude with a color scale',
-] as const
-
 type AiSchema = {
   readonly metadata: ExampleMetadata
   readonly config: Record<string, unknown>
@@ -34,41 +23,14 @@ type AiSchema = {
   readonly legend_config?: LegendConfig
 }
 
-function buildDefaultParams(
-  paramsConfig: readonly ParamConfig[],
-): ResolvedParams {
-  return Object.fromEntries(paramsConfig.map((p) => [p.key, p.default]))
-}
-
 export function AiPage() {
   const [renderer, setRenderer] = useState<RendererControlsValue>({
     renderer: 'maplibre',
   })
   const [viewMode, setViewMode] = useState<AiViewMode>('chat')
-  const [schema, setSchema] = useState<AiSchema | null>(null)
+  const [schema] = useState<AiSchema | null>(null)
   const [paramValues, setParamValues] = useState<ResolvedParams>({})
-  const [chatError, setChatError] = useState<string | null>(null)
-
-  const handleResult = useCallback(
-    (output: AiOutput) => {
-      const styleErrors = validateStyle(output.style, renderer.renderer)
-      if (styleErrors.length > 0) {
-        setChatError(
-          `Generated style invalid: ${styleErrors.map((e) => e.message).join('; ')}`,
-        )
-        return
-      }
-      try {
-        const processed = postProcess(output) as AiSchema
-        setSchema(processed)
-        setParamValues(buildDefaultParams(processed.params_config))
-        setChatError(null)
-      } catch (err) {
-        setChatError(err instanceof Error ? err.message : String(err))
-      }
-    },
-    [renderer.renderer],
-  )
+  const [, setChatError] = useState<string | null>(null)
 
   const schemaJson = useMemo(
     () => (schema ? JSON.stringify(schema, null, 2) : ''),
@@ -86,12 +48,6 @@ export function AiPage() {
     setParamValues((prev) => ({ ...prev, [key]: value }))
   }, [])
 
-  const handleClear = useCallback(() => {
-    setSchema(null)
-    setParamValues({})
-    setChatError(null)
-  }, [])
-
   return (
     <AiLayout
       viewMode={viewMode}
@@ -104,22 +60,9 @@ export function AiPage() {
         />
       }
       chat={
-        <div className="flex h-full flex-col">
-          <div className="min-h-0 flex-1">
-            <AiChat
-              renderer={renderer}
-              onResult={handleResult}
-              onError={setChatError}
-              onClear={handleClear}
-              promptChips={PROMPT_CHIPS}
-              hasSchema={schema !== null}
-            />
-          </div>
-          {chatError && (
-            <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
-              {chatError}
-            </div>
-          )}
+        /* TODO Task 16: replace stub with real chat from Dexie */
+        <div className="p-3 text-xs text-muted-foreground">
+          Chat (rewiring in progress — see Task 16)
         </div>
       }
       viewer={<JsonViewer json={schemaJson} />}
