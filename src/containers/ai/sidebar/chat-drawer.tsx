@@ -63,14 +63,11 @@ export function ChatDrawer({ activeChatId, onSelectChat }: Props) {
           </Button>
         }
       />
-      <SheetContent side="left" className="w-72 p-0">
-        <SheetHeader className="flex flex-row items-center justify-between border-b p-3">
+      <SheetContent side="left" className="w-72 gap-0 p-0">
+        <SheetHeader className="border-b p-3.5 pr-12">
           <SheetTitle className="text-sm">Chats</SheetTitle>
-          <Button size="sm" onClick={handleNew}>
-            <Plus className="mr-1 h-3 w-3" /> New
-          </Button>
         </SheetHeader>
-        <div className="flex flex-col gap-0.5 overflow-y-auto p-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto p-2">
           {chats.length === 0 && (
             <p className="p-2 text-xs text-muted-foreground">No chats yet.</p>
           )}
@@ -87,6 +84,11 @@ export function ChatDrawer({ activeChatId, onSelectChat }: Props) {
               onDelete={() => void handleDelete(c)}
             />
           ))}
+        </div>
+        <div className="border-t bg-popover p-2">
+          <Button size="lg" className="w-full" onClick={handleNew}>
+            <Plus className="mr-1 h-4 w-4" /> New chat
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
