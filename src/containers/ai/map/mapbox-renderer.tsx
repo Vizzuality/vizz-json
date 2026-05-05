@@ -42,7 +42,7 @@ export function MapboxRenderer({
         projection={{ name: 'mercator' }}
       >
         {source && styles && (
-          <Source {...source} id={`${itemId}-source`}>
+          <Source {...source} key={itemId} id={`${itemId}-source`}>
             {styles.map((style, i) => (
               <Layer
                 {...style}
