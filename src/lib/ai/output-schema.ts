@@ -29,7 +29,12 @@ const parameterizeEntrySchema = z.object({
   group: z.literal('legend').optional(),
 })
 
-const styleSchema = z.record(z.string(), z.unknown())
+const styleSchema = z
+  .object({
+    source: z.record(z.string(), z.unknown()),
+    styles: z.array(z.record(z.string(), z.unknown())).min(1),
+  })
+  .passthrough()
 
 export const aiOutputSchema = z.object({
   metadata: metadataSchema,
@@ -40,7 +45,7 @@ export const aiOutputSchema = z.object({
 
 export const aiResponseSchema = z.object({
   reply: z.string().min(1),
-  envelope: aiOutputSchema,
+  envelope: aiOutputSchema.optional(),
 })
 
 export type AiOutput = z.infer<typeof aiOutputSchema>

@@ -114,7 +114,7 @@ export function AiChat({
           text: parsed.reply,
         },
       ])
-      onResult(parsed.envelope)
+      if (parsed.envelope) onResult(parsed.envelope)
     } catch (err) {
       if ((err as Error).name === 'AbortError') return
       const e = err instanceof Error ? err : new Error(String(err))
