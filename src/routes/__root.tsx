@@ -17,6 +17,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { getLocale } from '#/paraglide/runtime'
 import { m } from '#/paraglide/messages'
 import { buttonVariants } from '#/components/ui/button'
+import { Toaster } from '#/components/ui/sonner'
 import { TooltipProvider } from '#/components/ui/tooltip'
 
 import appCss from '../styles.css?url'
@@ -108,6 +109,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               TanStackQueryDevtools,
             ]}
           />
+          <Toaster />
         </TanStackQueryProvider>
         <Scripts />
       </body>
