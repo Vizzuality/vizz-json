@@ -30,12 +30,12 @@ export function RendererSection({ value, onChange }: Props) {
               renderer: v as RendererControlsValue['renderer'],
             })
           }
-          className="grid grid-cols-2 gap-2"
+          className="flex flex-wrap gap-4"
         >
           {RENDERER_OPTIONS.map((opt) => (
             <label
               key={opt.value}
-              className="flex cursor-pointer items-center gap-2 rounded-md border border-input px-3 py-2 has-data-checked:border-primary has-data-checked:bg-primary/5"
+              className="flex cursor-pointer items-center gap-2 font-normal"
             >
               <RadioGroupItem value={opt.value} />
               {opt.label}
