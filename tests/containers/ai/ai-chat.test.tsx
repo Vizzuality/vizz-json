@@ -49,6 +49,8 @@ function makeProps(
     onError: (message: string) => void
     onClear: () => void
     promptChips: readonly string[]
+    activeMessageId: string | null
+    onSelectMessage: (id: string) => void
   }> = {},
 ) {
   return {
@@ -58,6 +60,8 @@ function makeProps(
     onResult: vi.fn(),
     onError: vi.fn(),
     onClear: vi.fn(),
+    activeMessageId: null,
+    onSelectMessage: vi.fn(),
     ...overrides,
   }
 }

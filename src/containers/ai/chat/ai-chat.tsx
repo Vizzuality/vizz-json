@@ -28,6 +28,8 @@ type Props = {
   readonly onError: (message: string) => void
   readonly onClear: () => void
   readonly promptChips: readonly string[]
+  readonly activeMessageId: string | null
+  readonly onSelectMessage: (id: string) => void
 }
 
 export function AiChat({
@@ -37,6 +39,8 @@ export function AiChat({
   onError,
   onClear,
   promptChips,
+  activeMessageId,
+  onSelectMessage,
 }: Props) {
   const [draft, setDraft] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -125,21 +129,43 @@ export function AiChat({
             ))}
           </div>
         )}
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            className={
-              m.role === 'user'
-                ? 'rounded-md bg-primary/10 p-2'
-                : 'rounded-md bg-muted p-2'
-            }
-          >
-            <span className="block text-[10px] uppercase text-muted-foreground">
-              {m.role}
-            </span>
-            <span className="whitespace-pre-wrap text-xs">{m.text}</span>
-          </div>
-        ))}
+        {messages.map((m) => {
+          const isAssistantWithSnap =
+            m.role === 'assistant' && !!m.schemaSnapshot
+          const isActive = m.id === activeMessageId
+          return (
+            <div
+              key={m.id}
+              onClick={() => {
+                if (isAssistantWithSnap) onSelectMessage(m.id)
+              }}
+              onKeyDown={(e) => {
+                if (!isAssistantWithSnap) return
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onSelectMessage(m.id)
+                }
+              }}
+              role={isAssistantWithSnap ? 'button' : undefined}
+              tabIndex={isAssistantWithSnap ? 0 : -1}
+              className={[
+                m.role === 'user'
+                  ? 'rounded-md bg-primary/10 p-2'
+                  : 'rounded-md bg-muted p-2',
+                isAssistantWithSnap
+                  ? 'cursor-pointer hover:ring-1 hover:ring-primary'
+                  : '',
+                isActive ? 'ring-2 ring-primary' : '',
+              ].join(' ')}
+            >
+              <span className="block text-[10px] uppercase text-muted-foreground">
+                {m.role}
+                {isActive && ' · active'}
+              </span>
+              <span className="whitespace-pre-wrap text-xs">{m.text}</span>
+            </div>
+          )
+        })}
         {isLoading && (
           <div className="rounded-md bg-muted p-2 text-xs italic">
             Generating…
