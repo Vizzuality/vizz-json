@@ -65,10 +65,31 @@ function buildSyntheticStyle(style: unknown): Record<string, unknown> {
   return { version: 8, sources, layers }
 }
 
+function customSemanticErrors(style: unknown): readonly StyleError[] {
+  if (!style || typeof style !== 'object') return []
+  const fragment = style as Record<string, unknown>
+  const errors: StyleError[] = []
+
+  const sourcesArr = fragment.sources
+  if (Array.isArray(sourcesArr)) {
+    const seen = new Set<string>()
+    for (const entry of sourcesArr) {
+      const id = (entry as { id?: unknown }).id
+      if (typeof id !== 'string') continue
+      if (seen.has(id)) errors.push({ message: `duplicate source id: "${id}"` })
+      seen.add(id)
+    }
+  }
+
+  return errors
+}
+
 export function validateStyle(
   style: unknown,
   renderer: RendererId,
 ): readonly StyleError[] {
+  const custom = customSemanticErrors(style)
+  if (custom.length > 0) return custom
   const synthetic = buildSyntheticStyle(style)
   const errors =
     renderer === 'mapbox'

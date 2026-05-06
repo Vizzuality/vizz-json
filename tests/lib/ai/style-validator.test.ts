@@ -98,4 +98,20 @@ describe('validateStyle', () => {
     )
     expect(errors).toEqual([])
   })
+
+  it('rejects duplicate source ids', () => {
+    const errors = validateStyle(
+      {
+        sources: [
+          { id: 'dup', type: 'geojson', data: 'https://a' },
+          { id: 'dup', type: 'geojson', data: 'https://b' },
+        ],
+        styles: [{ source: 'dup', type: 'fill' }],
+      },
+      'maplibre',
+    )
+    expect(errors.some((e) => /duplicate source id/i.test(e.message))).toBe(
+      true,
+    )
+  })
 })
