@@ -44,6 +44,7 @@ export function PanelHeader({ title, actions }: Props) {
         {editable && editing ? (
           <Input
             autoFocus
+            aria-label="Edit title"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onBlur={commit}
