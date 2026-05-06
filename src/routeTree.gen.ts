@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
+import { Route as AiRouteImport } from './routes/ai'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuidelinesIndexRouteImport } from './routes/guidelines/index'
@@ -20,6 +21,7 @@ import { Route as GuidelinesParamsRouteImport } from './routes/guidelines/params
 import { Route as GuidelinesLegendsRouteImport } from './routes/guidelines/legends'
 import { Route as GuidelinesFunctionsRouteImport } from './routes/guidelines/functions'
 import { Route as GuidelinesExpressionsRouteImport } from './routes/guidelines/expressions'
+import { Route as ApiAiGenerateRouteImport } from './routes/api/ai-generate'
 
 const PresentationRoute = PresentationRouteImport.update({
   id: '/presentation',
@@ -34,6 +36,11 @@ const PlaygroundRoute = PlaygroundRouteImport.update({
 const GuidelinesRoute = GuidelinesRouteImport.update({
   id: '/guidelines',
   path: '/guidelines',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiRoute = AiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -76,13 +83,20 @@ const GuidelinesExpressionsRoute = GuidelinesExpressionsRouteImport.update({
   path: '/expressions',
   getParentRoute: () => GuidelinesRoute,
 } as any)
+const ApiAiGenerateRoute = ApiAiGenerateRouteImport.update({
+  id: '/api/ai-generate',
+  path: '/api/ai-generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
+  '/api/ai-generate': typeof ApiAiGenerateRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
@@ -93,8 +107,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
+  '/api/ai-generate': typeof ApiAiGenerateRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
@@ -106,9 +122,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai': typeof AiRoute
   '/guidelines': typeof GuidelinesRouteWithChildren
   '/playground': typeof PlaygroundRoute
   '/presentation': typeof PresentationRoute
+  '/api/ai-generate': typeof ApiAiGenerateRoute
   '/guidelines/expressions': typeof GuidelinesExpressionsRoute
   '/guidelines/functions': typeof GuidelinesFunctionsRoute
   '/guidelines/legends': typeof GuidelinesLegendsRoute
@@ -121,9 +139,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/ai'
     | '/guidelines'
     | '/playground'
     | '/presentation'
+    | '/api/ai-generate'
     | '/guidelines/expressions'
     | '/guidelines/functions'
     | '/guidelines/legends'
@@ -134,8 +154,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/ai'
     | '/playground'
     | '/presentation'
+    | '/api/ai-generate'
     | '/guidelines/expressions'
     | '/guidelines/functions'
     | '/guidelines/legends'
@@ -146,9 +168,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/ai'
     | '/guidelines'
     | '/playground'
     | '/presentation'
+    | '/api/ai-generate'
     | '/guidelines/expressions'
     | '/guidelines/functions'
     | '/guidelines/legends'
@@ -160,9 +184,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AiRoute: typeof AiRoute
   GuidelinesRoute: typeof GuidelinesRouteWithChildren
   PlaygroundRoute: typeof PlaygroundRoute
   PresentationRoute: typeof PresentationRoute
+  ApiAiGenerateRoute: typeof ApiAiGenerateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -186,6 +212,13 @@ declare module '@tanstack/react-router' {
       path: '/guidelines'
       fullPath: '/guidelines'
       preLoaderRoute: typeof GuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai': {
+      id: '/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -244,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidelinesExpressionsRouteImport
       parentRoute: typeof GuidelinesRoute
     }
+    '/api/ai-generate': {
+      id: '/api/ai-generate'
+      path: '/api/ai-generate'
+      fullPath: '/api/ai-generate'
+      preLoaderRoute: typeof ApiAiGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -272,9 +312,11 @@ const GuidelinesRouteWithChildren = GuidelinesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AiRoute: AiRoute,
   GuidelinesRoute: GuidelinesRouteWithChildren,
   PlaygroundRoute: PlaygroundRoute,
   PresentationRoute: PresentationRoute,
+  ApiAiGenerateRoute: ApiAiGenerateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
