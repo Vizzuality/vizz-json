@@ -7,22 +7,11 @@ describe('validateStyle', () => {
     expect(validateStyle({}, 'mapbox')).toEqual([])
   })
 
-  it('accepts a VizzJson-style fragment ({source, styles[]})', () => {
-    const errors = validateStyle(
-      {
-        source: { type: 'raster', tiles: ['x'], tileSize: 256 },
-        styles: [{ type: 'raster' }],
-      },
-      'maplibre',
-    )
-    expect(errors).toEqual([])
-  })
-
   it('rejects a fragment whose source has an unknown type', () => {
     const errors = validateStyle(
       {
-        source: { type: 'definitely-not-a-real-type' },
-        styles: [{ type: 'raster' }],
+        sources: [{ id: 'main', type: 'definitely-not-a-real-type' }],
+        styles: [{ source: 'main', type: 'raster' }],
       },
       'maplibre',
     )
@@ -32,8 +21,8 @@ describe('validateStyle', () => {
   it('rejects a fragment whose layer has an unknown type', () => {
     const errors = validateStyle(
       {
-        source: { type: 'raster', tiles: ['x'], tileSize: 256 },
-        styles: [{ type: 'definitely-not-a-real-layer-type' }],
+        sources: [{ id: 'main', type: 'raster', tiles: ['x'], tileSize: 256 }],
+        styles: [{ source: 'main', type: 'definitely-not-a-real-layer-type' }],
       },
       'maplibre',
     )

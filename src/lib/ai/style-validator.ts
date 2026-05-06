@@ -6,10 +6,11 @@ export type StyleError = { readonly message: string; readonly line?: number }
 
 const SYNTHETIC_SOURCE_KEY = '__vizz_source__'
 
-// VizzJson style fragments use a custom shape ({source, styles[]} or
-// {sources, layers[]}) — not a full MapLibre/Mapbox style. Wrap the fragment
-// into a synthetic full style so the spec validators can check sources and
-// layers without complaining about missing top-level keys.
+// VizzJson style fragments use a custom shape ({sources, styles[]}) — not a
+// full MapLibre/Mapbox style. Wrap the fragment into a synthetic full style
+// so the spec validators can check sources and layers without complaining
+// about missing top-level keys. A pre-existing full style ({version, sources,
+// layers}) is passed through unchanged.
 function buildSyntheticStyle(style: unknown): Record<string, unknown> {
   if (!style || typeof style !== 'object') {
     return { version: 8, sources: {}, layers: [] }
@@ -22,36 +23,22 @@ function buildSyntheticStyle(style: unknown): Record<string, unknown> {
 
   const explicitSourcesArray = fragment.sources as
     | ReadonlyArray<Record<string, unknown>>
-    | Record<string, unknown>
     | undefined
 
-  const sources: Record<string, unknown> = (() => {
-    if (Array.isArray(explicitSourcesArray)) {
-      const out: Record<string, unknown> = {}
-      for (const entry of explicitSourcesArray) {
-        const { id, ...rest } = entry as { id?: string } & Record<
-          string,
-          unknown
-        >
-        if (typeof id !== 'string') continue
-        out[id] = rest
-      }
-      return out
-    }
-    if (explicitSourcesArray && typeof explicitSourcesArray === 'object') {
-      return explicitSourcesArray as Record<string, unknown>
-    }
-    const explicitSource = fragment.source as
-      | Record<string, unknown>
-      | undefined
-    return explicitSource ? { [SYNTHETIC_SOURCE_KEY]: explicitSource } : {}
-  })()
+  if (!Array.isArray(explicitSourcesArray)) {
+    return { version: 8, sources: {}, layers: [] }
+  }
+
+  const sources: Record<string, unknown> = {}
+  for (const entry of explicitSourcesArray) {
+    const { id, ...rest } = entry as { id?: string } & Record<string, unknown>
+    if (typeof id !== 'string') continue
+    sources[id] = rest
+  }
 
   const sourceKeys = Object.keys(sources)
   const fallbackSourceKey = sourceKeys[0] ?? SYNTHETIC_SOURCE_KEY
-  const rawLayers = (fragment.layers ?? fragment.styles) as
-    | ReadonlyArray<unknown>
-    | undefined
+  const rawLayers = fragment.styles as ReadonlyArray<unknown> | undefined
 
   const layers = (rawLayers ?? []).map((entry, i) => {
     const layer = (entry ?? {}) as Record<string, unknown>
