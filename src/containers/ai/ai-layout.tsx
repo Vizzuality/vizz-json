@@ -1,82 +1,56 @@
-import { Braces, MessageSquare, Settings } from 'lucide-react'
+import type { ReactNode } from 'react'
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from '#/components/ui/resizable'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '#/components/ui/tabs'
+import { PanelHeader } from './panel-header'
+import { SidebarRail } from './sidebar/sidebar-rail'
+import type { AiViewMode } from './sidebar/sidebar-rail'
 
-export type AiViewMode = 'chat' | 'json' | 'config'
+export type { AiViewMode }
+
+type EditableTitle = {
+  readonly value: string
+  readonly onRename: (next: string) => void
+}
+
+export type AiPanel = {
+  readonly title: string | EditableTitle
+  readonly actions?: ReactNode
+  readonly body: ReactNode
+}
 
 type AiLayoutProps = {
   readonly viewMode: AiViewMode
-  readonly onViewModeChange: (value: AiViewMode) => void
-  readonly chat: React.ReactNode
-  readonly viewer: React.ReactNode
-  readonly config: React.ReactNode
-  readonly map: React.ReactNode
-  readonly params: React.ReactNode
-  readonly chatHeaderLeft?: React.ReactNode
-  readonly toolbarActions?: React.ReactNode
+  readonly onViewModeChange: (next: AiViewMode) => void
+  readonly panels: Record<AiViewMode, AiPanel>
+  readonly map: ReactNode
+  readonly params: ReactNode
 }
 
 export function AiLayout({
   viewMode,
   onViewModeChange,
-  chat,
-  viewer,
-  config,
+  panels,
   map,
   params,
-  chatHeaderLeft,
-  toolbarActions,
 }: AiLayoutProps) {
+  const active = panels[viewMode]
   return (
     <div className="flex h-[calc(100vh-3.5rem)] bg-background">
+      <SidebarRail value={viewMode} onChange={onViewModeChange} />
       <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel
-          id="chat"
+          id="ai-panel"
           defaultSize="500px"
           minSize="400px"
           groupResizeBehavior="preserve-pixel-size"
         >
-          <Tabs
-            value={viewMode}
-            onValueChange={(value) => onViewModeChange(value as AiViewMode)}
-            className="flex h-full flex-col gap-0"
-          >
-            <div className="flex h-12 items-center justify-between border-b px-4">
-              <div className="flex items-center gap-2">
-                {chatHeaderLeft}
-                <TabsList size="lg">
-                  <TabsTrigger value="chat">
-                    <MessageSquare />
-                    Chat
-                  </TabsTrigger>
-                  <TabsTrigger value="json">
-                    <Braces />
-                    JSON
-                  </TabsTrigger>
-                  <TabsTrigger value="config">
-                    <Settings />
-                    Config
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              {toolbarActions ? (
-                <div className="flex items-center gap-2">{toolbarActions}</div>
-              ) : null}
-            </div>
-            <TabsContent value="chat" keepMounted className="min-h-0">
-              {chat}
-            </TabsContent>
-            <TabsContent value="json" className="min-h-0">
-              {viewer}
-            </TabsContent>
-            <TabsContent value="config" keepMounted className="min-h-0">
-              {config}
-            </TabsContent>
-          </Tabs>
+          <div className="flex h-full flex-col">
+            <PanelHeader title={active.title} actions={active.actions} />
+            <div className="min-h-0 flex-1">{active.body}</div>
+          </div>
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel id="map" minSize="30%">

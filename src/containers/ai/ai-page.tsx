@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { AiLayout } from './ai-layout'
 import type { AiViewMode } from './ai-layout'
@@ -7,7 +8,13 @@ import { JsonViewer } from './json/json-viewer'
 import { RendererSwitch } from './map/renderer-switch'
 import { ExportMenu, buildFilename } from './export/export-menu'
 import { ConfigPanel } from './config/config-panel'
-import { ChatDrawer } from './sidebar/chat-drawer'
+import { MyAreaPanel } from './sidebar/my-area-panel'
+import { Button } from '#/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '#/components/ui/tooltip'
 import { ParamsPanel } from '#/containers/playground/params-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
 import { useConverter } from '#/hooks/use-converter'
@@ -140,7 +147,6 @@ export function AiPage() {
       try {
         const processed = postProcess(output) as AiSchema
         void writeParams(chat.id, buildDefaultParams(processed.params_config))
-        // Auto-title from schema metadata if still default or seeded from first message
         const firstUserText =
           messages.find((m) => m.role === 'user')?.text ?? ''
         const fallback = firstUserText.slice(0, 40)
@@ -186,64 +192,127 @@ export function AiPage() {
     setChatError(null)
   }, [chatId, setChatId])
 
+  const handleSelectChatFromMyArea = useCallback(
+    (id: string) => {
+      setChatId(id)
+      setViewMode('chat')
+    },
+    [setChatId],
+  )
+
+  const handleNewChat = useCallback(async () => {
+    const fresh = await createChat()
+    setChatId(fresh.id)
+    setViewMode('chat')
+  }, [setChatId])
+
+  const exportActions = (
+    <ExportMenu
+      schemaJson={schemaJson}
+      filename={buildFilename(activeSnapshot?.metadata.title)}
+      onError={setChatError}
+    />
+  )
+
+  const newChatAction = (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            size="icon-sm"
+            variant="outline"
+            onClick={() => void handleNewChat()}
+            aria-label="New chat"
+          >
+            <Plus />
+          </Button>
+        }
+      />
+      <TooltipContent>New chat</TooltipContent>
+    </Tooltip>
+  )
+
+  const editableTitle = chat
+    ? {
+        value: chat.title,
+        onRename: (next: string) => void renameChat(chat.id, next),
+      }
+    : 'Loading…'
+
   return (
     <AiLayout
       viewMode={viewMode}
       onViewModeChange={setViewMode}
-      chatHeaderLeft={
-        <ChatDrawer activeChatId={chatId} onSelectChat={setChatId} />
-      }
-      toolbarActions={
-        <ExportMenu
-          schemaJson={schemaJson}
-          filename={buildFilename(activeSnapshot?.metadata.title)}
-          onError={setChatError}
-        />
-      }
-      chat={
-        <PaneErrorBoundary label="Chat" resetKey={chatId}>
-          {chat ? (
-            <div className="flex h-full flex-col">
-              <div className="min-h-0 flex-1">
-                <AiChat
-                  chat={chat}
-                  messages={messages}
-                  activeMessageId={chat.activeMessageId}
-                  onSelectMessage={handleSelectMessage}
-                  onResult={handleResult}
-                  onError={setChatError}
-                  onClear={handleClear}
-                  promptChips={PROMPT_CHIPS}
-                />
-              </div>
-              {chatError && (
-                <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
-                  {chatError}
+      panels={{
+        chat: {
+          title: editableTitle,
+          actions: exportActions,
+          body: (
+            <PaneErrorBoundary label="Chat" resetKey={chatId}>
+              {chat ? (
+                <div className="flex h-full flex-col">
+                  <div className="min-h-0 flex-1">
+                    <AiChat
+                      chat={chat}
+                      messages={messages}
+                      activeMessageId={chat.activeMessageId}
+                      onSelectMessage={handleSelectMessage}
+                      onResult={handleResult}
+                      onError={setChatError}
+                      onClear={handleClear}
+                      promptChips={PROMPT_CHIPS}
+                    />
+                  </div>
+                  {chatError && (
+                    <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
+                      {chatError}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-3 text-xs text-muted-foreground">
+                  Loading chat…
                 </div>
               )}
-            </div>
-          ) : (
-            <div className="p-3 text-xs text-muted-foreground">
-              Loading chat…
-            </div>
-          )}
-        </PaneErrorBoundary>
-      }
-      viewer={
-        <PaneErrorBoundary label="JSON viewer" resetKey={schemaJson}>
-          <JsonViewer json={schemaJson} />
-        </PaneErrorBoundary>
-      }
-      config={
-        <PaneErrorBoundary label="Config" resetKey={chatId}>
-          {chat ? (
-            <ConfigPanel
-              renderer={chat.renderer}
-              onRendererChange={(r) => void handleRendererChange(r)}
-            />
-          ) : null}
-        </PaneErrorBoundary>
-      }
+            </PaneErrorBoundary>
+          ),
+        },
+        json: {
+          title: editableTitle,
+          actions: exportActions,
+          body: (
+            <PaneErrorBoundary label="JSON viewer" resetKey={schemaJson}>
+              <JsonViewer json={schemaJson} />
+            </PaneErrorBoundary>
+          ),
+        },
+        config: {
+          title: editableTitle,
+          actions: exportActions,
+          body: (
+            <PaneErrorBoundary label="Config" resetKey={chatId}>
+              {chat ? (
+                <ConfigPanel
+                  renderer={chat.renderer}
+                  onRendererChange={(r) => void handleRendererChange(r)}
+                />
+              ) : null}
+            </PaneErrorBoundary>
+          ),
+        },
+        'my-area': {
+          title: 'My area',
+          actions: newChatAction,
+          body: (
+            <PaneErrorBoundary label="My area" resetKey={chatId ?? 'none'}>
+              <MyAreaPanel
+                activeChatId={chatId}
+                onSelectChat={handleSelectChatFromMyArea}
+              />
+            </PaneErrorBoundary>
+          ),
+        },
+      }}
       map={
         <PaneErrorBoundary label="Map" resetKey={schemaJson}>
           <RendererSwitch
