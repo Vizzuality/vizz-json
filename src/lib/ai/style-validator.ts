@@ -99,20 +99,14 @@ export function validateStyle(
   renderer: RendererId,
 ): readonly StyleError[] {
   const custom = customSemanticErrors(style)
-  const hasDuplicateIds = custom.some((e) =>
-    /duplicate source id/i.test(e.message),
-  )
-  if (hasDuplicateIds) return custom
+  if (custom.length > 0) return custom
   const synthetic = buildSyntheticStyle(style)
-  const specErrors =
+  const errors =
     renderer === 'mapbox'
       ? validateMapbox(synthetic as never)
       : validateStyleMin(synthetic as never)
-  const mappedSpec = specErrors.map(
-    (e: { message: string; line?: number | null }) => ({
-      message: e.message,
-      line: e.line ?? undefined,
-    }),
-  )
-  return [...custom, ...mappedSpec]
+  return errors.map((e: { message: string; line?: number | null }) => ({
+    message: e.message,
+    line: e.line ?? undefined,
+  }))
 }
