@@ -14,8 +14,10 @@ import type { Chat, Message } from '#/lib/ai/persistence/types'
 const ENVELOPE = {
   metadata: { title: 'Test', tier: 'basic' as const, description: 'd' },
   style: {
-    source: { type: 'geojson', data: 'https://example.com/x.geojson' },
-    styles: [{ id: 'l', type: 'circle' }],
+    sources: [
+      { id: 'pts', type: 'geojson', data: 'https://example.com/x.geojson' },
+    ],
+    styles: [{ source: 'pts', id: 'l', type: 'circle' }],
   },
   parameterize: [],
 }

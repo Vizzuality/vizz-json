@@ -5,26 +5,31 @@ import type { GradientStop } from '#/lib/gradient-types'
 const RASTER_JSON = JSON.stringify(
   {
     config: {
-      source: {
-        type: 'raster',
-        tiles: [
-          {
-            '@@function': 'setQueryParams',
-            url: 'https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png',
-            query: {
-              url: 'https://example.com/data.tif',
-              colormap: {
-                '@@function': 'buildColormap',
-                stops: [
-                  ['@@#params.threshold_1', '@@#params.color_1'],
-                  ['@@#params.threshold_2', '@@#params.color_2'],
-                ],
+      sources: [
+        {
+          id: 'imagery',
+          type: 'raster',
+          tiles: [
+            {
+              '@@function': 'setQueryParams',
+              url: 'https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png',
+              query: {
+                url: 'https://example.com/data.tif',
+                colormap: {
+                  '@@function': 'buildColormap',
+                  stops: [
+                    ['@@#params.threshold_1', '@@#params.color_1'],
+                    ['@@#params.threshold_2', '@@#params.color_2'],
+                  ],
+                },
               },
             },
-          },
-        ],
-      },
-      styles: [{ type: 'raster', paint: { 'raster-opacity': 0.8 } }],
+          ],
+        },
+      ],
+      styles: [
+        { source: 'imagery', type: 'raster', paint: { 'raster-opacity': 0.8 } },
+      ],
     },
     params_config: [
       { key: 'threshold_1', default: -10000, group: 'legend' },
@@ -47,9 +52,16 @@ const RASTER_JSON = JSON.stringify(
 const EXAMPLE_JSON = JSON.stringify(
   {
     config: {
-      source: { type: 'geojson', data: 'https://example.com/data.geojson' },
+      sources: [
+        {
+          id: 'countries',
+          type: 'geojson',
+          data: 'https://example.com/data.geojson',
+        },
+      ],
       styles: [
         {
+          source: 'countries',
           type: 'fill',
           paint: {
             'fill-color': [
@@ -345,7 +357,7 @@ describe('serializeGradientToJson with buildColormap', () => {
 
     const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
 
-    const colormapFn = result.config.source.tiles[0].query.colormap
+    const colormapFn = result.config.sources[0].tiles[0].query.colormap
     expect(colormapFn['@@function']).toBe('buildColormap')
     expect(colormapFn.stops).toEqual([
       ['@@#params.threshold_1', '@@#params.color_1'],
@@ -384,7 +396,7 @@ describe('serializeGradientToJson with buildColormap', () => {
 
     const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
 
-    const colormapFn = result.config.source.tiles[0].query.colormap
+    const colormapFn = result.config.sources[0].tiles[0].query.colormap
     expect(colormapFn.stops).toHaveLength(3)
     expect(colormapFn.stops[0]).toEqual([
       '@@#params.threshold_1',
@@ -413,7 +425,7 @@ describe('serializeGradientToJson with buildColormap', () => {
 
     const result = JSON.parse(serializeGradientToJson(RASTER_JSON, stops))
 
-    const colormapFn = result.config.source.tiles[0].query.colormap
+    const colormapFn = result.config.sources[0].tiles[0].query.colormap
     expect(colormapFn.stops).toHaveLength(1)
     expect(colormapFn.stops[0]).toEqual([
       '@@#params.threshold_1',

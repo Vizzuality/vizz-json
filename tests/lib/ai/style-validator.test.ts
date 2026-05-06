@@ -7,22 +7,11 @@ describe('validateStyle', () => {
     expect(validateStyle({}, 'mapbox')).toEqual([])
   })
 
-  it('accepts a VizzJson-style fragment ({source, styles[]})', () => {
-    const errors = validateStyle(
-      {
-        source: { type: 'raster', tiles: ['x'], tileSize: 256 },
-        styles: [{ type: 'raster' }],
-      },
-      'maplibre',
-    )
-    expect(errors).toEqual([])
-  })
-
   it('rejects a fragment whose source has an unknown type', () => {
     const errors = validateStyle(
       {
-        source: { type: 'definitely-not-a-real-type' },
-        styles: [{ type: 'raster' }],
+        sources: [{ id: 'main', type: 'definitely-not-a-real-type' }],
+        styles: [{ source: 'main', type: 'raster' }],
       },
       'maplibre',
     )
@@ -32,8 +21,8 @@ describe('validateStyle', () => {
   it('rejects a fragment whose layer has an unknown type', () => {
     const errors = validateStyle(
       {
-        source: { type: 'raster', tiles: ['x'], tileSize: 256 },
-        styles: [{ type: 'definitely-not-a-real-layer-type' }],
+        sources: [{ id: 'main', type: 'raster', tiles: ['x'], tileSize: 256 }],
+        styles: [{ source: 'main', type: 'definitely-not-a-real-layer-type' }],
       },
       'maplibre',
     )
@@ -62,5 +51,71 @@ describe('validateStyle', () => {
       'mapbox',
     )
     expect(errors).toEqual([])
+  })
+
+  it('accepts the new array sources + style.source shape', () => {
+    const errors = validateStyle(
+      {
+        sources: [
+          {
+            id: 'osm',
+            type: 'raster',
+            tiles: ['https://a/{z}/{x}/{y}'],
+            tileSize: 256,
+          },
+        ],
+        styles: [{ source: 'osm', type: 'raster' }],
+      },
+      'maplibre',
+    )
+    expect(errors).toEqual([])
+  })
+
+  it('binds layers to their declared source.id (not the first source)', () => {
+    const errors = validateStyle(
+      {
+        sources: [
+          { id: 'a', type: 'geojson', data: 'https://a' },
+          { id: 'b', type: 'geojson', data: 'https://b' },
+        ],
+        styles: [
+          { source: 'a', type: 'fill' },
+          { source: 'b', type: 'heatmap' },
+        ],
+      },
+      'maplibre',
+    )
+    expect(errors).toEqual([])
+  })
+
+  it('rejects duplicate source ids', () => {
+    const errors = validateStyle(
+      {
+        sources: [
+          { id: 'dup', type: 'geojson', data: 'https://a' },
+          { id: 'dup', type: 'geojson', data: 'https://b' },
+        ],
+        styles: [{ source: 'dup', type: 'fill' }],
+      },
+      'maplibre',
+    )
+    expect(errors.some((e) => /duplicate source id/i.test(e.message))).toBe(
+      true,
+    )
+  })
+
+  it('rejects styles whose source field references an unknown source id', () => {
+    const errors = validateStyle(
+      {
+        sources: [{ id: 'a', type: 'geojson', data: 'https://a' }],
+        styles: [{ source: 'b', type: 'fill' }],
+      },
+      'maplibre',
+    )
+    expect(
+      errors.some(
+        (e) => /unknown source/i.test(e.message) && /"b"/.test(e.message),
+      ),
+    ).toBe(true)
   })
 })

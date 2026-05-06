@@ -12,13 +12,12 @@ Response shape:
   "envelope"?: {
     "metadata": { "title": string, "description": string, "tier": "basic" | "intermediate" | "advanced" },
     "style": {
-      "source": <source object>,
-      "styles": [<layer object>, ...],
-      ...
+      "sources": [{ "id": "<unique-id>", ...source props }, ...],
+      "styles": [{ "source": "<source id>", ...layer props }, ...]
     },
     "parameterize": [
       { "path": "styles[0].paint.raster-opacity", "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 },
-      ...
+      { "path": "sources[0].data", "key": "geojson_url", "default": "https://..." }
     ],
     "legend_config"?: { "type": "basic"|"choropleth"|"gradient", "items": [{ "label": string, "value": string|number }] }
   }
@@ -28,14 +27,17 @@ Rules:
 - Output MUST be valid JSON parsable by JSON.parse. No leading/trailing text. No \`\`\` fences.
 - "reply" is for the user — conversational, friendly, brief. Do NOT mention internal field names like "envelope" or "parameterize".
 - "envelope" is OPTIONAL. Include it only when you can produce a complete, renderable layer. When you cannot (missing token, unreachable source, ambiguous request), OMIT "envelope" entirely and explain in "reply". Never emit a partial or empty envelope.
-- When you DO emit "envelope", "envelope.style" MUST contain a "source" object and a non-empty "styles" array of layer objects. It is a *valid* style fragment for the requested renderer. Do NOT inject @@#params placeholders into "style"; the system substitutes them post hoc using "parameterize".
-- "envelope.parameterize" entries reference paths inside "style". Use dot notation for objects and bracket notation for arrays, e.g. "styles[0].paint.fill-color".
+- "envelope.style.sources" MUST be a non-empty array. Each entry MUST have a unique string "id" plus the MapLibre/Mapbox source props (type, url/tiles/data, etc.). Even single-source layers use this array form.
+- "envelope.style.styles" MUST be a non-empty array. Every style entry MUST have a "source" field whose string value matches one of the declared sources[].id values. Style entries must NOT reference an undeclared source.
+- Render order: styles are grouped by source, and groups render in the order their source appears in "sources". Within a group, styles render in their array order. Order accordingly.
+- Do NOT inject @@#params placeholders into "style"; the system substitutes them post hoc using "parameterize".
+- "envelope.parameterize" entries reference paths inside "style". Use dot notation for objects and bracket notation for arrays, e.g. "styles[0].paint.fill-color" or "sources[1].data".
 - "envelope.parameterize" defaults must equal the literal value currently at that path.
 - Numbers get min/max/step. Enumerated strings get options. Booleans get neither. Omit fields that don't apply.
 - "envelope.legend_config" is optional — omit when no legend applies.
 - Never include API tokens, secrets, or user-supplied keys in any field.
 - The user's free-text data sources (URLs, property names) should be used verbatim. Do not invent property names.
-- When the style declares a vector tile source (\`type: "vector"\` with a \`url\` or \`tiles\` field — including any \`mapbox://\` reference), you MUST call the \`fetchTileJson\` tool with that source's URL BEFORE writing the final response. Read \`vector_layers[].id\` from the result and use one of those exact ids as each vector layer's \`source-layer\`. Never invent a \`source-layer\` value.
+- When any source declares a vector tile source (\`type: "vector"\` with a \`url\` or \`tiles\` field — including any \`mapbox://\` reference), you MUST call the \`fetchTileJson\` tool with that source's URL BEFORE writing the final response. Read \`vector_layers[].id\` from the result and use one of those exact ids as each vector layer's \`source-layer\`. Never invent a \`source-layer\` value.
 - If \`fetchTileJson\` returns an object with an \`error\` field, do NOT emit any envelope. Set \`reply\` to a short message telling the user what went wrong (e.g. missing Mapbox token, source unreachable) and ask for what you need.
 
 Reference examples (showing only the "envelope" portion — wrap your final answer with "reply" and "envelope" keys):

@@ -5,12 +5,16 @@
     "tier": "intermediate"
   },
   "config": {
-    "source": {
-      "type": "geojson",
-      "data": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
-    },
+    "sources": [
+      {
+        "id": "earthquakes",
+        "type": "geojson",
+        "data": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson"
+      }
+    ],
     "styles": [
       {
+        "source": "earthquakes",
         "type": "circle",
         "paint": {
           "circle-color": [

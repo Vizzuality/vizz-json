@@ -18,9 +18,17 @@ export type LegendConfig = {
   readonly items: readonly LegendItem[]
 }
 
+export type SourceConfig = {
+  readonly id: string
+} & Record<string, unknown>
+
+export type StyleConfig = {
+  readonly source: string
+} & Record<string, unknown>
+
 export type LayerConfig = {
-  readonly source: Record<string, unknown>
-  readonly styles: readonly Record<string, unknown>[]
+  readonly sources: readonly SourceConfig[]
+  readonly styles: readonly StyleConfig[]
 }
 
 export type LayerSchema = {

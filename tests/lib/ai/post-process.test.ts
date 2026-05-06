@@ -5,9 +5,12 @@ import type { AiOutput } from '#/lib/ai/output-schema'
 const baseOutput: AiOutput = {
   metadata: { title: 'Raster opacity', description: 'd', tier: 'basic' },
   style: {
-    source: { type: 'raster', tiles: ['https://x'], tileSize: 256 },
+    sources: [
+      { id: 'imagery', type: 'raster', tiles: ['https://x'], tileSize: 256 },
+    ],
     styles: [
       {
+        source: 'imagery',
         type: 'raster',
         paint: { 'raster-opacity': 0.8 },
         layout: { visibility: 'visible' },
@@ -37,9 +40,10 @@ describe('postProcess', () => {
     const result = postProcess(baseOutput)
 
     expect(result.config).toMatchObject({
-      source: { type: 'raster' },
+      sources: [{ id: 'imagery', type: 'raster' }],
       styles: [
         {
+          source: 'imagery',
           type: 'raster',
           paint: { 'raster-opacity': '@@#params.opacity' },
           layout: { visibility: '@@#params.visibility' },
