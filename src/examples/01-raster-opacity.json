@@ -5,15 +5,19 @@
     "tier": "basic"
   },
   "config": {
-    "source": {
-      "type": "raster",
-      "tiles": [
-        "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg"
-      ],
-      "tileSize": 256
-    },
+    "sources": [
+      {
+        "id": "imagery",
+        "type": "raster",
+        "tiles": [
+          "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg"
+        ],
+        "tileSize": 256
+      }
+    ],
     "styles": [
       {
+        "source": "imagery",
         "type": "raster",
         "paint": {
           "raster-opacity": "@@#params.opacity"
