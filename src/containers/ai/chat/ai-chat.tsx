@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '#/components/ui/button'
 import { Textarea } from '#/components/ui/textarea'
 import {
@@ -47,6 +47,17 @@ export function AiChat({
   const [isLoading, setIsLoading] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+
+  function scrollToBottom() {
+    const el = scrollRef.current
+    if (!el) return
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages.length, isLoading])
 
   function stop() {
     abortRef.current?.abort()
@@ -65,6 +76,7 @@ export function AiChat({
     }
     setDraft('')
     setIsLoading(true)
+    scrollToBottom()
 
     const controller = new AbortController()
     abortRef.current = controller
@@ -117,7 +129,10 @@ export function AiChat({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex-1 space-y-2 overflow-y-auto p-3 text-sm">
+      <div
+        ref={scrollRef}
+        className="flex-1 space-y-2 overflow-y-auto p-3 text-sm"
+      >
         {!hasAssistant && promptChips.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {promptChips.map((chip) => (
