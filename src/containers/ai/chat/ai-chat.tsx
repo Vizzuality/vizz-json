@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Sparkles } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Textarea } from '#/components/ui/textarea'
 import {
@@ -28,7 +29,7 @@ type Props = {
   readonly onResult: (output: AiOutput) => void
   readonly onError: (message: string) => void
   readonly onClear: () => void
-  readonly promptChips: readonly string[]
+  readonly promptChips: readonly { label: string; prompt: string }[]
   readonly activeMessageId: string | null
   readonly onSelectMessage: (id: string) => void
 }
@@ -105,6 +106,13 @@ export function AiChat({
       })
 
       if (!res.ok) {
+        if (res.status === 502) {
+          await appendAssistantMessage(
+            chatId,
+            "I couldn't produce a valid map for that prompt. Try rephrasing or adding more detail.",
+          )
+          return
+        }
         const detail = await res.text().catch(() => '')
         throw new Error(
           `Request failed (${res.status})${detail ? `: ${detail}` : ''}`,
@@ -138,18 +146,23 @@ export function AiChat({
         className="flex-1 space-y-2 overflow-y-auto p-3 text-sm"
       >
         {!hasAssistant && promptChips.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {promptChips.map((chip) => (
-              <button
-                key={chip}
-                type="button"
-                onClick={() => submit(chip)}
-                disabled={isLoading}
-                className="rounded-full border px-3 py-1 text-xs hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {chip}
-              </button>
-            ))}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">Try one of these</p>
+            <div className="flex flex-col items-start gap-1.5">
+              {promptChips.map((chip) => (
+                <Button
+                  key={chip.label}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => submit(chip.prompt)}
+                  disabled={isLoading}
+                >
+                  <Sparkles />
+                  {chip.label}
+                </Button>
+              ))}
+            </div>
           </div>
         )}
         {messages.map((m) => {

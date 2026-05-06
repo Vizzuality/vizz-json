@@ -13,7 +13,6 @@ import { PaneErrorBoundary } from '#/components/pane-error-boundary'
 import { useConverter } from '#/hooks/use-converter'
 import { inferParamControl } from '#/lib/param-inference'
 import { postProcess } from '#/lib/ai/post-process'
-import { validateStyle } from '#/lib/ai/style-validator'
 import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
 import {
@@ -31,10 +30,26 @@ import type { ResolvedParams, ParamConfig } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
 
 const PROMPT_CHIPS = [
-  'Show Sentinel-2 imagery with an opacity slider',
-  'Heatmap of earthquakes from https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson',
-  'Choropleth of US states by population',
-  'Vector circles sized by magnitude with a color scale',
+  {
+    label: 'Sentinel-2 imagery with opacity slider',
+    prompt:
+      'Add Sentinel-2 cloudless satellite imagery as a raster tile layer. Use the WMTS endpoint https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg with tileSize 256. Expose an opacity slider parameter (range 0 to 1, default 1).',
+  },
+  {
+    label: 'Earthquake heatmap from Mapbox sample',
+    prompt:
+      'Render a heatmap of earthquakes. Use a single GeoJSON source pointing to https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson. Add one style layer of type "heatmap" with paint properties: heatmap-weight as ["interpolate", ["linear"], ["get", "mag"], 0, 0, 6, 1]; heatmap-intensity interpolated on ["zoom"]; heatmap-color interpolated on ["heatmap-density"] from transparent through a blue→yellow→red ramp; heatmap-radius interpolated on ["zoom"]; heatmap-opacity bound to an opacity parameter (0–1, default 0.8). Initial camera near zoom 1, centered globally.',
+  },
+  {
+    label: 'US states choropleth by population',
+    prompt:
+      'Build a choropleth of US states using the GeoJSON at https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json. Color the states by the "density" numeric property as a proxy for population, using a graduated color scale, and include a legend.',
+  },
+  {
+    label: 'Vector circles sized by magnitude',
+    prompt:
+      'Render earthquake points as circles. Use a single GeoJSON source pointing to https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson. Add one style layer of type "circle" with paint properties: circle-radius as ["interpolate", ["linear"], ["get", "mag"], 1, 2, 7, 14]; circle-color as ["interpolate", ["linear"], ["get", "mag"], 1, "#2c7bb6", 3, "#abd9e9", 5, "#fdae61", 7, "#d7191c"]; circle-opacity bound to an opacity parameter (0–1, default 0.8); circle-stroke-width 1; circle-stroke-color "#ffffff". Add a gradient legend mapping low→high magnitude.',
+  },
 ] as const
 
 function buildDefaultParams(
@@ -122,13 +137,6 @@ export function AiPage() {
   const handleResult = useCallback(
     (output: AiOutput) => {
       if (!chat) return
-      const styleErrors = validateStyle(output.style, chat.renderer.renderer)
-      if (styleErrors.length > 0) {
-        setChatError(
-          `Generated style invalid: ${styleErrors.map((e) => e.message).join('; ')}`,
-        )
-        return
-      }
       try {
         const processed = postProcess(output) as AiSchema
         void writeParams(chat.id, buildDefaultParams(processed.params_config))

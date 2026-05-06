@@ -41,7 +41,9 @@ async function setupChat(): Promise<Chat> {
   return await createChat()
 }
 
-const PROMPT_CHIPS = ['Show Sentinel-2']
+const PROMPT_CHIPS = [
+  { label: 'Show Sentinel-2', prompt: 'Show Sentinel-2 imagery' },
+]
 
 function makeProps(
   overrides: Partial<{
@@ -50,7 +52,7 @@ function makeProps(
     onResult: (output: unknown) => void
     onError: (message: string) => void
     onClear: () => void
-    promptChips: readonly string[]
+    promptChips: readonly { label: string; prompt: string }[]
     activeMessageId: string | null
     onSelectMessage: (id: string) => void
   }> = {},
@@ -127,7 +129,9 @@ describe('AiChat', () => {
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
     const [, init] = fetchSpy.mock.calls[0]
     const body = JSON.parse(init!.body as string)
-    expect(body.messages.at(-1).parts[0].content).toBe('Show Sentinel-2')
+    expect(body.messages.at(-1).parts[0].content).toBe(
+      'Show Sentinel-2 imagery',
+    )
   })
 
   it('replaces the current draft when a chip is clicked', async () => {
@@ -139,7 +143,9 @@ describe('AiChat', () => {
     fireEvent.click(screen.getByText('Show Sentinel-2'))
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
     const body = JSON.parse(fetchSpy.mock.calls[0][1]!.body as string)
-    expect(body.messages.at(-1).parts[0].content).toBe('Show Sentinel-2')
+    expect(body.messages.at(-1).parts[0].content).toBe(
+      'Show Sentinel-2 imagery',
+    )
   })
 
   it('disables prompt chips while loading', async () => {
