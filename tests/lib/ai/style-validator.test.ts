@@ -114,4 +114,19 @@ describe('validateStyle', () => {
       true,
     )
   })
+
+  it('rejects styles whose source field references an unknown source id', () => {
+    const errors = validateStyle(
+      {
+        sources: [{ id: 'a', type: 'geojson', data: 'https://a' }],
+        styles: [{ source: 'b', type: 'fill' }],
+      },
+      'maplibre',
+    )
+    expect(
+      errors.some(
+        (e) => /unknown source/i.test(e.message) && /"b"/.test(e.message),
+      ),
+    ).toBe(true)
+  })
 })

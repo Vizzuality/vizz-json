@@ -71,13 +71,23 @@ function customSemanticErrors(style: unknown): readonly StyleError[] {
   const errors: StyleError[] = []
 
   const sourcesArr = fragment.sources
+  const ids = new Set<string>()
   if (Array.isArray(sourcesArr)) {
-    const seen = new Set<string>()
     for (const entry of sourcesArr) {
       const id = (entry as { id?: unknown }).id
       if (typeof id !== 'string') continue
-      if (seen.has(id)) errors.push({ message: `duplicate source id: "${id}"` })
-      seen.add(id)
+      if (ids.has(id)) errors.push({ message: `duplicate source id: "${id}"` })
+      ids.add(id)
+    }
+  }
+
+  const stylesArr = fragment.styles
+  if (Array.isArray(stylesArr) && ids.size > 0) {
+    for (const entry of stylesArr) {
+      const ref = (entry as { source?: unknown }).source
+      if (typeof ref !== 'string') continue
+      if (!ids.has(ref))
+        errors.push({ message: `style references unknown source "${ref}"` })
     }
   }
 
