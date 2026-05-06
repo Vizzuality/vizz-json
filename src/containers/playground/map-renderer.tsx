@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { Map } from 'react-map-gl/maplibre'
-import type { SourceProps, LayerProps } from 'react-map-gl/maplibre'
 import { LayerManager } from '@vizzuality/vizz-map'
 import type { LayerItem } from '@vizzuality/vizz-map'
+import { buildLayerItems } from '#/lib/converter'
+import type { SourceConfig, StyleConfig } from '#/lib/types'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const BASEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
@@ -14,29 +15,18 @@ type MapRendererProps = {
   readonly error: string | null
 }
 
-/**
- * Derive a stable-but-type-sensitive item id so the underlying react-map-gl
- * <Source>/<Layer> components remount when the resolved config's structural
- * types change (e.g., switching from a raster to a geojson example). Without
- * this, react-map-gl asserts "source type changed" / "layer type changed".
- */
-function deriveItemId(
-  source: SourceProps | undefined,
-  styles: LayerProps[] | undefined,
-): string {
-  const sourceType = source?.type ?? 'none'
-  const styleTypes = styles?.map((s) => s.type).join(',') ?? 'none'
-  return `${PLAYGROUND_ITEM_BASE_ID}--${sourceType}--${styleTypes}`
-}
-
 export function MapRenderer({ resolvedConfig, error }: MapRendererProps) {
-  const source = resolvedConfig?.source as SourceProps | undefined
-  const styles = resolvedConfig?.styles as LayerProps[] | undefined
+  const sources = (resolvedConfig?.sources as SourceConfig[] | undefined) ?? []
+  const styles = (resolvedConfig?.styles as StyleConfig[] | undefined) ?? []
 
   const items = useMemo<LayerItem[]>(() => {
-    if (!source || !styles) return []
-    return [{ id: deriveItemId(source, styles), source, styles }]
-  }, [source, styles])
+    const built = buildLayerItems({ sources, styles })
+    return built.map((b) => ({
+      id: `${PLAYGROUND_ITEM_BASE_ID}--${b.id}`,
+      source: b.source as never,
+      styles: b.styles as never,
+    }))
+  }, [sources, styles])
 
   return (
     <div className="h-full w-full relative">
