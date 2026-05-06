@@ -113,3 +113,67 @@ describe('resolveParams', () => {
     expect(result.constant).toBe('@@#GL.ONE')
   })
 })
+
+describe('resolveParams — multi-source layers', () => {
+  it('resolves @@#params refs in both sources and styles independently', () => {
+    const config = {
+      sources: [
+        { id: 'a', type: 'geojson', data: '@@#params.url_a' },
+        { id: 'b', type: 'geojson', data: '@@#params.url_b' },
+      ],
+      styles: [
+        {
+          source: 'a',
+          type: 'fill',
+          paint: { 'fill-color': '@@#params.color_a' },
+        },
+        {
+          source: 'b',
+          type: 'heatmap',
+          paint: { 'heatmap-opacity': '@@#params.opacity' },
+        },
+      ],
+    }
+    const params = {
+      url_a: 'https://a',
+      url_b: 'https://b',
+      color_a: '#ff0000',
+      opacity: 0.7,
+    }
+    const out = resolveParams(config, params) as typeof config
+
+    expect(out.sources[0].data).toBe('https://a')
+    expect(out.sources[1].data).toBe('https://b')
+    expect(out.styles[0].paint['fill-color']).toBe('#ff0000')
+    expect(out.styles[1].paint['heatmap-opacity']).toBe(0.7)
+  })
+
+  it('allows the same param to drive props in distinct sources', () => {
+    const config = {
+      sources: [
+        { id: 'a', type: 'geojson', data: '@@#params.url' },
+        { id: 'b', type: 'geojson', data: '@@#params.url' },
+      ],
+      styles: [
+        {
+          source: 'a',
+          type: 'fill',
+          paint: { 'fill-opacity': '@@#params.opacity' },
+        },
+        {
+          source: 'b',
+          type: 'fill',
+          paint: { 'fill-opacity': '@@#params.opacity' },
+        },
+      ],
+    }
+    const out = resolveParams(config, {
+      url: 'https://x',
+      opacity: 0.5,
+    }) as typeof config
+    expect(out.sources[0].data).toBe('https://x')
+    expect(out.sources[1].data).toBe('https://x')
+    expect(out.styles[0].paint['fill-opacity']).toBe(0.5)
+    expect(out.styles[1].paint['fill-opacity']).toBe(0.5)
+  })
+})
