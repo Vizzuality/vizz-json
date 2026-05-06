@@ -33,11 +33,13 @@ export function AiLayout({
 }: AiLayoutProps) {
   return (
     <div className="flex h-[calc(100vh-3.5rem)] bg-background">
-      <ResizablePanelGroup
-        orientation="horizontal"
-        defaultLayout={{ chat: 40, map: 60 }}
-      >
-        <ResizablePanel id="chat" minSize="25%">
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel
+          id="chat"
+          defaultSize="500px"
+          minSize="400px"
+          groupResizeBehavior="preserve-pixel-size"
+        >
           <Tabs
             value={viewMode}
             onValueChange={(value) => onViewModeChange(value as AiViewMode)}
