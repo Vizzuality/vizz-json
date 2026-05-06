@@ -9,6 +9,7 @@ import example06 from './06-data-driven-circles.json'
 import example07 from './07-raster-function.json'
 import example09 from './09-conditional-case.json'
 import example10 from './10-react-components.json'
+import example11 from './11-multi-source-heatmap.json'
 
 export const examples: readonly ExampleConfig[] = [
   example01 as ExampleConfig,
@@ -20,6 +21,7 @@ export const examples: readonly ExampleConfig[] = [
   example07 as ExampleConfig,
   example09 as ExampleConfig,
   example10 as ExampleConfig,
+  example11 as ExampleConfig,
 ]
 
 // -------------------------------------------------------------------------
@@ -36,6 +38,7 @@ export const EXAMPLE_SLUGS = [
   'raster-function',
   'conditional-case',
   'react-components',
+  'multi-source-heatmap',
 ] as const
 
 export type ExampleSlug = (typeof EXAMPLE_SLUGS)[number]
