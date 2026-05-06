@@ -5,12 +5,16 @@
     "tier": "intermediate"
   },
   "config": {
-    "source": {
-      "type": "geojson",
-      "data": "https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson"
-    },
+    "sources": [
+      {
+        "id": "earthquakes",
+        "type": "geojson",
+        "data": "https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson"
+      }
+    ],
     "styles": [
       {
+        "source": "earthquakes",
         "type": "heatmap",
         "paint": {
           "heatmap-weight": [
@@ -61,6 +65,7 @@
         }
       },
       {
+        "source": "earthquakes",
         "type": "circle",
         "paint": {
           "circle-radius": [
