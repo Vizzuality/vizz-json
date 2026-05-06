@@ -1,6 +1,6 @@
 import { toast } from 'sonner'
 import { useChatList } from '#/hooks/use-chat-list'
-import { createChat, deleteChat, renameChat } from '#/lib/ai/persistence/chats'
+import { deleteChat, renameChat } from '#/lib/ai/persistence/chats'
 import { db } from '#/lib/ai/persistence/db'
 import type { Chat } from '#/lib/ai/persistence/types'
 import { ChatRow } from './chat-row'
@@ -54,11 +54,4 @@ export function MyAreaPanel({ activeChatId, onSelectChat }: Props) {
       ))}
     </div>
   )
-}
-
-export async function createAndSelectChat(
-  onSelectChat: (id: string) => void,
-): Promise<void> {
-  const chat = await createChat()
-  onSelectChat(chat.id)
 }
