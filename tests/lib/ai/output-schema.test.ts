@@ -6,8 +6,8 @@ describe('aiOutputSchema', () => {
     const ok = aiOutputSchema.safeParse({
       metadata: { title: 't', description: 'd', tier: 'basic' },
       style: {
-        source: { type: 'raster', tiles: ['x'], tileSize: 256 },
-        styles: [{ type: 'raster' }],
+        sources: [{ id: 'main', type: 'raster', tiles: ['x'], tileSize: 256 }],
+        styles: [{ source: 'main', type: 'raster' }],
       },
       parameterize: [],
     })
@@ -17,7 +17,10 @@ describe('aiOutputSchema', () => {
   it('accepts a parameterize entry with min/max/step', () => {
     const ok = aiOutputSchema.safeParse({
       metadata: { title: 't', description: 'd', tier: 'basic' },
-      style: { source: {}, styles: [{ type: 'fill' }] },
+      style: {
+        sources: [{ id: 'main', type: 'raster' }],
+        styles: [{ source: 'main', type: 'fill' }],
+      },
       parameterize: [
         {
           path: 'styles[0].paint.raster-opacity',
@@ -35,7 +38,10 @@ describe('aiOutputSchema', () => {
   it('rejects a parameterize entry with options that is not a string array', () => {
     const bad = aiOutputSchema.safeParse({
       metadata: { title: 't', description: 'd', tier: 'basic' },
-      style: { source: {}, styles: [{ type: 'fill' }] },
+      style: {
+        sources: [{ id: 'main', type: 'raster' }],
+        styles: [{ source: 'main', type: 'fill' }],
+      },
       parameterize: [{ path: 'x', key: 'k', default: 'v', options: [1, 2] }],
     })
     expect(bad.success).toBe(false)
@@ -44,7 +50,10 @@ describe('aiOutputSchema', () => {
   it('rejects metadata.tier outside basic|intermediate|advanced', () => {
     const bad = aiOutputSchema.safeParse({
       metadata: { title: 't', description: 'd', tier: 'expert' },
-      style: { source: {}, styles: [{ type: 'fill' }] },
+      style: {
+        sources: [{ id: 'main', type: 'raster' }],
+        styles: [{ source: 'main', type: 'fill' }],
+      },
       parameterize: [],
     })
     expect(bad.success).toBe(false)
@@ -53,16 +62,25 @@ describe('aiOutputSchema', () => {
   it('rejects a style with an empty styles array', () => {
     const bad = aiOutputSchema.safeParse({
       metadata: { title: 't', description: 'd', tier: 'basic' },
-      style: { source: {}, styles: [] },
+      style: { sources: [{ id: 'main', type: 'raster' }], styles: [] },
       parameterize: [],
     })
     expect(bad.success).toBe(false)
   })
 
-  it('rejects a style missing the source field', () => {
+  it('rejects a style missing the sources field', () => {
     const bad = aiOutputSchema.safeParse({
       metadata: { title: 't', description: 'd', tier: 'basic' },
-      style: { styles: [{ type: 'fill' }] },
+      style: { styles: [{ source: 'main', type: 'fill' }] },
+      parameterize: [],
+    })
+    expect(bad.success).toBe(false)
+  })
+
+  it('rejects styles array entries missing the source field', () => {
+    const bad = aiOutputSchema.safeParse({
+      metadata: { title: 't', description: 'd', tier: 'basic' },
+      style: { sources: [{ id: 'a' }], styles: [{ type: 'fill' }] },
       parameterize: [],
     })
     expect(bad.success).toBe(false)
@@ -71,7 +89,10 @@ describe('aiOutputSchema', () => {
   it('accepts an optional legend_config', () => {
     const ok = aiOutputSchema.safeParse({
       metadata: { title: 't', description: 'd', tier: 'basic' },
-      style: { source: {}, styles: [{ type: 'fill' }] },
+      style: {
+        sources: [{ id: 'main', type: 'raster' }],
+        styles: [{ source: 'main', type: 'fill' }],
+      },
       parameterize: [],
       legend_config: {
         type: 'basic',
@@ -93,7 +114,10 @@ describe('aiResponseSchema', () => {
       reply: 'Here you go.',
       envelope: {
         metadata: { title: 't', description: 'd', tier: 'basic' },
-        style: { source: {}, styles: [{ type: 'fill' }] },
+        style: {
+          sources: [{ id: 'main', type: 'raster' }],
+          styles: [{ source: 'main', type: 'fill' }],
+        },
         parameterize: [],
       },
     })

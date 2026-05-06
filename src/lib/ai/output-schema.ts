@@ -29,10 +29,18 @@ const parameterizeEntrySchema = z.object({
   group: z.literal('legend').optional(),
 })
 
+const sourceConfigSchema = z
+  .object({ id: z.string().min(1) })
+  .catchall(z.unknown())
+
+const styleConfigSchema = z
+  .object({ source: z.string().min(1) })
+  .catchall(z.unknown())
+
 const styleSchema = z
   .object({
-    source: z.record(z.string(), z.unknown()),
-    styles: z.array(z.record(z.string(), z.unknown())).min(1),
+    sources: z.array(sourceConfigSchema).min(1),
+    styles: z.array(styleConfigSchema).min(1),
   })
   .passthrough()
 
