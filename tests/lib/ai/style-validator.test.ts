@@ -63,4 +63,39 @@ describe('validateStyle', () => {
     )
     expect(errors).toEqual([])
   })
+
+  it('accepts the new array sources + style.source shape', () => {
+    const errors = validateStyle(
+      {
+        sources: [
+          {
+            id: 'osm',
+            type: 'raster',
+            tiles: ['https://a/{z}/{x}/{y}'],
+            tileSize: 256,
+          },
+        ],
+        styles: [{ source: 'osm', type: 'raster' }],
+      },
+      'maplibre',
+    )
+    expect(errors).toEqual([])
+  })
+
+  it('binds layers to their declared source.id (not the first source)', () => {
+    const errors = validateStyle(
+      {
+        sources: [
+          { id: 'a', type: 'geojson', data: 'https://a' },
+          { id: 'b', type: 'geojson', data: 'https://b' },
+        ],
+        styles: [
+          { source: 'a', type: 'fill' },
+          { source: 'b', type: 'heatmap' },
+        ],
+      },
+      'maplibre',
+    )
+    expect(errors).toEqual([])
+  })
 })

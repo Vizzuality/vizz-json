@@ -20,17 +20,35 @@ function buildSyntheticStyle(style: unknown): Record<string, unknown> {
     return fragment
   }
 
-  const explicitSources = fragment.sources as
+  const explicitSourcesArray = fragment.sources as
+    | ReadonlyArray<Record<string, unknown>>
     | Record<string, unknown>
     | undefined
-  const explicitSource = fragment.source as Record<string, unknown> | undefined
-  const sources: Record<string, unknown> = explicitSources
-    ? explicitSources
-    : explicitSource
-      ? { [SYNTHETIC_SOURCE_KEY]: explicitSource }
-      : {}
 
-  const sourceKey = Object.keys(sources)[0] ?? SYNTHETIC_SOURCE_KEY
+  const sources: Record<string, unknown> = (() => {
+    if (Array.isArray(explicitSourcesArray)) {
+      const out: Record<string, unknown> = {}
+      for (const entry of explicitSourcesArray) {
+        const { id, ...rest } = entry as { id?: string } & Record<
+          string,
+          unknown
+        >
+        if (typeof id !== 'string') continue
+        out[id] = rest
+      }
+      return out
+    }
+    if (explicitSourcesArray && typeof explicitSourcesArray === 'object') {
+      return explicitSourcesArray as Record<string, unknown>
+    }
+    const explicitSource = fragment.source as
+      | Record<string, unknown>
+      | undefined
+    return explicitSource ? { [SYNTHETIC_SOURCE_KEY]: explicitSource } : {}
+  })()
+
+  const sourceKeys = Object.keys(sources)
+  const fallbackSourceKey = sourceKeys[0] ?? SYNTHETIC_SOURCE_KEY
   const rawLayers = (fragment.layers ?? fragment.styles) as
     | ReadonlyArray<unknown>
     | undefined
@@ -39,7 +57,7 @@ function buildSyntheticStyle(style: unknown): Record<string, unknown> {
     const layer = (entry ?? {}) as Record<string, unknown>
     return {
       id: layer.id ?? `${SYNTHETIC_SOURCE_KEY}_layer_${i}`,
-      source: layer.source ?? sourceKey,
+      source: layer.source ?? fallbackSourceKey,
       ...layer,
     }
   })
