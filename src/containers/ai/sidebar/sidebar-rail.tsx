@@ -40,7 +40,7 @@ function NavButton({
   active: boolean
   onClick: () => void
 }) {
-  const { Icon, label, value } = item
+  const { Icon, label } = item
   return (
     <Tooltip>
       <TooltipTrigger
@@ -50,7 +50,6 @@ function NavButton({
             aria-label={label}
             aria-pressed={active}
             onClick={onClick}
-            data-value={value}
             className={cn(
               'flex w-full cursor-pointer flex-col items-center gap-1 rounded-md px-2 py-2 text-[10px] font-medium text-muted-foreground transition-colors',
               'hover:bg-muted hover:text-foreground',
