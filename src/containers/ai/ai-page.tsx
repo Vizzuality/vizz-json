@@ -58,7 +58,6 @@ const PROMPT_CHIPS = [
 
 export function AiPage() {
   const [viewMode, setViewMode] = useState<AiViewMode>('chat')
-  const [chatError, setChatError] = useState<string | null>(null)
   const { chatId, setChatId } = useActiveChatId()
   const { chat, messages } = useChat(chatId)
 
@@ -109,6 +108,27 @@ export function AiPage() {
     }
   }, [])
 
+  // Seed default param values when the active message's snapshot params don't
+  // match what's currently stored. Preserves user edits: only writes when the
+  // key set differs (e.g. on first activation or after switching messages).
+  useEffect(() => {
+    if (!chat) return
+    const messageId = chat.activeMessageId
+    if (!messageId) return
+    const msg = messages.find((m) => m.id === messageId)
+    const snapshot = msg?.schemaSnapshot
+    if (!snapshot) return
+
+    const expectedKeys = snapshot.params_config.map((p) => p.key)
+    const currentKeys = Object.keys(chat.activeParamValues)
+    const sameKeys =
+      currentKeys.length === expectedKeys.length &&
+      expectedKeys.every((k) => k in chat.activeParamValues)
+    if (sameKeys) return
+
+    void writeParams(chat.id, buildDefaultParams(snapshot.params_config))
+  }, [chat, messages, writeParams])
+
   const handleParamChange = useCallback(
     (key: string, value: unknown) => {
       if (!chatId) return
@@ -138,12 +158,8 @@ export function AiPage() {
       const msg = messages.find((m) => m.id === messageId)
       if (!msg?.schemaSnapshot) return
       await setActiveMessage(chatId, messageId)
-      await writeParams(
-        chatId,
-        buildDefaultParams(msg.schemaSnapshot.params_config),
-      )
     },
-    [chatId, messages, writeParams],
+    [chatId, messages],
   )
 
   const handleClear = useCallback(async () => {
@@ -156,7 +172,6 @@ export function AiPage() {
       const fresh = await createChat()
       setChatId(fresh.id)
     }
-    setChatError(null)
   }, [chatId, setChatId])
 
   const handleSelectChatFromMyArea = useCallback(
@@ -177,7 +192,7 @@ export function AiPage() {
     <ExportMenu
       schemaJson={schemaJson}
       filename={buildFilename(activeSnapshot?.metadata.title)}
-      onError={setChatError}
+      onError={(msg) => toast.error(`Export failed: ${msg}`)}
     />
   )
 
@@ -218,23 +233,14 @@ export function AiPage() {
           body: (
             <PaneErrorBoundary label="Chat" resetKey={chatId}>
               {chat ? (
-                <div className="flex h-full flex-col">
-                  <div className="min-h-0 flex-1">
-                    <AiChat
-                      chat={chat}
-                      messages={messages}
-                      activeMessageId={chat.activeMessageId}
-                      onSelectMessage={handleSelectMessage}
-                      onClear={handleClear}
-                      promptChips={PROMPT_CHIPS}
-                    />
-                  </div>
-                  {chatError && (
-                    <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
-                      {chatError}
-                    </div>
-                  )}
-                </div>
+                <AiChat
+                  chat={chat}
+                  messages={messages}
+                  activeMessageId={chat.activeMessageId}
+                  onSelectMessage={handleSelectMessage}
+                  onClear={handleClear}
+                  promptChips={PROMPT_CHIPS}
+                />
               ) : (
                 <div className="p-3 text-xs text-muted-foreground">
                   Loading chat…
