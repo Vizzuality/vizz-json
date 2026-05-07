@@ -18,7 +18,6 @@ import {
 import { ParamsPanel } from '#/containers/playground/params-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
 import { useResolutionPipeline, buildDefaultParams } from '#/lib/pipeline'
-import { postProcess } from '#/lib/ai/post-process'
 import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
 import {
@@ -30,7 +29,6 @@ import {
   setRenderer,
 } from '#/lib/ai/persistence/chats'
 import { db } from '#/lib/ai/persistence/db'
-import type { AiOutput } from '#/lib/ai/output-schema'
 import type { RendererControls } from '#/lib/ai/types'
 import type { ResolvedParams } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
@@ -134,30 +132,6 @@ export function AiPage() {
     [chatId],
   )
 
-  const handleResult = useCallback(
-    (output: AiOutput) => {
-      if (!chat) return
-      try {
-        const processed = postProcess(output) as AiSchema
-        void writeParams(chat.id, buildDefaultParams(processed.params_config))
-        const firstUserText =
-          messages.find((m) => m.role === 'user')?.text ?? ''
-        const fallback = firstUserText.slice(0, 40)
-        if (
-          chat.title === 'New chat' ||
-          chat.title === fallback ||
-          chat.title === firstUserText
-        ) {
-          void renameChat(chat.id, processed.metadata.title)
-        }
-        setChatError(null)
-      } catch (err) {
-        setChatError(err instanceof Error ? err.message : String(err))
-      }
-    },
-    [chat, messages, writeParams],
-  )
-
   const handleSelectMessage = useCallback(
     async (messageId: string) => {
       if (!chatId) return
@@ -251,8 +225,6 @@ export function AiPage() {
                       messages={messages}
                       activeMessageId={chat.activeMessageId}
                       onSelectMessage={handleSelectMessage}
-                      onResult={handleResult}
-                      onError={setChatError}
                       onClear={handleClear}
                       promptChips={PROMPT_CHIPS}
                     />
