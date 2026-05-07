@@ -19,6 +19,7 @@ import { ParamsPanel } from '#/containers/playground/params-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
 import { useConverter } from '#/hooks/use-converter'
 import { inferParamControl } from '#/lib/param-inference'
+import { resolveParams } from '#/lib/converter/params-resolver'
 import { postProcess } from '#/lib/ai/post-process'
 import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
@@ -33,7 +34,8 @@ import {
 import { db } from '#/lib/ai/persistence/db'
 import type { AiOutput } from '#/lib/ai/output-schema'
 import type { RendererControls } from '#/lib/ai/types'
-import type { ResolvedParams, ParamConfig } from '#/lib/types'
+import type { LegendConfig, ResolvedParams, ParamConfig } from '#/lib/types'
+import type { RawLegendConfig } from '#/lib/legend-param-mapping'
 import type { AiSchema } from '#/lib/ai/persistence/types'
 
 const PROMPT_CHIPS = [
@@ -107,6 +109,19 @@ export function AiPage() {
       activeSnapshot ? activeSnapshot.params_config.map(inferParamControl) : [],
     [activeSnapshot],
   )
+
+  const rawLegendConfig = useMemo<RawLegendConfig | null>(
+    () => (activeSnapshot?.legend_config as RawLegendConfig | null) ?? null,
+    [activeSnapshot],
+  )
+
+  const resolvedLegendConfig = useMemo<LegendConfig | null>(() => {
+    if (!rawLegendConfig) return null
+    return resolveParams(
+      rawLegendConfig as unknown as Record<string, unknown>,
+      paramValues,
+    ) as unknown as LegendConfig
+  }, [rawLegendConfig, paramValues])
 
   const writeParams = useCallback(async (id: string, next: ResolvedParams) => {
     try {
@@ -331,8 +346,8 @@ export function AiPage() {
                 tier: activeSnapshot.metadata.tier,
               }}
               paramsConfig={inferred}
-              legendConfig={activeSnapshot.legend_config ?? null}
-              rawLegendConfig={null}
+              legendConfig={resolvedLegendConfig}
+              rawLegendConfig={rawLegendConfig}
               values={paramValues}
               onChange={handleParamChange}
             />
