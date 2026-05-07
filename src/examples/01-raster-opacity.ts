@@ -1,0 +1,48 @@
+import type { ExampleConfig } from '#/lib/types'
+
+const config = {
+  metadata: {
+    title: 'Params — Opacity & Visibility',
+    description:
+      'Simple raster layer with parameterized opacity and visibility',
+    tier: 'basic',
+  },
+  config: {
+    sources: [
+      {
+        id: 'imagery',
+        type: 'raster',
+        tiles: [
+          'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+        ],
+        tileSize: 256,
+      },
+    ],
+    styles: [
+      {
+        source: 'imagery',
+        type: 'raster',
+        paint: {
+          'raster-opacity': '@@#params.opacity',
+        },
+        layout: {
+          visibility: '@@#params.visibility',
+        },
+      },
+    ],
+  },
+  params_config: [
+    { key: 'opacity', default: 0.8, min: 0, max: 1, step: 0.05 },
+    {
+      key: 'visibility',
+      default: 'visible',
+      options: ['visible', 'none'],
+    },
+  ],
+  legend_config: {
+    type: 'basic',
+    items: [{ label: 'Sentinel-2 Imagery', value: 'visible' }],
+  },
+} satisfies ExampleConfig
+
+export default config
