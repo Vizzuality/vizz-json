@@ -27,11 +27,9 @@ export function useAiSession(chatId: string | null): UseAiSessionApi {
         signal: controller.signal,
       })
 
-      if (abortRef.current === controller) {
-        abortRef.current = null
-        setIsLoading(false)
-      }
-
+      if (abortRef.current !== controller) return
+      abortRef.current = null
+      setIsLoading(false)
       if (result.kind === 'error') setLastError(result.message)
       else setLastError(null)
     },
