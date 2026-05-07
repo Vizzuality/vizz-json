@@ -17,9 +17,7 @@ import {
 } from '#/components/ui/tooltip'
 import { ParamsPanel } from '#/containers/playground/params-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
-import { useConverter } from '#/hooks/use-converter'
-import { inferParamControl } from '#/lib/param-inference'
-import { resolveParams } from '#/lib/converter/params-resolver'
+import { useResolutionPipeline, buildDefaultParams } from '#/lib/pipeline'
 import { postProcess } from '#/lib/ai/post-process'
 import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
@@ -34,8 +32,7 @@ import {
 import { db } from '#/lib/ai/persistence/db'
 import type { AiOutput } from '#/lib/ai/output-schema'
 import type { RendererControls } from '#/lib/ai/types'
-import type { LegendConfig, ResolvedParams, ParamConfig } from '#/lib/types'
-import type { RawLegendConfig } from '#/lib/legend-param-mapping'
+import type { ResolvedParams } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
 
 const PROMPT_CHIPS = [
@@ -60,12 +57,6 @@ const PROMPT_CHIPS = [
       'Render earthquake points as circles. Use a single GeoJSON source pointing to https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson. Add one style layer of type "circle" with paint properties: circle-radius as ["interpolate", ["linear"], ["get", "mag"], 1, 2, 7, 14]; circle-color as ["interpolate", ["linear"], ["get", "mag"], 1, "#2c7bb6", 3, "#abd9e9", 5, "#fdae61", 7, "#d7191c"]; circle-opacity bound to an opacity parameter (0–1, default 0.8); circle-stroke-width 1; circle-stroke-color "#ffffff". Add a gradient legend mapping low→high magnitude.',
   },
 ] as const
-
-function buildDefaultParams(
-  paramsConfig: readonly ParamConfig[],
-): ResolvedParams {
-  return Object.fromEntries(paramsConfig.map((p) => [p.key, p.default]))
-}
 
 export function AiPage() {
   const [viewMode, setViewMode] = useState<AiViewMode>('chat')
@@ -102,26 +93,13 @@ export function AiPage() {
   )
 
   const paramValues = chat?.activeParamValues ?? {}
-  const { resolved, error } = useConverter(schemaJson || '{}', paramValues)
-
-  const inferred = useMemo(
-    () =>
-      activeSnapshot ? activeSnapshot.params_config.map(inferParamControl) : [],
-    [activeSnapshot],
+  const pipeline = useResolutionPipeline(
+    activeSnapshot as Readonly<Record<string, unknown>> | null,
+    paramValues,
   )
-
-  const rawLegendConfig = useMemo<RawLegendConfig | null>(
-    () => (activeSnapshot?.legend_config as RawLegendConfig | null) ?? null,
-    [activeSnapshot],
-  )
-
-  const resolvedLegendConfig = useMemo<LegendConfig | null>(() => {
-    if (!rawLegendConfig) return null
-    return resolveParams(
-      rawLegendConfig as unknown as Record<string, unknown>,
-      paramValues,
-    ) as unknown as LegendConfig
-  }, [rawLegendConfig, paramValues])
+  const resolved =
+    pipeline.output.kind === 'map' ? pipeline.output.resolvedConfig : null
+  const error = pipeline.output.error
 
   const writeParams = useCallback(async (id: string, next: ResolvedParams) => {
     try {
@@ -346,9 +324,10 @@ export function AiPage() {
                 title: activeSnapshot.metadata.title,
                 tier: activeSnapshot.metadata.tier,
               }}
-              paramsConfig={inferred}
-              legendConfig={resolvedLegendConfig}
-              rawLegendConfig={rawLegendConfig}
+              paramsConfig={pipeline.inferredParams}
+              legendConfig={pipeline.resolvedLegendConfig}
+              legendParamMapping={pipeline.legendParamMapping}
+              orphanLegendParams={pipeline.orphanLegendParams}
               values={paramValues}
               onChange={handleParamChange}
             />

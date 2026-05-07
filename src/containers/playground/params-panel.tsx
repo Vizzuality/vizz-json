@@ -7,13 +7,14 @@ import type {
   LegendConfig,
   ResolvedParams,
 } from '#/lib/types'
-import type { RawLegendConfig } from '#/lib/legend-param-mapping'
+import type { ItemParamMapping } from '#/lib/legend-param-mapping'
 
 type ParamsPanelProps = {
   readonly metadata: Pick<ExampleMetadata, 'title' | 'tier'> | null
   readonly paramsConfig: readonly InferredParam[]
   readonly legendConfig: LegendConfig | null
-  readonly rawLegendConfig: RawLegendConfig | null
+  readonly legendParamMapping: ReadonlyMap<number, ItemParamMapping>
+  readonly orphanLegendParams: readonly InferredParam[]
   readonly values: ResolvedParams
   readonly onChange: (key: string, value: unknown) => void
   readonly currentJson?: string
@@ -26,7 +27,8 @@ export function ParamsPanel({
   metadata,
   paramsConfig,
   legendConfig,
-  rawLegendConfig,
+  legendParamMapping,
+  orphanLegendParams,
   values,
   onChange,
   currentJson,
@@ -54,8 +56,9 @@ export function ParamsPanel({
       <div className="flex flex-col gap-3 py-3">
         <LegendCard
           legendConfig={legendConfig}
-          rawLegendConfig={rawLegendConfig}
           legendParams={legendParams}
+          legendParamMapping={legendParamMapping}
+          orphanLegendParams={orphanLegendParams}
           values={values}
           onChange={onChange}
           currentJson={currentJson}
