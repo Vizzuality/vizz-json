@@ -18,7 +18,6 @@ import {
 import { ParamsPanel } from '#/containers/playground/params-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
 import { useResolutionPipeline, buildDefaultParams } from '#/lib/pipeline'
-import { postProcess } from '#/lib/ai/post-process'
 import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
 import {
@@ -30,7 +29,6 @@ import {
   setRenderer,
 } from '#/lib/ai/persistence/chats'
 import { db } from '#/lib/ai/persistence/db'
-import type { AiOutput } from '#/lib/ai/output-schema'
 import type { RendererControls } from '#/lib/ai/types'
 import type { ResolvedParams } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
@@ -60,7 +58,6 @@ const PROMPT_CHIPS = [
 
 export function AiPage() {
   const [viewMode, setViewMode] = useState<AiViewMode>('chat')
-  const [chatError, setChatError] = useState<string | null>(null)
   const { chatId, setChatId } = useActiveChatId()
   const { chat, messages } = useChat(chatId)
 
@@ -111,6 +108,27 @@ export function AiPage() {
     }
   }, [])
 
+  // Seed default param values when the active message's snapshot params don't
+  // match what's currently stored. Preserves user edits: only writes when the
+  // key set differs (e.g. on first activation or after switching messages).
+  useEffect(() => {
+    if (!chat) return
+    const messageId = chat.activeMessageId
+    if (!messageId) return
+    const msg = messages.find((m) => m.id === messageId)
+    const snapshot = msg?.schemaSnapshot
+    if (!snapshot) return
+
+    const expectedKeys = snapshot.params_config.map((p) => p.key)
+    const currentKeys = Object.keys(chat.activeParamValues)
+    const sameKeys =
+      currentKeys.length === expectedKeys.length &&
+      expectedKeys.every((k) => k in chat.activeParamValues)
+    if (sameKeys) return
+
+    void writeParams(chat.id, buildDefaultParams(snapshot.params_config))
+  }, [chat, messages, writeParams])
+
   const handleParamChange = useCallback(
     (key: string, value: unknown) => {
       if (!chatId) return
@@ -134,42 +152,14 @@ export function AiPage() {
     [chatId],
   )
 
-  const handleResult = useCallback(
-    (output: AiOutput) => {
-      if (!chat) return
-      try {
-        const processed = postProcess(output) as AiSchema
-        void writeParams(chat.id, buildDefaultParams(processed.params_config))
-        const firstUserText =
-          messages.find((m) => m.role === 'user')?.text ?? ''
-        const fallback = firstUserText.slice(0, 40)
-        if (
-          chat.title === 'New chat' ||
-          chat.title === fallback ||
-          chat.title === firstUserText
-        ) {
-          void renameChat(chat.id, processed.metadata.title)
-        }
-        setChatError(null)
-      } catch (err) {
-        setChatError(err instanceof Error ? err.message : String(err))
-      }
-    },
-    [chat, messages, writeParams],
-  )
-
   const handleSelectMessage = useCallback(
     async (messageId: string) => {
       if (!chatId) return
       const msg = messages.find((m) => m.id === messageId)
       if (!msg?.schemaSnapshot) return
       await setActiveMessage(chatId, messageId)
-      await writeParams(
-        chatId,
-        buildDefaultParams(msg.schemaSnapshot.params_config),
-      )
     },
-    [chatId, messages, writeParams],
+    [chatId, messages],
   )
 
   const handleClear = useCallback(async () => {
@@ -182,7 +172,6 @@ export function AiPage() {
       const fresh = await createChat()
       setChatId(fresh.id)
     }
-    setChatError(null)
   }, [chatId, setChatId])
 
   const handleSelectChatFromMyArea = useCallback(
@@ -203,7 +192,7 @@ export function AiPage() {
     <ExportMenu
       schemaJson={schemaJson}
       filename={buildFilename(activeSnapshot?.metadata.title)}
-      onError={setChatError}
+      onError={(msg) => toast.error(`Export failed: ${msg}`)}
     />
   )
 
@@ -244,25 +233,14 @@ export function AiPage() {
           body: (
             <PaneErrorBoundary label="Chat" resetKey={chatId}>
               {chat ? (
-                <div className="flex h-full flex-col">
-                  <div className="min-h-0 flex-1">
-                    <AiChat
-                      chat={chat}
-                      messages={messages}
-                      activeMessageId={chat.activeMessageId}
-                      onSelectMessage={handleSelectMessage}
-                      onResult={handleResult}
-                      onError={setChatError}
-                      onClear={handleClear}
-                      promptChips={PROMPT_CHIPS}
-                    />
-                  </div>
-                  {chatError && (
-                    <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
-                      {chatError}
-                    </div>
-                  )}
-                </div>
+                <AiChat
+                  chat={chat}
+                  messages={messages}
+                  activeMessageId={chat.activeMessageId}
+                  onSelectMessage={handleSelectMessage}
+                  onClear={handleClear}
+                  promptChips={PROMPT_CHIPS}
+                />
               ) : (
                 <div className="p-3 text-xs text-muted-foreground">
                   Loading chat…

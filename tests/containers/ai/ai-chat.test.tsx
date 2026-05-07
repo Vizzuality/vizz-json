@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -26,6 +27,15 @@ const SUCCESS_BODY = {
   envelope: ENVELOPE,
 }
 
+async function flushLiveQuery() {
+  // useLiveQuery resolves async; flush microtasks + a macrotask + microtasks.
+  await act(async () => {
+    for (let i = 0; i < 20; i++) await Promise.resolve()
+    await new Promise((r) => setTimeout(r, 0))
+    for (let i = 0; i < 20; i++) await Promise.resolve()
+  })
+}
+
 function mockFetchOnce(body: unknown, status = 200) {
   return vi.spyOn(global, 'fetch').mockResolvedValueOnce(
     new Response(JSON.stringify(body), {
@@ -49,8 +59,6 @@ function makeProps(
   overrides: Partial<{
     chat: Chat
     messages: readonly Message[]
-    onResult: (output: unknown) => void
-    onError: (message: string) => void
     onClear: () => void
     promptChips: readonly { label: string; prompt: string }[]
     activeMessageId: string | null
@@ -61,8 +69,6 @@ function makeProps(
     chat,
     messages: [] as readonly Message[],
     promptChips: PROMPT_CHIPS,
-    onResult: vi.fn(),
-    onError: vi.fn(),
     onClear: vi.fn(),
     activeMessageId: null,
     onSelectMessage: vi.fn(),
@@ -90,6 +96,7 @@ describe('AiChat', () => {
   it('submits on plain Enter', async () => {
     const fetchSpy = mockFetchOnce(SUCCESS_BODY)
     render(<AiChat {...makeProps()} />)
+    await flushLiveQuery()
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'hello' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
@@ -125,6 +132,7 @@ describe('AiChat', () => {
   it('submits immediately when a prompt chip is clicked', async () => {
     const fetchSpy = mockFetchOnce(SUCCESS_BODY)
     render(<AiChat {...makeProps()} />)
+    await flushLiveQuery()
     fireEvent.click(screen.getByText('Show Sentinel-2'))
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
     const [, init] = fetchSpy.mock.calls[0]
@@ -137,6 +145,7 @@ describe('AiChat', () => {
   it('replaces the current draft when a chip is clicked', async () => {
     const fetchSpy = mockFetchOnce(SUCCESS_BODY)
     render(<AiChat {...makeProps()} />)
+    await flushLiveQuery()
     fireEvent.change(screen.getByPlaceholderText(/describe a map/i), {
       target: { value: 'previous draft' },
     })
@@ -152,6 +161,7 @@ describe('AiChat', () => {
     // Never-resolving fetch keeps the component in `isLoading`.
     vi.spyOn(global, 'fetch').mockImplementation(() => new Promise(() => {}))
     render(<AiChat {...makeProps()} />)
+    await flushLiveQuery()
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'kick off' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
@@ -164,6 +174,7 @@ describe('AiChat', () => {
   it('shows Send when idle and Stop when loading', async () => {
     vi.spyOn(global, 'fetch').mockImplementation(() => new Promise(() => {}))
     render(<AiChat {...makeProps()} />)
+    await flushLiveQuery()
     expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument()
     expect(
       screen.queryByRole('button', { name: 'Stop' }),
@@ -186,6 +197,7 @@ describe('AiChat', () => {
       return new Promise(() => {})
     })
     render(<AiChat {...makeProps()} />)
+    await flushLiveQuery()
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'go' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })
@@ -294,6 +306,7 @@ describe('AiChat', () => {
       },
     ]
     render(<AiChat {...makeProps({ messages, onClear })} />)
+    await flushLiveQuery()
     const textarea = screen.getByPlaceholderText(/describe a map/i)
     fireEvent.change(textarea, { target: { value: 'go' } })
     fireEvent.keyDown(textarea, { key: 'Enter' })

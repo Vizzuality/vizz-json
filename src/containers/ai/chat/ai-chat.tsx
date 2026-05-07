@@ -13,21 +13,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '#/components/ui/alert-dialog'
-import { aiResponseSchema } from '#/lib/ai/output-schema'
-import { postProcess } from '#/lib/ai/post-process'
-import {
-  appendUserMessage,
-  appendAssistantMessage,
-} from '#/lib/ai/persistence/messages'
-import { renameChat } from '#/lib/ai/persistence/chats'
-import type { AiSchema, Chat, Message } from '#/lib/ai/persistence/types'
-import type { AiOutput } from '#/lib/ai/output-schema'
+import { useAiSession } from '#/lib/ai/session'
+import type { Chat, Message } from '#/lib/ai/persistence/types'
 
 type Props = {
   readonly chat: Chat
   readonly messages: readonly Message[]
-  readonly onResult: (output: AiOutput) => void
-  readonly onError: (message: string) => void
   readonly onClear: () => void
   readonly promptChips: readonly { label: string; prompt: string }[]
   readonly activeMessageId: string | null
@@ -37,18 +28,15 @@ type Props = {
 export function AiChat({
   chat,
   messages,
-  onResult,
-  onError,
   onClear,
   promptChips,
   activeMessageId,
   onSelectMessage,
 }: Props) {
   const [draft, setDraft] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const abortRef = useRef<AbortController | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
+  const session = useAiSession(chat.id)
 
   function scrollToBottom() {
     const el = scrollRef.current
@@ -62,79 +50,14 @@ export function AiChat({
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages.length, isLoading])
+  }, [messages.length, session.isLoading])
 
-  function stop() {
-    abortRef.current?.abort()
-    abortRef.current = null
-    setIsLoading(false)
-  }
-
-  async function submit(overridePrompt?: string) {
-    const trimmed = (overridePrompt ?? draft).trim()
-    if (!trimmed || isLoading) return
-
-    const chatId = chat.id
-    const userMsg = await appendUserMessage(chatId, trimmed)
-    if (messages.length === 0) {
-      void renameChat(chatId, trimmed.slice(0, 40))
-    }
+  function submit(overridePrompt?: string) {
+    const text = (overridePrompt ?? draft).trim()
+    if (!text) return
     setDraft('')
-    setIsLoading(true)
     scrollToBottom()
-
-    const controller = new AbortController()
-    abortRef.current = controller
-
-    const history = [...messages, userMsg]
-
-    try {
-      const res = await fetch('/api/ai-generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          messages: history.map((m) => ({
-            id: m.id,
-            role: m.role,
-            parts: [{ type: 'text', content: m.text }],
-          })),
-          renderer: chat.renderer.renderer,
-          mapboxToken: chat.renderer.mapboxToken,
-          mapboxStyleUrl: chat.renderer.mapboxStyleUrl,
-        }),
-      })
-
-      if (!res.ok) {
-        if (res.status === 502) {
-          await appendAssistantMessage(
-            chatId,
-            "I couldn't produce a valid map for that prompt. Try rephrasing or adding more detail.",
-          )
-          return
-        }
-        const detail = await res.text().catch(() => '')
-        throw new Error(
-          `Request failed (${res.status})${detail ? `: ${detail}` : ''}`,
-        )
-      }
-
-      const json = await res.json()
-      const parsed = aiResponseSchema.parse(json)
-
-      const snapshot = parsed.envelope
-        ? (postProcess(parsed.envelope) as AiSchema)
-        : undefined
-      await appendAssistantMessage(chatId, parsed.reply, snapshot)
-      if (parsed.envelope) onResult(parsed.envelope)
-    } catch (err) {
-      if ((err as Error).name === 'AbortError') return
-      const e = err instanceof Error ? err : new Error(String(err))
-      onError(e.message)
-    } finally {
-      abortRef.current = null
-      setIsLoading(false)
-    }
+    void session.submit(text)
   }
 
   const hasAssistant = messages.some((m) => m.role === 'assistant')
@@ -156,7 +79,7 @@ export function AiChat({
                   variant="outline"
                   size="sm"
                   onClick={() => submit(chip.prompt)}
-                  disabled={isLoading}
+                  disabled={session.isLoading}
                 >
                   <Sparkles />
                   {chip.label}
@@ -202,12 +125,17 @@ export function AiChat({
             </div>
           )
         })}
-        {isLoading && (
+        {session.isLoading && (
           <div className="rounded-md bg-muted p-2 text-xs italic">
             Generating…
           </div>
         )}
       </div>
+      {session.lastError && (
+        <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
+          {session.lastError}
+        </div>
+      )}
       <div className="border-t p-3">
         <Textarea
           value={draft}
@@ -219,14 +147,14 @@ export function AiChat({
             if (e.key !== 'Enter') return
             if (e.shiftKey) return
             if (e.nativeEvent.isComposing) return
-            if (isLoading) return
+            if (session.isLoading) return
             e.preventDefault()
             submit()
           }}
         />
         <div className="mt-2 flex gap-2">
-          {isLoading ? (
-            <Button size="sm" variant="outline" onClick={stop}>
+          {session.isLoading ? (
+            <Button size="sm" variant="outline" onClick={session.stop}>
               Stop
             </Button>
           ) : (
@@ -259,7 +187,7 @@ export function AiChat({
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={() => {
-                    stop()
+                    session.stop()
                     setConfirmOpen(false)
                     onClear()
                   }}
