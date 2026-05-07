@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.3.3...@vizzuality/vizz-json-v0.4.0) (2026-05-07)
+
+
+### Features
+
+* vizz-figma-map — Figma plugin for inserting vizz-json maps ([#28](https://github.com/Vizzuality/vizz-json/issues/28)) ([e02177a](https://github.com/Vizzuality/vizz-json/commit/e02177a277b0f5d9c13b8b509c6bd04df93a0619))
+
 ## [0.3.3](https://github.com/Vizzuality/vizz-json/compare/@vizzuality/vizz-json-v0.3.2...@vizzuality/vizz-json-v0.3.3) (2026-03-27)
 
 ### Bug Fixes
