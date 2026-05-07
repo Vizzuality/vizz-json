@@ -11,7 +11,7 @@ export type { BuiltLayerItem, BuildLayerItemsInput } from './build-layer-items'
 
 let converterInstance: VizzJson | null = null
 
-function getConverter(): VizzJson {
+export function getConverter(): VizzJson {
   if (!converterInstance) {
     converterInstance = createConverter()
   }

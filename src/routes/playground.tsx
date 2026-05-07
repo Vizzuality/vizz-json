@@ -10,10 +10,8 @@ import { StatusIndicator } from '#/containers/playground/status-indicator'
 import { ResolvedJsonViewer } from '#/containers/playground/resolved-json-viewer'
 import { Switch } from '#/components/ui/switch'
 import { ComponentPreview } from '#/containers/playground/component-preview'
-import { useConverter } from '#/hooks/use-converter'
 import { useDebouncedValue } from '#/hooks/use-debounced-value'
-import { resolveParams, createConverter } from '#/lib/converter'
-import { inferParamControl } from '#/lib/param-inference'
+import { useResolutionPipeline, buildDefaultParams } from '#/lib/pipeline'
 import {
   examples,
   EXAMPLE_SLUGS,
@@ -21,14 +19,7 @@ import {
   getExampleIndexBySlug,
   getSlugByIndex,
 } from '#/examples'
-import type {
-  ParamConfig,
-  LegendConfig,
-  ResolvedParams,
-  InferredParam,
-} from '#/lib/types'
-import type { RawLegendConfig } from '#/lib/legend-param-mapping'
-import type { VizzJson } from '@vizzuality/vizz-json'
+import type { ParamConfig, ResolvedParams } from '#/lib/types'
 
 const searchSchema = z.object({
   example: z
@@ -44,12 +35,6 @@ export const Route = createFileRoute('/playground')({
 
 const DEBOUNCE_MS = 300
 
-function buildDefaultParams(
-  paramsConfig: readonly ParamConfig[],
-): ResolvedParams {
-  return Object.fromEntries(paramsConfig.map((p) => [p.key, p.default]))
-}
-
 function PlaygroundPage() {
   const { example: exampleSlug } = Route.useSearch()
   const navigate = Route.useNavigate()
@@ -63,9 +48,6 @@ function PlaygroundPage() {
   )
   const [showResolved, setShowResolved] = useState(false)
 
-  // -------------------------------------------------------------------------
-  // Example selection
-  // -------------------------------------------------------------------------
   const handleExampleSelect = useCallback(
     (index: number) => {
       const slug = getSlugByIndex(index)
@@ -81,16 +63,10 @@ function PlaygroundPage() {
     [navigate],
   )
 
-  // -------------------------------------------------------------------------
-  // Param change handler (immutable update)
-  // -------------------------------------------------------------------------
   const handleParamChange = useCallback((key: string, value: unknown) => {
     setParamValues((prev) => ({ ...prev, [key]: value }))
   }, [])
 
-  // -------------------------------------------------------------------------
-  // Gradient apply handler — updates editor JSON and re-derives param values
-  // -------------------------------------------------------------------------
   const handleGradientApply = useCallback((updatedJson: string) => {
     setJsonString(updatedJson)
     try {
@@ -106,14 +82,9 @@ function PlaygroundPage() {
     }
   }, [])
 
-  // -------------------------------------------------------------------------
-  // Resolution pipeline
-  // -------------------------------------------------------------------------
   const debouncedJson = useDebouncedValue(jsonString, DEBOUNCE_MS)
-  const { resolved, error } = useConverter(debouncedJson, paramValues)
 
-  // Parse editor JSON once — all derived memos read from this
-  const parsedJson = useMemo<Record<string, unknown> | null>(() => {
+  const parsedConfig = useMemo<Record<string, unknown> | null>(() => {
     try {
       return JSON.parse(debouncedJson) as Record<string, unknown>
     } catch {
@@ -121,88 +92,15 @@ function PlaygroundPage() {
     }
   }, [debouncedJson])
 
-  // Parse params_config from the current editor JSON and infer controls
-  const currentInferredParams = useMemo<readonly InferredParam[]>(() => {
-    if (!parsedJson) return []
-    const paramsConfig = parsedJson.params_config as
-      | readonly ParamConfig[]
-      | undefined
-    return (paramsConfig ?? []).map(inferParamControl)
-  }, [parsedJson])
+  const pipeline = useResolutionPipeline(parsedConfig, paramValues)
 
-  // Derive metadata from selected example
-  const currentMetadata = useMemo(() => {
-    const example = examples[selectedExampleIndex]
-    return example.metadata
-  }, [selectedExampleIndex])
-
-  // Resolve legend_config through params so @@#params references update live
-  const resolvedLegendConfig = useMemo<LegendConfig | null>(() => {
-    if (!parsedJson) return null
-    if (!parsedJson.legend_config) return null
-    return resolveParams(
-      parsedJson.legend_config as Record<string, unknown>,
-      paramValues,
-    ) as unknown as LegendConfig
-  }, [parsedJson, paramValues])
-
-  // Extract raw legend_config BEFORE resolution (for param key mapping)
-  const rawLegendConfig = useMemo<RawLegendConfig | null>(() => {
-    if (!parsedJson) return null
-    return (parsedJson.legend_config as RawLegendConfig | undefined) ?? null
-  }, [parsedJson])
-
-  // Detect preview mode
-  const previewMode = useMemo<'map' | 'components'>(() => {
-    if (!parsedJson) return 'map'
-    const metadata = parsedJson.metadata as { preview?: string } | undefined
-    return metadata?.preview === 'components' ? 'components' : 'map'
-  }, [parsedJson])
-
-  // Singleton converter — created once per component lifetime
-  const converterRef = useMemo<VizzJson>(() => createConverter(), [])
-
-  // Resolve components for component preview mode
-  const { resolvedComponents, componentError } = useMemo<{
-    resolvedComponents: readonly unknown[] | null
-    componentError: string | null
-  }>(() => {
-    if (previewMode !== 'components' || !parsedJson) {
-      return { resolvedComponents: null, componentError: null }
-    }
-    try {
-      const components = parsedJson.components
-      if (!Array.isArray(components)) {
-        return { resolvedComponents: null, componentError: null }
-      }
-
-      const wrapped = { components }
-      const paramsResolved = resolveParams(wrapped, paramValues)
-      const result = converterRef.resolve(paramsResolved)
-      const unwrapped = result.components
-
-      return {
-        resolvedComponents: Array.isArray(unwrapped) ? unwrapped : null,
-        componentError: null,
-      }
-    } catch (err) {
-      return {
-        resolvedComponents: null,
-        componentError: err instanceof Error ? err.message : String(err),
-      }
-    }
-  }, [parsedJson, paramValues, previewMode, converterRef])
-
-  // -------------------------------------------------------------------------
-  // Toggle resolved view
-  // -------------------------------------------------------------------------
   const handleToggleResolved = useCallback(() => {
     setShowResolved((prev) => !prev)
   }, [])
 
-  // -------------------------------------------------------------------------
-  // Layout
-  // -------------------------------------------------------------------------
+  const resolvedForViewer =
+    pipeline.output.kind === 'map' ? pipeline.output.resolvedConfig : null
+
   return (
     <PlaygroundLayout
       sidebarHeader={
@@ -213,15 +111,16 @@ function PlaygroundPage() {
               onSelect={handleExampleSelect}
             />
           </div>
-          <StatusIndicator
-            error={previewMode === 'components' ? componentError : error}
-          />
+          <StatusIndicator error={pipeline.output.error} />
         </div>
       }
       editor={
         <div className="relative isolate h-full overflow-hidden">
           <JsonEditor value={jsonString} onChange={setJsonString} />
-          <ResolvedJsonViewer resolved={resolved} visible={showResolved} />
+          <ResolvedJsonViewer
+            resolved={resolvedForViewer}
+            visible={showResolved}
+          />
           <div className="absolute bottom-3 right-3 z-50 flex items-center gap-2 rounded-md border bg-background/90 px-3 py-1.5 shadow-sm backdrop-blur">
             <label
               htmlFor="show-resolved"
@@ -238,18 +137,32 @@ function PlaygroundPage() {
         </div>
       }
       map={
-        previewMode === 'components' ? (
-          <ComponentPreview components={resolvedComponents} />
+        pipeline.previewMode === 'components' ? (
+          <ComponentPreview
+            components={
+              pipeline.output.kind === 'components'
+                ? pipeline.output.resolvedComponents
+                : null
+            }
+          />
         ) : (
-          <MapRenderer resolvedConfig={resolved} error={error} />
+          <MapRenderer
+            resolvedConfig={
+              pipeline.output.kind === 'map'
+                ? pipeline.output.resolvedConfig
+                : null
+            }
+            error={pipeline.output.error}
+          />
         )
       }
       params={
         <ParamsPanel
-          metadata={currentMetadata}
-          paramsConfig={currentInferredParams}
-          legendConfig={resolvedLegendConfig}
-          rawLegendConfig={rawLegendConfig}
+          metadata={pipeline.metadata}
+          paramsConfig={pipeline.inferredParams}
+          legendConfig={pipeline.resolvedLegendConfig}
+          legendParamMapping={pipeline.legendParamMapping}
+          orphanLegendParams={pipeline.orphanLegendParams}
           values={paramValues}
           onChange={handleParamChange}
           currentJson={debouncedJson}
