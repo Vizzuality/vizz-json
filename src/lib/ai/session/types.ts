@@ -19,3 +19,10 @@ export type AiSessionOptions = {
   readonly prompt: string
   readonly signal: AbortSignal
 }
+
+export type UseAiSessionApi = {
+  readonly submit: (prompt: string) => Promise<void>
+  readonly stop: () => void
+  readonly isLoading: boolean
+  readonly lastError: string | null
+}
