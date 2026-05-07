@@ -1,4 +1,4 @@
-import { Braces, FolderOpen, MessageSquare, Settings } from 'lucide-react'
+import { Braces, FolderOpen, MessageSquare, Plus, Settings } from 'lucide-react'
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +29,7 @@ const BOTTOM_ITEM: Item = {
 type Props = {
   readonly value: AiViewMode
   readonly onChange: (next: AiViewMode) => void
+  readonly onNewChat: () => void
 }
 
 function NavButton({
@@ -66,7 +67,7 @@ function NavButton({
   )
 }
 
-export function SidebarRail({ value, onChange }: Props) {
+export function SidebarRail({ value, onChange, onNewChat }: Props) {
   return (
     <nav
       aria-label="AI views"
@@ -82,6 +83,22 @@ export function SidebarRail({ value, onChange }: Props) {
       ))}
       <div className="mt-auto flex flex-col gap-1">
         <div className="border-t" />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <button
+                type="button"
+                aria-label="New chat"
+                onClick={onNewChat}
+                className="flex w-full cursor-pointer flex-col items-center gap-1 rounded-md px-2 py-2 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <Plus className="h-4 w-4" />
+                <span>New</span>
+              </button>
+            }
+          />
+          <TooltipContent side="right">New chat</TooltipContent>
+        </Tooltip>
         <NavButton
           item={BOTTOM_ITEM}
           active={BOTTOM_ITEM.value === value}

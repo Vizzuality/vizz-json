@@ -24,6 +24,7 @@ export type AiPanel = {
 type AiLayoutProps = {
   readonly viewMode: AiViewMode
   readonly onViewModeChange: (next: AiViewMode) => void
+  readonly onNewChat: () => void
   readonly panels: Record<AiViewMode, AiPanel>
   readonly map: ReactNode
   readonly params: ReactNode
@@ -32,6 +33,7 @@ type AiLayoutProps = {
 export function AiLayout({
   viewMode,
   onViewModeChange,
+  onNewChat,
   panels,
   map,
   params,
@@ -39,7 +41,11 @@ export function AiLayout({
   const active = panels[viewMode]
   return (
     <div className="flex h-[calc(100vh-3.5rem)] bg-background">
-      <SidebarRail value={viewMode} onChange={onViewModeChange} />
+      <SidebarRail
+        value={viewMode}
+        onChange={onViewModeChange}
+        onNewChat={onNewChat}
+      />
       <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel
           id="ai-panel"

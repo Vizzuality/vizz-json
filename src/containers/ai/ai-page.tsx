@@ -258,6 +258,7 @@ export function AiPage() {
     <AiLayout
       viewMode={viewMode}
       onViewModeChange={setViewMode}
+      onNewChat={() => void handleNewChat()}
       panels={{
         chat: {
           title: editableTitle,
