@@ -1,6 +1,5 @@
 import type { LegendItem } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
-import { Input } from '#/components/ui/input'
 
 type ChoroplethLegendProps = {
   readonly items: readonly LegendItem[]
@@ -74,45 +73,34 @@ function Labels({
   items,
   paramMapping,
   values,
-  onChange,
 }: {
   readonly items: readonly LegendItem[]
   readonly paramMapping?: ReadonlyMap<number, ItemParamMapping>
   readonly values?: Record<string, unknown>
-  readonly onChange?: (key: string, value: unknown) => void
 }) {
-  const isEditable = paramMapping && values && onChange
+  const isEditable = paramMapping && values
 
   return (
     <div className="mt-1 flex">
       {items.map((item, i) => {
         const mapping = isEditable ? paramMapping.get(i) : undefined
-        const labelValue =
+        const resolvedLabel =
           mapping?.labelParamKey && values
-            ? String(values[mapping.labelParamKey] ?? item.label)
-            : undefined
-
-        if (labelValue !== undefined && mapping?.labelParamKey && onChange) {
-          return (
-            <div key={i} className="flex-1">
-              <Input
-                type="text"
-                value={labelValue}
-                onChange={(e) =>
-                  onChange(mapping.labelParamKey!, e.target.value)
-                }
-                className="h-6 text-[10px]"
-              />
-            </div>
-          )
-        }
+            ? values[mapping.labelParamKey]
+            : item.label
+        const labelValue =
+          resolvedLabel === null ||
+          resolvedLabel === undefined ||
+          resolvedLabel === ''
+            ? ''
+            : String(resolvedLabel)
 
         return (
           <span
             key={i}
             className="flex-1 text-center text-[10px] text-muted-foreground"
           >
-            {item.label}
+            {labelValue}
           </span>
         )
       })}
@@ -134,12 +122,7 @@ export function ChoroplethLegend({
         values={values}
         onChange={onChange}
       />
-      <Labels
-        items={items}
-        paramMapping={paramMapping}
-        values={values}
-        onChange={onChange}
-      />
+      <Labels items={items} paramMapping={paramMapping} values={values} />
     </div>
   )
 }

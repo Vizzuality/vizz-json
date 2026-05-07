@@ -1,6 +1,5 @@
 import type { LegendItem } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
-import { Input } from '#/components/ui/input'
 
 type BasicLegendProps = {
   readonly items: readonly LegendItem[]
@@ -23,9 +22,13 @@ function EditableRow({
   const colorValue = mapping.valueParamKey
     ? String(values[mapping.valueParamKey] ?? item.value)
     : undefined
-  const labelValue = mapping.labelParamKey
-    ? String(values[mapping.labelParamKey] ?? item.label)
-    : undefined
+  const resolvedLabel = mapping.labelParamKey
+    ? values[mapping.labelParamKey]
+    : item.label
+  const labelValue =
+    resolvedLabel == null || resolvedLabel === ''
+      ? item.label
+      : String(resolvedLabel)
 
   return (
     <div className="flex items-center gap-2 px-1.5 py-1 -mx-1.5">
@@ -50,16 +53,7 @@ function EditableRow({
           }}
         />
       )}
-      {labelValue !== undefined && mapping.labelParamKey ? (
-        <Input
-          type="text"
-          value={labelValue}
-          onChange={(e) => onChange(mapping.labelParamKey!, e.target.value)}
-          className="h-7 flex-1 text-xs"
-        />
-      ) : (
-        <span className="text-xs text-muted-foreground">{item.label}</span>
-      )}
+      <span className="text-xs text-muted-foreground">{labelValue}</span>
     </div>
   )
 }

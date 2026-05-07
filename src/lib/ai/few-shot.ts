@@ -1,7 +1,7 @@
-import rasterOpacity from '#/examples/01-raster-opacity.json'
-import graduated from '#/examples/04-graduated-interpolate.json'
-import dataDriven from '#/examples/06-data-driven-circles.json'
-import multiSource from '#/examples/11-multi-source-heatmap.json'
+import rasterOpacity from '#/examples/01-raster-opacity'
+import graduated from '#/examples/04-graduated-interpolate'
+import dataDriven from '#/examples/06-data-driven-circles'
+import multiSource from '#/examples/11-multi-source-heatmap'
 
 type LayerSchemaExample = {
   metadata: {

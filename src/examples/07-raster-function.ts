@@ -1,0 +1,159 @@
+import type { ExampleConfig } from '#/lib/types'
+
+const config = {
+  metadata: {
+    title: '@@function — Interactive Raster Colormap',
+    description:
+      'Edit the gradient legend to change how TiTiler renders this COG',
+    tier: 'advanced',
+  },
+  config: {
+    sources: [
+      {
+        id: 'imagery',
+        type: 'raster',
+        tiles: [
+          {
+            '@@function': 'setQueryParams',
+            url: 'https://titiler.xyz/cog/tiles/WebMercatorQuad/{z}/{x}/{y}.png',
+            query: {
+              url: 'https://data.source.coop/alexgleith/gebco-2024/GEBCO_2024.tif',
+              colormap: {
+                '@@function': 'buildColormap',
+                stops: [
+                  ['@@#params.threshold_1', '@@#params.color_1'],
+                  ['@@#params.threshold_2', '@@#params.color_2'],
+                  ['@@#params.threshold_3', '@@#params.color_3'],
+                  ['@@#params.threshold_4', '@@#params.color_4'],
+                  ['@@#params.threshold_5', '@@#params.color_5'],
+                  ['@@#params.threshold_6', '@@#params.color_6'],
+                  ['@@#params.threshold_7', '@@#params.color_7'],
+                  ['@@#params.threshold_8', '@@#params.color_8'],
+                  ['@@#params.threshold_9', '@@#params.color_9'],
+                ],
+              },
+            },
+          },
+        ],
+        tileSize: 256,
+      },
+    ],
+    styles: [
+      {
+        source: 'imagery',
+        type: 'raster',
+        paint: {
+          'raster-opacity': '@@#params.opacity',
+        },
+        layout: {
+          visibility: '@@#params.visibility',
+        },
+      },
+    ],
+  },
+  params_config: [
+    {
+      key: 'threshold_1',
+      default: -11000,
+      min: -11000,
+      max: 7000,
+      step: 100,
+      group: 'legend',
+    },
+    { key: 'color_1', default: '#08306b', group: 'legend' },
+    {
+      key: 'threshold_2',
+      default: -4000,
+      min: -11000,
+      max: 7000,
+      step: 100,
+      group: 'legend',
+    },
+    { key: 'color_2', default: '#08519c', group: 'legend' },
+    {
+      key: 'threshold_3',
+      default: -500,
+      min: -11000,
+      max: 7000,
+      step: 1,
+      group: 'legend',
+    },
+    { key: 'color_3', default: '#2171b5', group: 'legend' },
+    {
+      key: 'threshold_4',
+      default: -499,
+      min: -11000,
+      max: 7000,
+      step: 1,
+      group: 'legend',
+    },
+    { key: 'color_4', default: '#1a9641', group: 'legend' },
+    {
+      key: 'threshold_5',
+      default: 200,
+      min: -11000,
+      max: 7000,
+      step: 100,
+      group: 'legend',
+    },
+    { key: 'color_5', default: '#a6d96a', group: 'legend' },
+    {
+      key: 'threshold_6',
+      default: 800,
+      min: -11000,
+      max: 7000,
+      step: 100,
+      group: 'legend',
+    },
+    { key: 'color_6', default: '#ffffbf', group: 'legend' },
+    {
+      key: 'threshold_7',
+      default: 2000,
+      min: -11000,
+      max: 7000,
+      step: 100,
+      group: 'legend',
+    },
+    { key: 'color_7', default: '#a87832', group: 'legend' },
+    {
+      key: 'threshold_8',
+      default: 4000,
+      min: -11000,
+      max: 7000,
+      step: 100,
+      group: 'legend',
+    },
+    { key: 'color_8', default: '#6e512b', group: 'legend' },
+    {
+      key: 'threshold_9',
+      default: 7000,
+      min: -11000,
+      max: 7000,
+      step: 100,
+      group: 'legend',
+    },
+    { key: 'color_9', default: '#f5f5f5', group: 'legend' },
+    { key: 'opacity', default: 1.0, min: 0, max: 1, step: 0.05 },
+    {
+      key: 'visibility',
+      default: 'visible',
+      options: ['visible', 'none'],
+    },
+  ],
+  legend_config: {
+    type: 'gradient',
+    items: [
+      { label: 'Deep ocean', value: '@@#params.color_1' },
+      { label: '', value: '@@#params.color_2' },
+      { label: '', value: '@@#params.color_3' },
+      { label: '', value: '@@#params.color_4' },
+      { label: '', value: '@@#params.color_5' },
+      { label: '', value: '@@#params.color_6' },
+      { label: '', value: '@@#params.color_7' },
+      { label: '', value: '@@#params.color_8' },
+      { label: 'Peak', value: '@@#params.color_9' },
+    ],
+  },
+} satisfies ExampleConfig
+
+export default config

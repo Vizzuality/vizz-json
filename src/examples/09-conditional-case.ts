@@ -1,0 +1,64 @@
+import type { ExampleConfig } from '#/lib/types'
+
+const config = {
+  metadata: {
+    title: 'Expression — case + @@function',
+    description:
+      'Conditional logic with case expression and parameterized threshold',
+    tier: 'advanced',
+  },
+  config: {
+    sources: [
+      {
+        id: 'countries',
+        type: 'geojson',
+        data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
+      },
+    ],
+    styles: [
+      {
+        source: 'countries',
+        type: 'fill',
+        paint: {
+          'fill-color': [
+            'case',
+            ['>', ['get', 'pop_est'], '@@#params.threshold'],
+            '@@#params.above_color',
+            '@@#params.below_color',
+          ],
+          'fill-opacity': '@@#params.opacity',
+        },
+        layout: {
+          visibility: '@@#params.visibility',
+        },
+      },
+    ],
+  },
+  params_config: [
+    {
+      key: 'threshold',
+      default: 50000000,
+      min: 1000000,
+      max: 1000000000,
+      step: 1000000,
+      group: 'legend',
+    },
+    { key: 'above_color', default: '#dc2626', group: 'legend' },
+    { key: 'below_color', default: '#3b82f6', group: 'legend' },
+    { key: 'opacity', default: 0.7, min: 0, max: 1, step: 0.05 },
+    {
+      key: 'visibility',
+      default: 'visible',
+      options: ['visible', 'none'],
+    },
+  ],
+  legend_config: {
+    type: 'choropleth',
+    items: [
+      { label: 'Above threshold', value: '@@#params.above_color' },
+      { label: 'Below threshold', value: '@@#params.below_color' },
+    ],
+  },
+} satisfies ExampleConfig
+
+export default config

@@ -20,6 +20,20 @@ function isParamsRef(value: unknown): value is string {
   return typeof value === 'string' && value.startsWith(PARAMS_PREFIX)
 }
 
+const EMBEDDED_PARAMS_RE = /@@#params\.([a-zA-Z_$][\w.$]*)/g
+
+function hasEmbeddedParamsRef(value: string): boolean {
+  return value.includes(PARAMS_PREFIX)
+}
+
+function stringifyParam(value: unknown): string {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value)
+  return JSON.stringify(value)
+}
+
 function resolveValue(
   value: unknown,
   params: Readonly<Record<string, unknown>>,
@@ -27,6 +41,13 @@ function resolveValue(
   if (isParamsRef(value)) {
     const path = value.slice(PARAMS_PREFIX.length)
     return getNestedValue(params as Record<string, unknown>, path)
+  }
+
+  if (typeof value === 'string' && hasEmbeddedParamsRef(value)) {
+    return value.replace(EMBEDDED_PARAMS_RE, (_match, path: string) => {
+      const resolved = getNestedValue(params as Record<string, unknown>, path)
+      return stringifyParam(resolved)
+    })
   }
 
   if (Array.isArray(value)) {
