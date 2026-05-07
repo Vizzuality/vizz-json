@@ -212,4 +212,39 @@ describe('useAiSession', () => {
     expect(runAiSessionMock).not.toHaveBeenCalled()
     expect(result.current.isLoading).toBe(false)
   })
+
+  it('aborts the in-flight request when chatId changes', async () => {
+    runAiSessionMock.mockImplementationOnce(
+      () => new Promise<AiSessionResult>(() => {}),
+    )
+    const otherChat = await createChat()
+
+    const { result, rerender } = renderHook(
+      ({ id }: { id: string }) => useAiSession(id),
+      { initialProps: { id: chat.id } },
+    )
+    await flushLiveQuery()
+
+    await act(async () => {
+      void result.current.submit('first')
+    })
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(true)
+    })
+
+    const firstSignal = runAiSessionMock.mock.calls[0][0].signal
+
+    rerender({ id: otherChat.id })
+    await flushLiveQuery()
+
+    expect(firstSignal.aborted).toBe(true)
+    expect(result.current.isLoading).toBe(false)
+
+    runAiSessionMock.mockResolvedValueOnce(OK_RESULT)
+    await act(async () => {
+      await result.current.submit('second')
+    })
+    expect(runAiSessionMock).toHaveBeenCalledTimes(2)
+    expect(runAiSessionMock.mock.calls[1][0].chat.id).toBe(otherChat.id)
+  })
 })

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useChat } from '#/hooks/use-chat'
 import { runAiSession } from './run-session'
 import type { UseAiSessionApi } from './types'
@@ -8,6 +8,17 @@ export function useAiSession(chatId: string | null): UseAiSessionApi {
   const [isLoading, setIsLoading] = useState(false)
   const [lastError, setLastError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    return () => {
+      const controller = abortRef.current
+      if (!controller) return
+      abortRef.current = null
+      controller.abort()
+      setIsLoading(false)
+      setLastError(null)
+    }
+  }, [chatId])
 
   const submit = useCallback(
     async (prompt: string): Promise<void> => {
