@@ -88,3 +88,17 @@ User edits JSON → debounce 300ms → parse → extract `params_config` → ren
 ## Skills
 
 Project-scoped skills live in `.claude/skills/` and auto-discover via session init — no need to invoke explicitly. Preferred stack skills for this repo: shadcn (`base-nova`), Tailwind v4, TanStack Start/Router/Query, Vitest, pnpm, accessibility.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical defaults (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) applied as `Status:` lines in issue files. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` at root, `docs/adr/` for ADRs. See `docs/agents/domain.md`.
