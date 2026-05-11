@@ -46,6 +46,17 @@ describe('mergeParamDefaults', () => {
     expect(snapshot).toEqual(frozen)
   })
 
+  it('preserves default when paramValues[key] is explicitly undefined', () => {
+    const out = mergeParamDefaults(baseSnapshot, { opacity: undefined })
+    expect(out.params_config[0]).toEqual({ key: 'opacity', default: 1 })
+  })
+
+  it('handles empty params_config without error', () => {
+    const empty: AiSchema = { ...baseSnapshot, params_config: [] }
+    const out = mergeParamDefaults(empty, { opacity: 0.3 })
+    expect(out.params_config).toEqual([])
+  })
+
   it('leaves legend_config and config tree untouched', () => {
     const out = mergeParamDefaults(baseSnapshot, {
       opacity: 0.3,

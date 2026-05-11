@@ -5,10 +5,10 @@ export function mergeParamDefaults(
   snapshot: AiSchema,
   values: ResolvedParams,
 ): AiSchema {
-  const next_params = snapshot.params_config.map((param) =>
-    Object.prototype.hasOwnProperty.call(values, param.key)
-      ? { ...param, default: values[param.key] }
-      : param,
-  )
+  const next_params = snapshot.params_config.map((param) => {
+    const value = values[param.key]
+    if (value === undefined) return param
+    return { ...param, default: value }
+  })
   return { ...snapshot, params_config: next_params }
 }
