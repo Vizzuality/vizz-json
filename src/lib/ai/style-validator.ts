@@ -81,6 +81,22 @@ function customSemanticErrors(style: unknown): readonly StyleError[] {
   return errors
 }
 
+export function validateLegendColors(legend: unknown): readonly StyleError[] {
+  if (!legend || typeof legend !== 'object') return []
+  const items = (legend as { items?: unknown }).items
+  if (!Array.isArray(items)) return []
+  const errors: StyleError[] = []
+  items.forEach((item, i) => {
+    const value = (item as { value?: unknown }).value
+    if (typeof value !== 'string') return
+    if (/^@@#params\..+/.test(value)) return
+    errors.push({
+      message: `legend_config.items[${i}].value is a literal value "${value}"; it must be a @@#params.<key> reference so every legend swatch stays editable.`,
+    })
+  })
+  return errors
+}
+
 export function validateStyle(
   style: unknown,
   renderer: RendererId,

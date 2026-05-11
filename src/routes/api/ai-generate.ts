@@ -12,7 +12,7 @@ import { aiResponseSchema } from '#/lib/ai/output-schema'
 import type { AiOutput } from '#/lib/ai/output-schema'
 import { createFetchTileJsonTool } from '#/lib/ai/tools/fetch-tilejson'
 import { postProcess } from '#/lib/ai/post-process'
-import { validateStyle } from '#/lib/ai/style-validator'
+import { validateLegendColors, validateStyle } from '#/lib/ai/style-validator'
 import { resolveParams } from '#/lib/converter/params-resolver'
 import type { RendererId } from '#/lib/ai/types'
 
@@ -34,7 +34,11 @@ function validateEnvelopeStyle(
     processed.params_config.map((p) => [p.key, p.default]),
   )
   const resolved = resolveParams(processed.config, defaults)
-  return validateStyle(resolved, renderer).map((e) => e.message)
+  const styleErrors = validateStyle(resolved, renderer).map((e) => e.message)
+  const legendErrors = validateLegendColors(envelope.legend_config).map(
+    (e) => e.message,
+  )
+  return [...styleErrors, ...legendErrors]
 }
 
 export const Route = createFileRoute('/api/ai-generate')({
@@ -42,12 +46,13 @@ export const Route = createFileRoute('/api/ai-generate')({
     handlers: {
       POST: async ({ request }) => {
         const body = await request.json()
-        const { messages, renderer, mapboxToken, mapboxStyleUrl } =
+        const { messages, renderer, mapboxToken, mapboxStyleUrl, paramValues } =
           aiGenerateInputSchema.parse(body)
 
         const systemPrompts = buildSystemPrompts({
           renderer,
           mapboxStyleUrl,
+          paramValues,
           // mapboxToken intentionally omitted from system prompts
         })
 
@@ -131,6 +136,12 @@ export const Route = createFileRoute('/api/ai-generate')({
           if (envelope) {
             const styleErrors = validateEnvelopeStyle(envelope, renderer)
             if (styleErrors.length > 0) {
+              const hasLegendError = styleErrors.some((m) =>
+                m.startsWith('legend_config.items'),
+              )
+              const legendHint = hasLegendError
+                ? ' Legend items[].value must be a "@@#params.<key>" reference with a matching parameterize entry (default = the hex colour) — never a literal colour.'
+                : ''
               lastFailure = { raw: parsedJson, issues: styleErrors }
               conversation.push(
                 {
@@ -144,7 +155,7 @@ export const Route = createFileRoute('/api/ai-generate')({
                   parts: [
                     {
                       type: 'text',
-                      content: `Your previous map style failed ${renderer === 'mapbox' ? 'Mapbox' : 'MapLibre'} style spec validation with these errors: ${styleErrors.join(' | ')}. Return a corrected JSON object that satisfies the spec. Common gotchas: "interpolate" expressions require literal numbers (not parameter refs) at input-stop positions; check property names against the spec; ensure layer types match source types.`,
+                      content: `Your previous envelope failed validation with these errors: ${styleErrors.join(' | ')}. Return a corrected JSON object.${legendHint} Common gotchas: "interpolate" expressions require literal numbers (not parameter refs) at input-stop positions; check property names against the ${renderer === 'mapbox' ? 'Mapbox' : 'MapLibre'} style spec; ensure layer types match source types.`,
                     },
                   ],
                 } as unknown as UIMessage,

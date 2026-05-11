@@ -32,6 +32,7 @@ export type Message = {
   createdAt: number
   schemaVersion: 1
   schemaSnapshot?: AiSchema
+  paramValues?: ResolvedParams
 }
 
 export type MetaRow = {

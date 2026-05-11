@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { validateStyle } from '#/lib/ai/style-validator'
+import { validateLegendColors, validateStyle } from '#/lib/ai/style-validator'
 
 describe('validateStyle', () => {
   it('accepts an empty fragment (treated as no-op)', () => {
@@ -117,5 +117,51 @@ describe('validateStyle', () => {
         (e) => /unknown source/i.test(e.message) && /"b"/.test(e.message),
       ),
     ).toBe(true)
+  })
+})
+
+describe('validateLegendColors', () => {
+  it('rejects legend items whose value is a literal CSS colour', () => {
+    const errors = validateLegendColors({
+      type: 'basic',
+      items: [{ label: 'A', value: '#ff0000' }],
+    })
+    expect(errors.length).toBeGreaterThan(0)
+    expect(errors[0].message).toMatch(/literal/i)
+  })
+
+  it('accepts legend items whose value is a @@#params reference', () => {
+    const errors = validateLegendColors({
+      type: 'basic',
+      items: [{ label: 'A', value: '@@#params.color_a' }],
+    })
+    expect(errors).toEqual([])
+  })
+
+  it('returns no errors when legend_config is undefined', () => {
+    expect(validateLegendColors(undefined)).toEqual([])
+  })
+
+  it('reports the offending item index in the message', () => {
+    const errors = validateLegendColors({
+      type: 'choropleth',
+      items: [
+        { label: 'A', value: '@@#params.color_a' },
+        { label: 'B', value: 'rgb(0,0,0)' },
+      ],
+    })
+    expect(errors).toHaveLength(1)
+    expect(errors[0].message).toMatch(/items\[1\]/)
+  })
+
+  it('ignores numeric values (gradient thresholds)', () => {
+    const errors = validateLegendColors({
+      type: 'gradient',
+      items: [
+        { label: '0', value: 0 },
+        { label: '1', value: 1 },
+      ],
+    })
+    expect(errors).toEqual([])
   })
 })

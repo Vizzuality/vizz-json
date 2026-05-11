@@ -35,6 +35,7 @@ Rules:
 - "envelope.parameterize" defaults must equal the literal value currently at that path.
 - Numbers get min/max/step. Enumerated strings get options. Booleans get neither. Omit fields that don't apply.
 - "envelope.legend_config" is optional — omit when no legend applies.
+- When you DO emit "legend_config", every items[].value that represents a colour MUST be a "@@#params.<key>" reference (e.g. "@@#params.color_a"), never a literal CSS colour string. Add a matching "parameterize" entry for each such key whose "default" holds the actual hex/rgb value. Numeric items[].value (e.g. gradient thresholds) are allowed as bare numbers. This keeps every legend swatch user-editable.
 - Never include API tokens, secrets, or user-supplied keys in any field.
 - The user's free-text data sources (URLs, property names) should be used verbatim. Do not invent property names.
 - When any source declares a vector tile source (\`type: "vector"\` with a \`url\` or \`tiles\` field — including any \`mapbox://\` reference), you MUST call the \`fetchTileJson\` tool with that source's URL BEFORE writing the final response. Read \`vector_layers[].id\` from the result and use one of those exact ids as each vector layer's \`source-layer\`. Never invent a \`source-layer\` value.
@@ -55,8 +56,21 @@ function rendererAddendum(controls: RendererControls): string {
   return `Renderer: MapLibre GL JS. Do NOT use mapbox:// URLs or Mapbox-only style spec features (model layer, fog, fill-extrusion-edge-radius, etc.). Stick to MapLibre style spec.`
 }
 
-export function buildSystemPrompts(
-  controls: RendererControls,
-): readonly string[] {
-  return [STATIC_PROMPT, rendererAddendum(controls)]
+function paramValuesAddendum(
+  paramValues: Readonly<Record<string, unknown>> | undefined,
+): string | null {
+  if (!paramValues || Object.keys(paramValues).length === 0) return null
+  const json = JSON.stringify(paramValues, null, 2)
+  return `Current user parameter values (live state of the previous envelope after any user edits):\n${json}\n\nWhen you produce the next envelope, treat these values as the ground truth for every parameter key the user has not explicitly asked you to change. For every "parameterize" entry whose "key" appears above and whose role you intend to KEEP, set "default" to the value shown here verbatim — do NOT pick a fresh colour or number, and do NOT regenerate the key name. Only emit a different "default" when the user explicitly asked you to change that specific parameter (e.g. "make the highest band red"). Param keys absent from this object are new and start fresh.`
+}
+
+type SystemPromptOpts = RendererControls & {
+  readonly paramValues?: Readonly<Record<string, unknown>>
+}
+
+export function buildSystemPrompts(opts: SystemPromptOpts): readonly string[] {
+  const parts: string[] = [STATIC_PROMPT, rendererAddendum(opts)]
+  const paramAddendum = paramValuesAddendum(opts.paramValues)
+  if (paramAddendum) parts.push(paramAddendum)
+  return parts
 }
