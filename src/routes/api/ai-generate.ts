@@ -29,7 +29,15 @@ function validateEnvelopeStyle(
   envelope: AiOutput,
   renderer: RendererId,
 ): readonly string[] {
-  const processed = postProcess(envelope)
+  let processed: ReturnType<typeof postProcess>
+  try {
+    processed = postProcess(envelope)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    return [
+      `parameterize entry has an unresolvable path: ${message}. Every "parameterize[].path" must point to a value that already exists in "style". Use bracket notation for array indices (e.g. "styles[0].paint.fill-color[4]") and never invent nested indices that the literal value at that position does not contain.`,
+    ]
+  }
   const defaults = Object.fromEntries(
     processed.params_config.map((p) => [p.key, p.default]),
   )
@@ -139,8 +147,14 @@ export const Route = createFileRoute('/api/ai-generate')({
               const hasLegendError = styleErrors.some((m) =>
                 m.startsWith('legend_config.items'),
               )
+              const hasPathError = styleErrors.some((m) =>
+                m.startsWith('parameterize entry has an unresolvable path'),
+              )
               const legendHint = hasLegendError
                 ? ' Legend items[].value must be a "@@#params.<key>" reference with a matching parameterize entry (default = the hex colour) — never a literal colour.'
+                : ''
+              const pathHint = hasPathError
+                ? ' For "step"/"interpolate" expressions, each stop value (threshold or colour) is a top-level element of the expression array. Index them directly — e.g. for `"fill-color": ["step", ["get", "x"], "#aaa", 10, "#bbb", 50, "#ccc"]` the parameterize paths are "styles[0].paint.fill-color[2]" (#aaa), "styles[0].paint.fill-color[3]" (10), "styles[0].paint.fill-color[4]" (#bbb), etc. Never use nested bracket indices unless the literal at that path is itself an array.'
                 : ''
               lastFailure = { raw: parsedJson, issues: styleErrors }
               conversation.push(
@@ -155,7 +169,7 @@ export const Route = createFileRoute('/api/ai-generate')({
                   parts: [
                     {
                       type: 'text',
-                      content: `Your previous envelope failed validation with these errors: ${styleErrors.join(' | ')}. Return a corrected JSON object.${legendHint} Common gotchas: "interpolate" expressions require literal numbers (not parameter refs) at input-stop positions; check property names against the ${renderer === 'mapbox' ? 'Mapbox' : 'MapLibre'} style spec; ensure layer types match source types.`,
+                      content: `Your previous envelope failed validation with these errors: ${styleErrors.join(' | ')}. Return a corrected JSON object.${legendHint}${pathHint} Common gotchas: check property names against the ${renderer === 'mapbox' ? 'Mapbox' : 'MapLibre'} style spec; ensure layer types match source types.`,
                     },
                   ],
                 } as unknown as UIMessage,

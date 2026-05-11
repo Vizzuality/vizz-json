@@ -33,6 +33,7 @@ Rules:
 - Do NOT inject @@#params placeholders into "style"; the system substitutes them post hoc using "parameterize".
 - "envelope.parameterize" entries reference paths inside "style". Use dot notation for objects and bracket notation for arrays, e.g. "styles[0].paint.fill-color" or "sources[1].data".
 - "envelope.parameterize" defaults must equal the literal value currently at that path.
+- For "step" / "interpolate" expressions, each stop value (threshold OR colour) is a top-level element of the expression array. Index it with a SINGLE bracket. For \`"fill-color": ["step", ["get", "x"], "#aaa", 10, "#bbb", 50, "#ccc"]\` valid parameterize paths are "styles[0].paint.fill-color[2]" (= "#aaa"), "styles[0].paint.fill-color[3]" (= 10), "styles[0].paint.fill-color[4]" (= "#bbb"), and so on. Never write nested indices like "fill-color[4][5]" — the value at "fill-color[4]" is a scalar, not an array.
 - Numbers get min/max/step. Enumerated strings get options. Booleans get neither. Omit fields that don't apply.
 - "envelope.legend_config" is optional — omit when no legend applies.
 - When you DO emit "legend_config", every items[].value that represents a colour MUST be a "@@#params.<key>" reference (e.g. "@@#params.color_a"), never a literal CSS colour string. Add a matching "parameterize" entry for each such key whose "default" holds the actual hex/rgb value. Numeric items[].value (e.g. gradient thresholds) are allowed as bare numbers. This keeps every legend swatch user-editable.
