@@ -134,6 +134,7 @@ export function GradientLegend({
           values={values}
           currentJson={currentJson}
           onApply={onApply}
+          onChange={onChange}
           onClose={() => setOpen(false)}
           fullRange={fullRange}
         />

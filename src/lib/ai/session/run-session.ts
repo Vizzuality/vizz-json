@@ -5,6 +5,7 @@ import {
 } from '#/lib/ai/persistence/messages'
 import { renameChat } from '#/lib/ai/persistence/chats'
 import { postProcess } from '#/lib/ai/post-process'
+import { reconcileParamValues } from '#/lib/ai/reconcile-param-values'
 import type { AiSchema } from '#/lib/ai/persistence/types'
 import {
   shouldRenameOnEnvelope,
@@ -27,6 +28,9 @@ export async function runAiSession(
     }
 
     const fullHistory = [...history, userMsg]
+    const activeMessage = history.find((m) => m.id === chat.activeMessageId)
+    const currentParamValues =
+      activeMessage?.paramValues ?? chat.activeParamValues
     const body = {
       messages: fullHistory.map((m) => ({
         id: m.id,
@@ -36,6 +40,7 @@ export async function runAiSession(
       renderer: chat.renderer.renderer,
       mapboxToken: chat.renderer.mapboxToken,
       mapboxStyleUrl: chat.renderer.mapboxStyleUrl,
+      paramValues: currentParamValues,
     }
 
     const res = await fetch('/api/ai-generate', {
@@ -62,7 +67,12 @@ export async function runAiSession(
 
     if (parsed.envelope) {
       const snapshot = postProcess(parsed.envelope) as AiSchema
-      await appendAssistantMessage(chat.id, parsed.reply, snapshot)
+      const reconciled = reconcileParamValues(
+        activeMessage?.schemaSnapshot ?? null,
+        snapshot,
+        currentParamValues,
+      )
+      await appendAssistantMessage(chat.id, parsed.reply, snapshot, reconciled)
       if (shouldRenameOnEnvelope(chat.title, prompt)) {
         await renameChat(chat.id, snapshot.metadata.title)
       }

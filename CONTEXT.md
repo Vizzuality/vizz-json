@@ -53,3 +53,11 @@ Shared vocabulary for the codebase. Use these terms exactly in code, plans, comm
 ## Gradient binding
 
 **Gradient binding** — Round-trip between a `buildColormap` invocation in the Config and the editable stops shown by the legend's gradient editor. Parsing stops out of the Config, mutating them, and writing back (which may inject new `@@#params.X` references) is one logical operation. Currently spread across `gradient-types`, `gradient-stops-init`, `gradient-serializer`, `gradient-css`, `use-gradient-editor`, plus 5 legend components.
+
+## Color editing (AI surface)
+
+**Legend as canonical color editor** — In the AI page, the legend is the only UI for editing color params. Param panels suppress any color control whose key is bound to a legend item (i.e. appears in `legendParamMapping.valueParamKey`). Color params still exist in the Config and still flow through `@@#params.X` refs — the legend swatch is just their control surface. The style validator forbids literal colors inside `legend_config.items[].value`, so every legend-bound color is guaranteed to be a `@@#params.X` ref.
+
+**Color override reconciliation** — `Chat.activeParamValues` is chat-scoped. On a new AI reply, for each `control_type === 'color_picker'` key in the new message's `params_config`, the new default is compared to the prior active message's default for the same key. Differ → user's value is overwritten with the new default (AI explicitly changed intent). Match → user's edit is preserved. Non-color keys never reset on reply. Logic lives in `reconcileParamValues(prev, next, current)` and is called only from the AI-reply success path; history-click navigation never triggers it.
+
+**Snapshot mutation for literal gradient stops** — Message snapshots are normally an immutable record of AI output. The one exception is gradient editor Apply on stops that are not parameterized: those edits write back into `Message.schemaSnapshot` via `db.messages.update`. Parameterized stops go through `onChange` → `setParamValues` and never touch the snapshot.

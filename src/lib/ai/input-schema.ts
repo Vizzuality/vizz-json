@@ -21,6 +21,7 @@ export const aiGenerateInputSchema = z.object({
   renderer: z.enum(['maplibre', 'mapbox']),
   mapboxToken: z.string().optional(),
   mapboxStyleUrl: z.string().optional(),
+  paramValues: z.record(z.string(), z.unknown()).optional(),
 })
 
 export type AiGenerateInput = z.infer<typeof aiGenerateInputSchema>

@@ -17,7 +17,7 @@ import {
 } from '#/components/ui/tooltip'
 import { ParamsPanel } from '#/containers/playground/params-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
-import { useResolutionPipeline, buildDefaultParams } from '#/lib/pipeline'
+import { useResolutionPipeline } from '#/lib/pipeline'
 import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
 import {
@@ -25,9 +25,9 @@ import {
   deleteChat,
   renameChat,
   setActiveMessage,
-  setParamValues,
   setRenderer,
 } from '#/lib/ai/persistence/chats'
+import { setMessageParamValues } from '#/lib/ai/persistence/messages'
 import { db } from '#/lib/ai/persistence/db'
 import type { RendererControls } from '#/lib/ai/types'
 import type { ResolvedParams } from '#/lib/types'
@@ -78,18 +78,34 @@ export function AiPage() {
     }
   }, [chatId, setChatId])
 
-  const activeSnapshot: AiSchema | null = useMemo(() => {
+  const activeMessage = useMemo(() => {
     if (!chat?.activeMessageId) return null
-    const msg = messages.find((m) => m.id === chat.activeMessageId)
-    return msg?.schemaSnapshot ?? null
+    return messages.find((m) => m.id === chat.activeMessageId) ?? null
   }, [chat?.activeMessageId, messages])
+
+  const activeSnapshot: AiSchema | null = activeMessage?.schemaSnapshot ?? null
 
   const schemaJson = useMemo(
     () => (activeSnapshot ? JSON.stringify(activeSnapshot, null, 2) : ''),
     [activeSnapshot],
   )
 
-  const paramValues = chat?.activeParamValues ?? {}
+  const paramValues = useMemo<ResolvedParams>(() => {
+    if (activeMessage?.paramValues) return activeMessage.paramValues
+    if (!activeSnapshot) return {}
+    const legacy = chat?.activeParamValues ?? {}
+    const fallback: Record<string, unknown> = {}
+    for (const param of activeSnapshot.params_config) {
+      fallback[param.key] = Object.prototype.hasOwnProperty.call(
+        legacy,
+        param.key,
+      )
+        ? legacy[param.key]
+        : param.default
+    }
+    return fallback
+  }, [activeMessage?.paramValues, activeSnapshot, chat?.activeParamValues])
+
   const pipeline = useResolutionPipeline(
     activeSnapshot as Readonly<Record<string, unknown>> | null,
     paramValues,
@@ -98,44 +114,53 @@ export function AiPage() {
     pipeline.output.kind === 'map' ? pipeline.output.resolvedConfig : null
   const error = pipeline.output.error
 
-  const writeParams = useCallback(async (id: string, next: ResolvedParams) => {
-    try {
-      await setParamValues(id, next)
-    } catch (err) {
-      if ((err as Error).name === 'QuotaExceededError') {
-        toast.error('Storage full — delete old chats to continue.')
-      } else throw err
-    }
-  }, [])
-
-  // Seed default param values when the active message's snapshot params don't
-  // match what's currently stored. Preserves user edits: only writes when the
-  // key set differs (e.g. on first activation or after switching messages).
-  useEffect(() => {
-    if (!chat) return
-    const messageId = chat.activeMessageId
-    if (!messageId) return
-    const msg = messages.find((m) => m.id === messageId)
-    const snapshot = msg?.schemaSnapshot
-    if (!snapshot) return
-
-    const expectedKeys = snapshot.params_config.map((p) => p.key)
-    const currentKeys = Object.keys(chat.activeParamValues)
-    const sameKeys =
-      currentKeys.length === expectedKeys.length &&
-      expectedKeys.every((k) => k in chat.activeParamValues)
-    if (sameKeys) return
-
-    void writeParams(chat.id, buildDefaultParams(snapshot.params_config))
-  }, [chat, messages, writeParams])
+  const writeMessageParams = useCallback(
+    async (messageId: string, next: ResolvedParams) => {
+      try {
+        await setMessageParamValues(messageId, next)
+      } catch (err) {
+        if ((err as Error).name === 'QuotaExceededError') {
+          toast.error('Storage full — delete old chats to continue.')
+        } else throw err
+      }
+    },
+    [],
+  )
 
   const handleParamChange = useCallback(
     (key: string, value: unknown) => {
-      if (!chatId) return
-      const next = { ...(chat?.activeParamValues ?? {}), [key]: value }
-      void writeParams(chatId, next)
+      const messageId = chat?.activeMessageId
+      if (!messageId) return
+      const next: ResolvedParams = { ...paramValues, [key]: value }
+      void writeMessageParams(messageId, next)
     },
-    [chat?.activeParamValues, chatId, writeParams],
+    [chat?.activeMessageId, paramValues, writeMessageParams],
+  )
+
+  const handleSnapshotApply = useCallback(
+    (updatedJson: string) => {
+      const messageId = chat?.activeMessageId
+      if (!messageId) return
+      let parsed: AiSchema
+      try {
+        parsed = JSON.parse(updatedJson) as AiSchema
+      } catch (err) {
+        toast.error(
+          `Failed to apply gradient edit: ${err instanceof Error ? err.message : String(err)}`,
+        )
+        return
+      }
+      void (async () => {
+        try {
+          await db.messages.update(messageId, { schemaSnapshot: parsed })
+        } catch (err) {
+          if ((err as Error).name === 'QuotaExceededError') {
+            toast.error('Storage full — delete old chats to continue.')
+          } else throw err
+        }
+      })()
+    },
+    [chat?.activeMessageId],
   )
 
   const handleRendererChange = useCallback(
@@ -308,6 +333,8 @@ export function AiPage() {
               orphanLegendParams={pipeline.orphanLegendParams}
               values={paramValues}
               onChange={handleParamChange}
+              currentJson={schemaJson}
+              onApply={handleSnapshotApply}
             />
           ) : (
             <div className="p-3 text-xs text-muted-foreground">

@@ -33,8 +33,16 @@ export function LegendCard({
   currentJson,
   onApply,
 }: LegendCardProps) {
+  const boundParamKeys = new Set<string>()
+  for (const mapping of legendParamMapping.values()) {
+    if (mapping.valueParamKey) boundParamKeys.add(mapping.valueParamKey)
+  }
+  const filteredOrphans = orphanLegendParams.filter(
+    (p) => !boundParamKeys.has(p.key),
+  )
+
   const hasPreview = legendConfig !== null
-  const hasOrphans = orphanLegendParams.length > 0
+  const hasOrphans = filteredOrphans.length > 0
 
   if (!hasPreview && !hasOrphans) return null
 
@@ -59,7 +67,7 @@ export function LegendCard({
         <>
           {hasPreview && <Separator className="my-3" />}
           <div className="flex flex-col gap-2">
-            {orphanLegendParams.map((param) => {
+            {filteredOrphans.map((param) => {
               const currentValue = Object.prototype.hasOwnProperty.call(
                 values,
                 param.key,

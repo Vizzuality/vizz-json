@@ -1,6 +1,7 @@
 import { db } from './db'
 import { migrateMessage } from './migrations'
 import type { AiSchema, Message } from './types'
+import type { ResolvedParams } from '#/lib/types'
 
 function uuid(): string {
   return crypto.randomUUID()
@@ -30,6 +31,7 @@ export async function appendAssistantMessage(
   chatId: string,
   text: string,
   schemaSnapshot?: AiSchema,
+  paramValues?: ResolvedParams,
 ): Promise<Message> {
   const now = Date.now()
   const message: Message = {
@@ -40,6 +42,7 @@ export async function appendAssistantMessage(
     createdAt: now,
     schemaVersion: 1,
     schemaSnapshot,
+    ...(paramValues ? { paramValues } : {}),
   }
   await db.transaction('rw', db.chats, db.messages, async () => {
     await db.messages.add(message)
@@ -48,6 +51,13 @@ export async function appendAssistantMessage(
     await db.chats.update(chatId, patch)
   })
   return message
+}
+
+export async function setMessageParamValues(
+  messageId: string,
+  paramValues: ResolvedParams,
+): Promise<void> {
+  await db.messages.update(messageId, { paramValues })
 }
 
 export async function listMessages(chatId: string): Promise<Message[]> {
