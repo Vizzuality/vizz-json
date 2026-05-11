@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '#/components/ui/alert-dialog'
-import { useAiSession } from '#/lib/ai/session'
+import { useAiSession, parsePastedSnapshot } from '#/lib/ai/session'
 import type { Chat, Message } from '#/lib/ai/persistence/types'
 
 type Props = {
@@ -57,6 +57,11 @@ export function AiChat({
     if (!text) return
     setDraft('')
     scrollToBottom()
+    const snapshot = parsePastedSnapshot(text)
+    if (snapshot) {
+      void session.ingest(snapshot, text)
+      return
+    }
     void session.submit(text)
   }
 
