@@ -28,6 +28,7 @@ import {
   setRenderer,
 } from '#/lib/ai/persistence/chats'
 import { setMessageParamValues } from '#/lib/ai/persistence/messages'
+import { mergeParamDefaults } from '#/lib/ai/merge-param-defaults'
 import { db } from '#/lib/ai/persistence/db'
 import type { RendererControls } from '#/lib/ai/types'
 import type { ResolvedParams } from '#/lib/types'
@@ -85,11 +86,6 @@ export function AiPage() {
 
   const activeSnapshot: AiSchema | null = activeMessage?.schemaSnapshot ?? null
 
-  const schemaJson = useMemo(
-    () => (activeSnapshot ? JSON.stringify(activeSnapshot, null, 2) : ''),
-    [activeSnapshot],
-  )
-
   const paramValues = useMemo<ResolvedParams>(() => {
     if (activeMessage?.paramValues) return activeMessage.paramValues
     if (!activeSnapshot) return {}
@@ -105,6 +101,17 @@ export function AiPage() {
     }
     return fallback
   }, [activeMessage?.paramValues, activeSnapshot, chat?.activeParamValues])
+
+  const mergedSnapshot = useMemo(
+    () =>
+      activeSnapshot ? mergeParamDefaults(activeSnapshot, paramValues) : null,
+    [activeSnapshot, paramValues],
+  )
+
+  const schemaJson = useMemo(
+    () => (mergedSnapshot ? JSON.stringify(mergedSnapshot, null, 2) : ''),
+    [mergedSnapshot],
+  )
 
   const pipeline = useResolutionPipeline(
     activeSnapshot as Readonly<Record<string, unknown>> | null,
