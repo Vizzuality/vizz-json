@@ -48,6 +48,8 @@ Shared vocabulary for the codebase. Use these terms exactly in code, plans, comm
 
 **AI page** — Chat-driven editor at `/ai`: user prompts → AI session → resolved Config + params + legend. Sidebar rail switches between Chat / JSON / Config / My area panels; map is always live.
 
+**AI page JSON tab** — Shows the active message snapshot with current `paramValues` folded into `params_config[].default` (display + export only). Disk snapshot stays immutable; AI session input stays raw. Helper: `src/lib/ai/merge-param-defaults.ts`.
+
 **Presentation** — Slide deck at `/presentation` walking the `@@` convention.
 
 ## Gradient binding
