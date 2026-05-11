@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useChat } from '#/hooks/use-chat'
 import { runAiSession } from './run-session'
+import { ingestSnapshot } from './ingest-snapshot'
 import type { UseAiSessionApi } from './types'
+import type { AiSchema } from '#/lib/ai/persistence/types'
 
 export function useAiSession(chatId: string | null): UseAiSessionApi {
   const { chat, messages } = useChat(chatId)
@@ -47,6 +49,25 @@ export function useAiSession(chatId: string | null): UseAiSessionApi {
     [chat, messages],
   )
 
+  const ingest = useCallback(
+    async (snapshot: AiSchema, userText: string): Promise<void> => {
+      if (!chat) return
+      if (abortRef.current) return
+
+      setIsLoading(true)
+      const result = await ingestSnapshot({
+        chat,
+        history: messages,
+        snapshot,
+        userText,
+      })
+      setIsLoading(false)
+      if (result.kind === 'error') setLastError(result.message)
+      else setLastError(null)
+    },
+    [chat, messages],
+  )
+
   const stop = useCallback((): void => {
     const controller = abortRef.current
     if (!controller) return
@@ -55,5 +76,5 @@ export function useAiSession(chatId: string | null): UseAiSessionApi {
     setIsLoading(false)
   }, [])
 
-  return { submit, stop, isLoading, lastError }
+  return { submit, ingest, stop, isLoading, lastError }
 }

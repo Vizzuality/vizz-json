@@ -22,6 +22,7 @@ export type AiSessionOptions = {
 
 export type UseAiSessionApi = {
   readonly submit: (prompt: string) => Promise<void>
+  readonly ingest: (snapshot: AiSchema, userText: string) => Promise<void>
   readonly stop: () => void
   readonly isLoading: boolean
   readonly lastError: string | null
