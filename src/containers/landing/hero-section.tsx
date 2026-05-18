@@ -39,9 +39,7 @@ function TransformationPreview() {
               &nbsp;&nbsp;&nbsp;&nbsp;
               <span className="text-blue-400">&quot;raster-opacity&quot;</span>
               {': '}
-              <span className="text-primary">
-                &quot;@@#params.opacity&quot;
-              </span>
+              <span className="text-accent">&quot;@@#params.opacity&quot;</span>
             </div>
             <div className="text-zinc-400">&nbsp;&nbsp;{'},'}</div>
             <div className="text-zinc-400">
@@ -53,9 +51,7 @@ function TransformationPreview() {
               &nbsp;&nbsp;&nbsp;&nbsp;
               <span className="text-blue-400">&quot;visibility&quot;</span>
               {': '}
-              <span className="text-primary">
-                &quot;@@#params.visible&quot;
-              </span>
+              <span className="text-accent">&quot;@@#params.visible&quot;</span>
             </div>
             <div className="text-zinc-400">&nbsp;&nbsp;{'}'}</div>
             <div className="text-zinc-600">{'}'}</div>
@@ -139,10 +135,10 @@ export function HeroSection() {
           Vizzuality — Frontend Team
         </Badge>
         <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl">
-          Vizz<span className="text-primary">Json</span>
+          Vizz<span className="text-accent">Json</span>
         </h1>
         <p className="mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-          The <code className="font-mono text-primary">@@</code> convention for
+          The <code className="font-mono text-accent">@@</code> convention for
           turning static JSON into dynamic, parameterized configurations —
           library-agnostic, CMS-ready, runtime-resolved.
         </p>

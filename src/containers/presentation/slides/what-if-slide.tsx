@@ -16,7 +16,7 @@ export function WhatIfSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-8 text-foreground">
-        What <span className="text-primary">if</span>...
+        What <span className="text-accent">if</span>...
       </SlideHeading>
       <SlideText className="mb-8 text-muted-foreground">
         ...the JSON itself could declare which values are parametrizable? Same
@@ -33,7 +33,7 @@ export function WhatIfSlide() {
         </div>
 
         <div>
-          <p className="mb-3 text-sm font-semibold text-primary">After</p>
+          <p className="mb-3 text-sm font-semibold text-accent">After</p>
           <SlideCode value={AFTER} />
         </div>
       </div>

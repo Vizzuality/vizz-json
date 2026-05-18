@@ -186,7 +186,7 @@ export function ShowcaseSection() {
                   <PatternSvg pattern={example.pattern} />
                 </div>
                 <div className="px-4 py-3">
-                  <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                  <h3 className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">
                     {example.title}
                   </h3>
                   <p className="mt-1 text-xs text-muted-foreground leading-relaxed">

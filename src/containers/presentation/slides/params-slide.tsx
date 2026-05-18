@@ -15,7 +15,7 @@ export function ParamsSlide() {
         @@#params.X
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Runtime parameter <span className="text-primary">injection</span>
+        Runtime parameter <span className="text-accent">injection</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
         Place a named parameter reference anywhere in the JSON. At resolution
@@ -29,7 +29,7 @@ export function ParamsSlide() {
         <div className="rounded-md border border-border bg-card px-4 py-3">
           <p className="text-sm text-muted-foreground">
             params = {'{ '}
-            <span className="font-mono text-primary">opacity: 0.75</span>
+            <span className="font-mono text-accent">opacity: 0.75</span>
             {' }'}
           </p>
         </div>

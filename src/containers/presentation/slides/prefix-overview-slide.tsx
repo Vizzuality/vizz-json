@@ -28,11 +28,11 @@ export function PrefixOverviewSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-4 text-foreground">
-        The <code className="font-mono text-primary">@@</code> family
+        The <code className="font-mono text-accent">@@</code> family
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
         One convention, four capabilities. Every string starting with{' '}
-        <code className="font-mono text-primary">@@</code> is a directive that
+        <code className="font-mono text-accent">@@</code> is a directive that
         the resolver knows how to handle — parameters, functions, types, and
         expressions.
       </SlideText>

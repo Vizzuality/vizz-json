@@ -40,7 +40,7 @@ export function AiLayout({
 }: AiLayoutProps) {
   const active = panels[viewMode]
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] bg-background">
+    <div className="flex h-dvh bg-background">
       <SidebarRail
         value={viewMode}
         onChange={onViewModeChange}

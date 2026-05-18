@@ -5,7 +5,7 @@ export function CtaSlide() {
   return (
     <Slide className="text-center">
       <SlideTitle className="mb-6 text-foreground">
-        Try it <span className="text-primary">yourself</span>
+        Try it <span className="text-accent">yourself</span>
       </SlideTitle>
       <SlideText className="mb-12 text-muted-foreground">
         Open the playground, pick an example, and tweak the parameters live.
