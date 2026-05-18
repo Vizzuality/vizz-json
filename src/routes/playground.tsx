@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { PlaygroundLayout } from '#/containers/playground/playground-layout'
@@ -13,13 +13,13 @@ import { ComponentPreview } from '#/containers/playground/component-preview'
 import { useDebouncedValue } from '#/hooks/use-debounced-value'
 import { useResolutionPipeline, buildDefaultParams } from '#/lib/pipeline'
 import {
-  examples,
   EXAMPLE_SLUGS,
   DEFAULT_EXAMPLE_SLUG,
   getExampleIndexBySlug,
   getSlugByIndex,
 } from '#/examples'
-import type { ParamConfig, ResolvedParams } from '#/lib/types'
+import { useProject } from '#/lib/project-context'
+import type { ParamConfig } from '#/lib/types'
 
 const searchSchema = z.object({
   example: z
@@ -40,12 +40,24 @@ function PlaygroundPage() {
   const navigate = Route.useNavigate()
   const selectedExampleIndex = getExampleIndexBySlug(exampleSlug) ?? 0
 
-  const [jsonString, setJsonString] = useState(() =>
-    JSON.stringify(examples[selectedExampleIndex], null, 2),
-  )
-  const [paramValues, setParamValues] = useState<ResolvedParams>(() =>
-    buildDefaultParams(examples[selectedExampleIndex].params_config),
-  )
+  const {
+    jsonString,
+    paramValues,
+    exampleSlug: contextSlug,
+    setJsonString,
+    setParamValues,
+    loadExample,
+  } = useProject()
+
+  // Sync URL slug → context when they diverge (e.g. user pastes a URL).
+  // Intentionally omitting contextSlug + loadExample from deps — we only want
+  // to fire when the URL slug changes, not on every context update.
+  useEffect(() => {
+    if (exampleSlug !== contextSlug) {
+      loadExample(selectedExampleIndex)
+    }
+  }, [exampleSlug]) // intentional partial deps — URL slug is the sole trigger
+
   const [showResolved, setShowResolved] = useState(false)
 
   const handleExampleSelect = useCallback(
@@ -53,34 +65,38 @@ function PlaygroundPage() {
       const slug = getSlugByIndex(index)
       if (!slug) return
 
-      const example = examples[index]
-      setJsonString(JSON.stringify(example, null, 2))
-      setParamValues(buildDefaultParams(example.params_config))
+      loadExample(index)
       setShowResolved(false)
 
-      navigate({ search: { example: slug }, replace: true })
+      void navigate({ search: { example: slug }, replace: true })
     },
-    [navigate],
+    [navigate, loadExample],
   )
 
-  const handleParamChange = useCallback((key: string, value: unknown) => {
-    setParamValues((prev) => ({ ...prev, [key]: value }))
-  }, [])
+  const handleParamChange = useCallback(
+    (key: string, value: unknown) => {
+      setParamValues((prev) => ({ ...prev, [key]: value }))
+    },
+    [setParamValues],
+  )
 
-  const handleGradientApply = useCallback((updatedJson: string) => {
-    setJsonString(updatedJson)
-    try {
-      const parsed = JSON.parse(updatedJson) as Record<string, unknown>
-      const paramsConfig = parsed.params_config as
-        | readonly ParamConfig[]
-        | undefined
-      if (paramsConfig) {
-        setParamValues(buildDefaultParams(paramsConfig))
+  const handleGradientApply = useCallback(
+    (updatedJson: string) => {
+      setJsonString(updatedJson)
+      try {
+        const parsed = JSON.parse(updatedJson) as Record<string, unknown>
+        const paramsConfig = parsed.params_config as
+          | readonly ParamConfig[]
+          | undefined
+        if (paramsConfig) {
+          setParamValues(buildDefaultParams(paramsConfig))
+        }
+      } catch {
+        // JSON parse failed — the editor content will show the error
       }
-    } catch {
-      // JSON parse failed — the editor content will show the error
-    }
-  }, [])
+    },
+    [setJsonString, setParamValues],
+  )
 
   const debouncedJson = useDebouncedValue(jsonString, DEBOUNCE_MS)
 
