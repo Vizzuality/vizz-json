@@ -28,7 +28,7 @@ export function TypeRegistrySlide() {
         @@type:
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Registering <span className="text-primary">custom</span> components
+        Registering <span className="text-accent">custom</span> components
       </SlideHeading>
       <SlideText className="mb-6 text-muted-foreground">
         Build a React component, register it by name in the converter, and the

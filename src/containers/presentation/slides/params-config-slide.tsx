@@ -13,7 +13,7 @@ export function ParamsConfigSlide() {
         @@#params.X
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Declaring what&apos;s <span className="text-primary">tuneable</span>
+        Declaring what&apos;s <span className="text-accent">tuneable</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
         Each entry declares a parameter key, its default value, and optional

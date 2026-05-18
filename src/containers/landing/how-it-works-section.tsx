@@ -392,7 +392,7 @@ export function HowItWorksSection() {
         <HubDiagram />
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
-          Every <code className="text-primary">@@</code> prefix is resolved in a
+          Every <code className="text-accent">@@</code> prefix is resolved in a
           single pass — no multi-stage builds, no compilation step.
         </p>
       </div>

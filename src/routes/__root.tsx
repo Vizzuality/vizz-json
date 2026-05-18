@@ -93,7 +93,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-primary/20">
         <TanStackQueryProvider>
           <TooltipProvider>
-            {!isPresentation && <Header />}
+            {!isPresentation && !isAi && <Header />}
             {children}
             {!isPlayground && !isPresentation && !isAi && <Footer />}
           </TooltipProvider>

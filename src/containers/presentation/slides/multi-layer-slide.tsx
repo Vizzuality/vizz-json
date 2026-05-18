@@ -37,7 +37,7 @@ export function MultiLayerSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-4 text-foreground">
-        Now <span className="text-primary">multiply</span> that
+        Now <span className="text-accent">multiply</span> that
       </SlideHeading>
       <SlideText className="mb-6 text-muted-foreground">
         Real maps stack many layers at once. Each type — circle, fill, line —

@@ -25,7 +25,7 @@ export function FunctionSlide() {
         @@function:
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Named function <span className="text-primary">dispatch</span>
+        Named function <span className="text-accent">dispatch</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
         Reference a registered function by name. Ideal for logic that depends on

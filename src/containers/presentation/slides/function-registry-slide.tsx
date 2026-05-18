@@ -30,7 +30,7 @@ export function FunctionRegistrySlide() {
         @@function:
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Registering <span className="text-primary">custom</span> functions
+        Registering <span className="text-accent">custom</span> functions
       </SlideHeading>
       <SlideText className="mb-6 text-muted-foreground">
         Write a plain function, export it from a registry object, and pass it to

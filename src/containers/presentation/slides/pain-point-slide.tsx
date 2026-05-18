@@ -31,7 +31,7 @@ export function PainPointSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-4 text-foreground">
-        A <span className="text-primary">single</span> layer
+        A <span className="text-accent">single</span> layer
       </SlideHeading>
       <SlideText className="mb-6 text-muted-foreground">
         Even one MapLibre layer is a wall of config — paint properties, layout

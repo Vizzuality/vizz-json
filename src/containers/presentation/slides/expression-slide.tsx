@@ -20,7 +20,7 @@ export function ExpressionSlide() {
         @@=[...]
       </p>
       <SlideHeading className="mb-4 text-foreground">
-        Inline <span className="text-primary">expressions</span>
+        Inline <span className="text-accent">expressions</span>
       </SlideHeading>
       <SlideText className="mb-10 text-muted-foreground">
         Embed inline JavaScript expressions directly in the JSON. Each{' '}

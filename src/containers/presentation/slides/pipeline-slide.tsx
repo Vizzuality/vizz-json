@@ -66,7 +66,7 @@ export function PipelineSlide() {
   return (
     <Slide>
       <SlideHeading className="mb-4 text-foreground">
-        The resolution <span className="text-primary">pipeline</span>
+        The resolution <span className="text-accent">pipeline</span>
       </SlideHeading>
       <SlideText className="mb-12 text-muted-foreground">
         One function, two stages.{' '}

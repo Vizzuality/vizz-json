@@ -46,7 +46,7 @@ export function ChoroplethSlide() {
   return (
     <Slide className="items-start">
       <SlideHeading className="mb-4 text-foreground">
-        Now make it <span className="text-primary">real</span>
+        Now make it <span className="text-accent">real</span>
       </SlideHeading>
       <SlideText className="mb-6 text-muted-foreground">
         A choropleth needs two layers for the same data — a fill for the color

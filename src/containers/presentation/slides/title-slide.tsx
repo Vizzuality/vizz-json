@@ -7,11 +7,11 @@ export function TitleSlide() {
         Vizzuality
       </p>
       <SlideTitle className="mb-6 text-foreground">
-        Vizz<span className="text-primary">Json</span>
+        Vizz<span className="text-accent">Json</span>
       </SlideTitle>
       <SlideText className="text-muted-foreground">
         A JSON templating convention using the{' '}
-        <code className="font-mono text-primary">@@</code> prefix
+        <code className="font-mono text-accent">@@</code> prefix
       </SlideText>
       <div className="mt-16 text-sm text-muted-foreground/60">
         <p>Miguel Barrenechea</p>
