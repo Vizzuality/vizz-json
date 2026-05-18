@@ -99,9 +99,9 @@ export default function Header() {
                     ;(e.target as HTMLInputElement).blur()
                   }
                 }}
-                className="min-w-[8ch] max-w-full border-transparent bg-transparent px-2 text-sm font-semibold text-foreground [field-sizing:content] hover:bg-secondary focus:bg-secondary"
+                className="min-w-[8ch] [field-sizing:content]"
               />
-              <Button variant="ghost" size="default">
+              <Button variant="ghost">
                 Version 1
                 <ChevronDown />
               </Button>
