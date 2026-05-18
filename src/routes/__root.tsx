@@ -19,6 +19,7 @@ import { m } from '#/paraglide/messages'
 import { buttonVariants } from '#/components/ui/button'
 import { Toaster } from '#/components/ui/sonner'
 import { TooltipProvider } from '#/components/ui/tooltip'
+import { ProjectProvider } from '#/lib/project-context'
 
 import appCss from '../styles.css?url'
 
@@ -90,12 +91,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-primary/20">
+      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-accent/30">
         <TanStackQueryProvider>
           <TooltipProvider>
-            {!isPresentation && !isAi && <Header />}
-            {children}
-            {!isPlayground && !isPresentation && !isAi && <Footer />}
+            <ProjectProvider>
+              {!isPresentation && <Header />}
+              {children}
+              {!isPlayground && !isPresentation && !isAi && <Footer />}
+            </ProjectProvider>
           </TooltipProvider>
           <TanStackDevtools
             config={{
