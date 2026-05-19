@@ -7,7 +7,7 @@ import { JsonViewer } from './json/json-viewer'
 import { RendererSwitch } from './map/renderer-switch'
 import { MapHeader } from './map/map-header'
 import { MapConfigDialog } from './map/map-config-dialog'
-import { ParamsPanel } from '#/containers/playground/params-panel'
+import { LayersPanel } from './layers/layers-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
 import { useResolutionPipeline } from '#/lib/pipeline'
 import { useChat } from '#/hooks/use-chat'
@@ -242,15 +242,13 @@ export function AiPage() {
         params={
           <PaneErrorBoundary label="Params" resetKey={schemaJson}>
             {activeSnapshot ? (
-              <ParamsPanel
+              <LayersPanel
                 metadata={{
                   title: activeSnapshot.metadata.title,
                   tier: activeSnapshot.metadata.tier,
                 }}
-                paramsConfig={pipeline.inferredParams}
-                legendConfig={pipeline.resolvedLegendConfig}
-                legendParamMapping={pipeline.legendParamMapping}
-                orphanLegendParams={pipeline.orphanLegendParams}
+                parsedConfig={pipeline.parsedConfig}
+                pipeline={pipeline}
                 values={paramValues}
                 onChange={handleParamChange}
                 currentJson={schemaJson}
