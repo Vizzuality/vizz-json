@@ -1,6 +1,7 @@
 import type { LegendItem, InferredParam } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
 import type { GradientStop } from '#/lib/gradient-types'
+import { resolveItemColor } from '#/lib/legend-color'
 
 export function initializeGradientStops(
   items: readonly LegendItem[],
@@ -37,7 +38,7 @@ export function initializeGradientStops(
 
     return {
       id: crypto.randomUUID(),
-      color: typeof item.value === 'string' ? item.value : '#000000',
+      color: resolveItemColor(item, mapping, values),
       position: 0,
       dataValue,
       label: item.label,

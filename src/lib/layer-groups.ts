@@ -15,6 +15,8 @@ export type LayerGroup = {
     type: 'basic' | 'choropleth' | 'gradient'
     items: readonly LegendItem[]
     paramMapping: ReadonlyMap<number, ItemParamMapping>
+    /** Slider params with group='legend' that belong to this layer — used by gradient editor */
+    thresholdParams: readonly InferredParam[]
   } | null
 }
 
@@ -114,6 +116,28 @@ function detectVisibility(style: StyleObject): {
 }
 
 /**
+ * Returns slider params with group='legend' from a group's bodyParams.
+ * These drive the threshold handles in the gradient editor.
+ * Color-param keys (from paramMapping) are excluded since they are color
+ * stops, not threshold positions.
+ */
+function buildThresholdParams(
+  group: LayerGroup,
+  paramMapping: ReadonlyMap<number, ItemParamMapping>,
+): readonly InferredParam[] {
+  const colorKeys = new Set<string>()
+  for (const mapping of paramMapping.values()) {
+    if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
+  }
+  return group.bodyParams.filter(
+    (p) =>
+      p.control_type === 'slider' &&
+      p.group === 'legend' &&
+      !colorKeys.has(p.key),
+  )
+}
+
+/**
  * Assigns legend ownership to the layer group with the most overlapping
  * color-param refs. Ties resolved by lowest styleIndex.
  */
@@ -138,6 +162,7 @@ function assignLegend(
           type: legendConfig.type,
           items: legendConfig.items,
           paramMapping,
+          thresholdParams: buildThresholdParams(g, paramMapping),
         },
       }
     }
@@ -169,6 +194,7 @@ function assignLegend(
       type: legendConfig.type,
       items: legendConfig.items,
       paramMapping,
+      thresholdParams: buildThresholdParams(bestGroup, paramMapping),
     },
   }
 }

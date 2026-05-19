@@ -496,4 +496,124 @@ describe('deriveLayerGroups', () => {
       expect(result.groups[1].name).toBe('Layer 2')
     })
   })
+
+  describe('legend.thresholdParams on LayerGroup', () => {
+    it('legend has empty thresholdParams when no slider params exist', () => {
+      const params = infer(example02Params)
+      const mapping = extractLegendParamKeys(example02Legend)
+      const result = deriveLayerGroups(
+        example02Config,
+        params,
+        example02Legend,
+        mapping,
+      )
+      const g = result.groups[0]
+      expect(g.legend).not.toBeNull()
+      expect(g.legend!.thresholdParams).toHaveLength(0)
+    })
+
+    it('legend has empty thresholdParams for basic legend without slider group params', () => {
+      const params = infer(example01Params)
+      const mapping = extractLegendParamKeys(example01Legend)
+      const result = deriveLayerGroups(
+        example01Config,
+        params,
+        example01Legend,
+        mapping,
+      )
+      const g = result.groups[0]
+      expect(g.legend).not.toBeNull()
+      expect(g.legend!.thresholdParams).toHaveLength(0)
+    })
+
+    // Scenario: legend with threshold sliders (group:'legend' + control_type:'slider')
+    it('legend.thresholdParams includes slider params with group legend that belong to the layer', () => {
+      // Use a heatmap-style paint where threshold values appear in the color
+      // ramp array (not as opacity) so they are not consumed by detectOpacity.
+      const configWithThresholds = {
+        config: {
+          sources: [{ id: 'data', type: 'geojson' }],
+          styles: [
+            {
+              source: 'data',
+              type: 'heatmap',
+              paint: {
+                'heatmap-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['heatmap-density'],
+                  0,
+                  'rgba(0,0,0,0)',
+                  '@@#params.threshold_low',
+                  '@@#params.color_low',
+                ],
+                'heatmap-opacity': '@@#params.opacity',
+              },
+            },
+          ],
+        },
+      }
+      const paramsWithThresholds = [
+        { key: 'color_low', default: '#ff0000', group: 'legend' as const },
+        { key: 'opacity', default: 0.85, min: 0, max: 1, step: 0.05 },
+        // threshold slider — group: 'legend', will be control_type: 'slider'
+        {
+          key: 'threshold_low',
+          default: 0.2,
+          min: 0,
+          max: 1,
+          step: 0.05,
+          group: 'legend' as const,
+        },
+      ]
+      const legendWithThresholds: LegendConfig = {
+        type: 'gradient',
+        items: [{ label: 'Low', value: '@@#params.color_low' }],
+      }
+      const layerParamsInferred = infer(paramsWithThresholds)
+      const mapping = extractLegendParamKeys(legendWithThresholds)
+      const result = deriveLayerGroups(
+        configWithThresholds,
+        layerParamsInferred,
+        legendWithThresholds,
+        mapping,
+      )
+      const g = result.groups[0]
+      expect(g.legend).not.toBeNull()
+      // threshold_low is a slider with group='legend' referenced by this layer's paint
+      const thresholdKeys = g.legend!.thresholdParams.map((p) => p.key)
+      expect(thresholdKeys).toContain('threshold_low')
+      // color_low is a color_picker, not a threshold
+      expect(thresholdKeys).not.toContain('color_low')
+    })
+  })
+
+  describe('legend items contain resolved colors after passing resolvedLegendConfig', () => {
+    it('legend items from resolvedLegendConfig have real color strings, not @@ refs', () => {
+      // Simulate what happens when resolvedLegendConfig is passed (items already resolved)
+      const resolvedLegend: LegendConfig = {
+        type: 'gradient',
+        items: [
+          { label: 'Country fill', value: '#dbeafe' },
+          { label: 'Heatmap low', value: '#2c7bb6' },
+          { label: 'Heatmap high', value: '#d7191c' },
+        ],
+      }
+      const params = infer(example11Params)
+      const mapping = extractLegendParamKeys(resolvedLegend)
+      const result = deriveLayerGroups(
+        example11Config,
+        params,
+        resolvedLegend,
+        mapping,
+      )
+      // Find group with legend
+      const groupWithLegend = result.groups.find((g) => g.legend !== null)
+      expect(groupWithLegend).toBeDefined()
+      const items = groupWithLegend!.legend!.items
+      for (const item of items) {
+        expect(String(item.value)).not.toMatch(/^@@/)
+      }
+    })
+  })
 })

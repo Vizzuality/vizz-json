@@ -168,7 +168,7 @@ export function LayerCard({
                   paramMapping={legend.paramMapping}
                   values={valuesRecord}
                   onChange={onChange}
-                  legendParams={colorParams}
+                  legendParams={[...colorParams, ...legend.thresholdParams]}
                   currentJson={currentJson}
                   onApply={onApply}
                 />

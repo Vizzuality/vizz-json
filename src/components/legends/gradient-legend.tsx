@@ -10,6 +10,7 @@ import {
 import { GradientEditorPopover } from '#/components/legends/gradient-editor-popover'
 import { initializeGradientStops } from '#/lib/gradient-stops-init'
 import { buildTransparencyGradient } from '#/lib/gradient-css'
+import { resolveItemColor } from '#/lib/legend-color'
 
 type GradientLegendProps = {
   readonly items: readonly LegendItem[]
@@ -29,11 +30,18 @@ const CHECKERBOARD_BG = [
 type GradientBarProps = {
   readonly items: readonly LegendItem[]
   readonly gradientCss?: string
+  readonly paramMapping?: ReadonlyMap<number, ItemParamMapping>
+  readonly values?: Record<string, unknown>
 }
 
-function GradientBar({ items, gradientCss }: GradientBarProps) {
+function GradientBar({
+  items,
+  gradientCss,
+  paramMapping,
+  values,
+}: GradientBarProps) {
   const fallbackCss = items
-    .map((item) => (typeof item.value === 'string' ? item.value : '#000'))
+    .map((item, i) => resolveItemColor(item, paramMapping?.get(i), values))
     .join(', ')
 
   const css = gradientCss ?? fallbackCss
@@ -129,13 +137,20 @@ export function GradientLegend({
   }, [hasEditor, fullRange, items, paramMapping, legendParams, values])
 
   if (!hasEditor) {
-    return <GradientBar items={items} />
+    return (
+      <GradientBar items={items} paramMapping={paramMapping} values={values} />
+    )
   }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="w-full cursor-pointer text-left">
-        <GradientBar items={items} gradientCss={gradientCss} />
+        <GradientBar
+          items={items}
+          gradientCss={gradientCss}
+          paramMapping={paramMapping}
+          values={values}
+        />
       </PopoverTrigger>
       <PopoverContent align="start" sideOffset={8} className="w-auto p-0">
         <GradientEditorPopover

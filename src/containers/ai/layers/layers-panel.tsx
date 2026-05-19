@@ -59,13 +59,13 @@ export function LayersPanel({
       deriveLayerGroups(
         parsedConfig,
         pipeline.inferredParams,
-        pipeline.rawLegendConfig,
+        pipeline.resolvedLegendConfig,
         paramMapping,
       ),
     [
       parsedConfig,
       pipeline.inferredParams,
-      pipeline.rawLegendConfig,
+      pipeline.resolvedLegendConfig,
       paramMapping,
     ],
   )

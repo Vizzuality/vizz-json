@@ -1,5 +1,6 @@
 import type { LegendItem } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
+import { resolveItemColor } from '#/lib/legend-color'
 
 type ChoroplethLegendProps = {
   readonly items: readonly LegendItem[]
@@ -8,19 +9,12 @@ type ChoroplethLegendProps = {
   readonly onChange?: (key: string, value: unknown) => void
 }
 
-function getColor(item: LegendItem): string {
-  return typeof item.value === 'string' ? item.value : '#000'
-}
-
 function resolveColor(
   item: LegendItem,
   mapping: ItemParamMapping | undefined,
   values: Record<string, unknown> | undefined,
 ): string {
-  if (mapping?.valueParamKey && values) {
-    return String(values[mapping.valueParamKey] ?? item.value)
-  }
-  return getColor(item)
+  return resolveItemColor(item, mapping, values)
 }
 
 function ColorBar({
