@@ -41,7 +41,7 @@ function GradientBar({ items, gradientCss }: GradientBarProps) {
   return (
     <div>
       <div
-        className="relative h-4 w-full overflow-hidden rounded-sm"
+        className="relative h-6 w-full overflow-hidden rounded-sm"
         style={{ background: CHECKERBOARD_BG }}
       >
         <div
@@ -50,11 +50,22 @@ function GradientBar({ items, gradientCss }: GradientBarProps) {
         />
       </div>
       <div className="mt-1 flex justify-between">
-        {items.map((item, i) => (
-          <span key={i} className="text-[10px] text-muted-foreground">
-            {item.label}
-          </span>
-        ))}
+        {items.length > 2 ? (
+          <>
+            <span className="text-[10px] text-muted-foreground">
+              {items[0].label}
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              {items[items.length - 1].label}
+            </span>
+          </>
+        ) : (
+          items.map((item, i) => (
+            <span key={i} className="text-[10px] text-muted-foreground">
+              {item.label}
+            </span>
+          ))
+        )}
       </div>
     </div>
   )

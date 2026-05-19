@@ -37,7 +37,7 @@ function ColorBar({
   const isEditable = paramMapping && values && onChange
 
   return (
-    <div className="flex h-4 w-full overflow-hidden rounded-sm">
+    <div className="flex h-6 w-full overflow-hidden rounded-sm">
       {items.map((item, i) => {
         const mapping = isEditable ? paramMapping.get(i) : undefined
         const color = resolveColor(item, mapping, values)
@@ -79,31 +79,38 @@ function Labels({
   readonly values?: Record<string, unknown>
 }) {
   const isEditable = paramMapping && values
+  const resolveLabel = (item: LegendItem, i: number) => {
+    const mapping = isEditable ? paramMapping.get(i) : undefined
+    const r =
+      mapping?.labelParamKey && values
+        ? values[mapping.labelParamKey]
+        : item.label
+    return r === null || r === undefined || r === '' ? '' : String(r)
+  }
+
+  if (items.length > 2) {
+    return (
+      <div className="mt-1 flex justify-between">
+        <span className="text-[10px] text-muted-foreground">
+          {resolveLabel(items[0], 0)}
+        </span>
+        <span className="text-[10px] text-muted-foreground">
+          {resolveLabel(items[items.length - 1], items.length - 1)}
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="mt-1 flex">
-      {items.map((item, i) => {
-        const mapping = isEditable ? paramMapping.get(i) : undefined
-        const resolvedLabel =
-          mapping?.labelParamKey && values
-            ? values[mapping.labelParamKey]
-            : item.label
-        const labelValue =
-          resolvedLabel === null ||
-          resolvedLabel === undefined ||
-          resolvedLabel === ''
-            ? ''
-            : String(resolvedLabel)
-
-        return (
-          <span
-            key={i}
-            className="flex-1 text-center text-[10px] text-muted-foreground"
-          >
-            {labelValue}
-          </span>
-        )
-      })}
+      {items.map((item, i) => (
+        <span
+          key={i}
+          className="flex-1 text-center text-[10px] text-muted-foreground"
+        >
+          {resolveLabel(item, i)}
+        </span>
+      ))}
     </div>
   )
 }
