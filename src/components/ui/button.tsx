@@ -18,6 +18,10 @@ const buttonVariants = cva(
           'hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50',
         destructive:
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40',
+        accent: 'bg-accent text-accent-foreground hover:bg-hover-accent',
+        chip: 'rounded-xl border-border bg-secondary text-muted hover:text-foreground',
+        'card-outline':
+          'rounded-2xl border-border bg-transparent text-foreground hover:border-accent aria-pressed:border-border',
         link: 'text-primary underline-offset-4 hover:underline',
       },
       size: {
@@ -33,6 +37,8 @@ const buttonVariants = cva(
         'icon-sm':
           'size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg',
         'icon-lg': 'size-9',
+        'icon-xl': 'size-10 rounded-2xl',
+        card: 'h-auto w-full justify-between gap-2 p-4 text-left',
       },
     },
     defaultVariants: {

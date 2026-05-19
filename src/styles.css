@@ -188,6 +188,21 @@ pre code {
   }
 }
 
+/* AI chat — generating state animations */
+@keyframes chat-tail-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes chat-generating-shimmer {
+  0% {
+    background-position: 200% 50%;
+  }
+  100% {
+    background-position: -200% 50%;
+  }
+}
+
 /* Landing page fluid gradient background */
 .landing-page-bg {
   position: relative;
