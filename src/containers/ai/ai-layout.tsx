@@ -27,7 +27,7 @@ export function AiLayout({
   params,
 }: AiLayoutProps) {
   return (
-    <div className="flex h-full bg-background px-4 pt-2 pb-4">
+    <div className="flex h-full bg-background px-4 pb-4">
       <ResizablePanelGroup orientation="horizontal">
         <ResizablePanel
           id="ai-panel"
