@@ -8,7 +8,9 @@ function uuid(): string {
   return crypto.randomUUID()
 }
 
-export async function createChat(): Promise<Chat> {
+export async function createChat(
+  renderer: RendererControls = { renderer: 'maplibre' },
+): Promise<Chat> {
   const now = Date.now()
   const chat: Chat = {
     id: uuid(),
@@ -16,7 +18,7 @@ export async function createChat(): Promise<Chat> {
     createdAt: now,
     updatedAt: now,
     schemaVersion: 1,
-    renderer: { renderer: 'maplibre' },
+    renderer,
     activeParamValues: {},
     activeMessageId: null,
   }

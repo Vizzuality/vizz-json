@@ -19,6 +19,7 @@ import {
   setActiveMessage,
 } from '#/lib/ai/persistence/chats'
 import { migrateMessage } from '#/lib/ai/persistence/migrations'
+import { initialBasemapForTheme } from '#/lib/ai/types'
 
 export default function Header() {
   const { importJson, exportJson } = useProject()
@@ -78,7 +79,10 @@ export default function Header() {
   }
 
   const handleNewProject = async () => {
-    const fresh = await createChat()
+    const fresh = await createChat({
+      renderer: 'maplibre',
+      basemap: initialBasemapForTheme(),
+    })
     await db.meta.put({ key: 'lastActiveChatId', value: fresh.id })
     void navigate({ to: '/ai', search: { chat: fresh.id } })
   }

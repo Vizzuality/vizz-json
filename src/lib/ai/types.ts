@@ -55,6 +55,13 @@ export const BASEMAP_OPTIONS: ReadonlyArray<{
 
 export const DEFAULT_BASEMAP: BasemapId = 'openfreemap-liberty'
 
+export function initialBasemapForTheme(): BasemapId {
+  if (typeof document === 'undefined') return 'openfreemap-positron'
+  return document.documentElement.classList.contains('dark')
+    ? 'openfreemap-dark'
+    : 'openfreemap-positron'
+}
+
 export function basemapStyleUrl(id: BasemapId | undefined): string {
   const found = BASEMAP_OPTIONS.find((b) => b.id === (id ?? DEFAULT_BASEMAP))
   return (found ?? BASEMAP_OPTIONS[0]).styleUrl

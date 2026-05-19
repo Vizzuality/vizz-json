@@ -19,7 +19,7 @@ import {
 } from '#/lib/ai/persistence/chats'
 import { setMessageParamValues } from '#/lib/ai/persistence/messages'
 import { db } from '#/lib/ai/persistence/db'
-import { DEFAULT_MAP_VIEW } from '#/lib/ai/types'
+import { DEFAULT_MAP_VIEW, initialBasemapForTheme } from '#/lib/ai/types'
 import type { MapView, RendererControls } from '#/lib/ai/types'
 import type { ResolvedParams } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
@@ -66,7 +66,10 @@ export function AiPage() {
     void (async () => {
       const count = await db.chats.count()
       if (isCancelled() || count > 0) return
-      const fresh = await createChat()
+      const fresh = await createChat({
+        renderer: 'maplibre',
+        basemap: initialBasemapForTheme(),
+      })
       if (isCancelled()) return
       setChatId(fresh.id)
     })()
