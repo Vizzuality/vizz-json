@@ -148,7 +148,7 @@ export function AiChat({
                       </span>
                     </span>
                     {isActive ? (
-                      <Check className="size-5 shrink-0" />
+                      <Check className="size-5 shrink-0 text-accent" />
                     ) : (
                       <span className="hidden text-sm italic text-muted-foreground group-hover/version:inline">
                         Preview
