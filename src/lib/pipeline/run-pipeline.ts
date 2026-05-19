@@ -24,6 +24,7 @@ const EMPTY_RESULT: PipelineResult = {
   metadata: null,
   previewMode: 'map',
   output: { kind: 'map', resolvedConfig: null, error: null },
+  parsedConfig: null,
 }
 
 function deriveInferredParams(
@@ -136,5 +137,6 @@ export function runResolutionPipeline(
     metadata,
     previewMode,
     output,
+    parsedConfig,
   }
 }

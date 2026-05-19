@@ -25,4 +25,5 @@ export type PipelineResult = {
   readonly metadata: ExampleMetadata | null
   readonly previewMode: 'map' | 'components'
   readonly output: PipelineOutput
+  readonly parsedConfig: Readonly<Record<string, unknown>> | null
 }
