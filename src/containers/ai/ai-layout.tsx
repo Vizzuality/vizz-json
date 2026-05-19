@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Bot, FileJson2 } from 'lucide-react'
+import { Bot, FileJson2, Layers } from 'lucide-react'
 import {
   ResizableHandle,
   ResizablePanel,
@@ -63,10 +63,18 @@ export function AiLayout({
         </ResizablePanel>
         <ResizableHandle className="w-2 bg-transparent" />
         <ResizablePanel id="map" minSize="30%">
-          <div className="relative h-full overflow-hidden rounded-2xl border border-border">
-            {map}
-            <div className="absolute bottom-4 left-4 z-10 max-h-[60%] w-80 overflow-y-auto rounded-lg border bg-background/95 shadow-lg backdrop-blur">
-              {params}
+          <div className="flex h-full overflow-hidden rounded-2xl border border-border">
+            <div className="flex h-full w-[300px] shrink-0 flex-col overflow-hidden border-r border-border bg-background">
+              <div className="flex shrink-0 items-center gap-2 p-4">
+                <Layers className="size-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
+                  Data Layers
+                </span>
+              </div>
+              <div className="min-h-0 flex-1 overflow-y-auto">{params}</div>
+            </div>
+            <div className="relative h-full min-w-0 flex-1 overflow-hidden">
+              {map}
             </div>
           </div>
         </ResizablePanel>
