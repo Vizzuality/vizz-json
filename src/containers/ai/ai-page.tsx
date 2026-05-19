@@ -218,17 +218,25 @@ export function AiPage() {
         }
         map={
           <PaneErrorBoundary label="Map" resetKey={schemaJson}>
-            <MapHeader
-              view={liveView}
-              renderer={renderer}
-              onOpenConfig={() => setConfigOpen(true)}
-            />
-            <RendererSwitch
-              resolvedConfig={resolved}
-              error={error}
-              renderer={renderer}
-              onViewChange={setLiveView}
-            />
+            {chat ? (
+              <>
+                <MapHeader
+                  view={liveView}
+                  renderer={renderer}
+                  onOpenConfig={() => setConfigOpen(true)}
+                />
+                <RendererSwitch
+                  resolvedConfig={resolved}
+                  error={error}
+                  renderer={renderer}
+                  onViewChange={setLiveView}
+                />
+              </>
+            ) : (
+              <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+                Loading map…
+              </div>
+            )}
           </PaneErrorBoundary>
         }
         params={
