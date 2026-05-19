@@ -1,14 +1,18 @@
 import { useMemo } from 'react'
 import { Map } from 'react-map-gl/maplibre'
-import type { SourceProps, LayerProps } from 'react-map-gl/maplibre'
+import type {
+  SourceProps,
+  LayerProps,
+  ViewStateChangeEvent,
+} from 'react-map-gl/maplibre'
 import { LayerManager } from '@vizzuality/vizz-map'
 import type { LayerItem } from '@vizzuality/vizz-map'
 import { buildLayerItems } from '#/lib/converter'
 import type { SourceConfig, StyleConfig } from '#/lib/types'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
-const BASEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
-const INITIAL_VIEW = { longitude: 0, latitude: 20, zoom: 2 }
+const DEFAULT_BASEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
+const DEFAULT_INITIAL_VIEW = { longitude: 0, latitude: 20, zoom: 2 }
 const PLAYGROUND_ITEM_BASE_ID = 'playground'
 
 const EMPTY_SOURCES: readonly SourceConfig[] = []
@@ -17,9 +21,18 @@ const EMPTY_STYLES: readonly StyleConfig[] = []
 type MapRendererProps = {
   readonly resolvedConfig: Record<string, unknown> | null
   readonly error: string | null
+  readonly initialView?: { longitude: number; latitude: number; zoom: number }
+  readonly basemapStyle?: string
+  readonly onMove?: (e: ViewStateChangeEvent) => void
 }
 
-export function MapRenderer({ resolvedConfig, error }: MapRendererProps) {
+export function MapRenderer({
+  resolvedConfig,
+  error,
+  initialView = DEFAULT_INITIAL_VIEW,
+  basemapStyle = DEFAULT_BASEMAP_STYLE,
+  onMove,
+}: MapRendererProps) {
   const sources =
     (resolvedConfig?.sources as readonly SourceConfig[] | undefined) ??
     EMPTY_SOURCES
@@ -39,9 +52,10 @@ export function MapRenderer({ resolvedConfig, error }: MapRendererProps) {
   return (
     <div className="h-full w-full relative">
       <Map
-        initialViewState={INITIAL_VIEW}
+        initialViewState={initialView}
         style={{ width: '100%', height: '100%' }}
-        mapStyle={BASEMAP_STYLE}
+        mapStyle={basemapStyle}
+        onMove={onMove}
       >
         <LayerManager items={items} />
       </Map>
