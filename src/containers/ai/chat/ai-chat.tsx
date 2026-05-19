@@ -94,7 +94,7 @@ export function AiChat({
                     onClick={() => submit(chip.prompt)}
                     disabled={session.isLoading}
                   >
-                    <Bot />
+                    <Bot className="text-accent" />
                     {chip.label}
                   </Button>
                 ))}
