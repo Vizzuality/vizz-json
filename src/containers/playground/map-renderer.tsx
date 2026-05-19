@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Map } from 'react-map-gl/maplibre'
 import type {
+  MapRef,
   SourceProps,
   LayerProps,
   ViewStateChangeEvent,
@@ -49,9 +50,25 @@ export function MapRenderer({
     }))
   }, [sources, styles])
 
+  const mapRef = useRef<MapRef | null>(null)
+  const { longitude, latitude, zoom } = initialView
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const current = map.getCenter()
+    if (
+      current.lng === longitude &&
+      current.lat === latitude &&
+      map.getZoom() === zoom
+    )
+      return
+    map.jumpTo({ center: [longitude, latitude], zoom })
+  }, [longitude, latitude, zoom])
+
   return (
     <div className="h-full w-full relative">
       <Map
+        ref={mapRef}
         initialViewState={initialView}
         style={{ width: '100%', height: '100%' }}
         mapStyle={basemapStyle}
