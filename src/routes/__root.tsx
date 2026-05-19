@@ -20,6 +20,7 @@ import { buttonVariants } from '#/components/ui/button'
 import { Toaster } from '#/components/ui/sonner'
 import { TooltipProvider } from '#/components/ui/tooltip'
 import { ProjectProvider } from '#/lib/project-context'
+import { cn } from '#/lib/utils'
 
 import appCss from '../styles.css?url'
 
@@ -91,12 +92,21 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-accent/30">
+      <body
+        className={cn(
+          'font-sans antialiased [overflow-wrap:anywhere] selection:bg-accent/30',
+          isAi && 'flex h-dvh flex-col overflow-hidden',
+        )}
+      >
         <TanStackQueryProvider>
           <TooltipProvider>
             <ProjectProvider>
               {!isPresentation && <Header />}
-              {children}
+              {isAi ? (
+                <div className="min-h-0 flex-1">{children}</div>
+              ) : (
+                children
+              )}
               {!isPlayground && !isPresentation && !isAi && <Footer />}
             </ProjectProvider>
           </TooltipProvider>

@@ -1,20 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { AiLayout } from './ai-layout'
-import type { AiViewMode } from './ai-layout'
+import type { MainTab } from './ai-layout'
 import { AiChat } from './chat/ai-chat'
 import { JsonViewer } from './json/json-viewer'
 import { RendererSwitch } from './map/renderer-switch'
-import { ExportMenu, buildFilename } from './export/export-menu'
-import { ConfigPanel } from './config/config-panel'
-import { MyAreaPanel } from './sidebar/my-area-panel'
-import { Button } from '#/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '#/components/ui/tooltip'
+import { MapHeader } from './map/map-header'
+import { MapConfigDialog } from './map/map-config-dialog'
 import { ParamsPanel } from '#/containers/playground/params-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
 import { useResolutionPipeline } from '#/lib/pipeline'
@@ -22,14 +14,13 @@ import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
 import {
   createChat,
-  deleteChat,
-  renameChat,
   setActiveMessage,
   setRenderer,
 } from '#/lib/ai/persistence/chats'
 import { setMessageParamValues } from '#/lib/ai/persistence/messages'
 import { db } from '#/lib/ai/persistence/db'
-import type { RendererControls } from '#/lib/ai/types'
+import { DEFAULT_MAP_VIEW } from '#/lib/ai/types'
+import type { MapView, RendererControls } from '#/lib/ai/types'
 import type { ResolvedParams } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
 
@@ -57,9 +48,15 @@ const PROMPT_CHIPS = [
 ] as const
 
 export function AiPage() {
-  const [viewMode, setViewMode] = useState<AiViewMode>('chat')
+  const [mainTab, setMainTab] = useState<MainTab>('chat')
+  const [configOpen, setConfigOpen] = useState(false)
   const { chatId, setChatId } = useActiveChatId()
   const { chat, messages } = useChat(chatId)
+  const [liveView, setLiveView] = useState<MapView>(DEFAULT_MAP_VIEW)
+
+  useEffect(() => {
+    if (chat?.renderer.mapView) setLiveView(chat.renderer.mapView)
+  }, [chat?.id, chat?.renderer.mapView])
 
   // Lazy-create first chat if none exists.
   useEffect(() => {
@@ -187,162 +184,81 @@ export function AiPage() {
     [chatId, messages],
   )
 
-  const handleClear = useCallback(async () => {
-    if (!chatId) return
-    await deleteChat(chatId)
-    const remaining = await db.chats.orderBy('updatedAt').reverse().first()
-    if (remaining) {
-      setChatId(remaining.id)
-    } else {
-      const fresh = await createChat()
-      setChatId(fresh.id)
-    }
-  }, [chatId, setChatId])
-
-  const handleSelectChatFromMyArea = useCallback(
-    (id: string) => {
-      setChatId(id)
-      setViewMode('chat')
-    },
-    [setChatId],
-  )
-
-  const handleNewChat = useCallback(async () => {
-    const fresh = await createChat()
-    setChatId(fresh.id)
-    setViewMode('chat')
-  }, [setChatId])
-
-  const exportActions = (
-    <ExportMenu
-      schemaJson={schemaJson}
-      filename={buildFilename(activeSnapshot?.metadata.title)}
-      onError={(msg) => toast.error(`Export failed: ${msg}`)}
-    />
-  )
-
-  const newChatAction = (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            size="icon-sm"
-            variant="outline"
-            onClick={() => void handleNewChat()}
-            aria-label="New chat"
-          >
-            <Plus />
-          </Button>
-        }
-      />
-      <TooltipContent>New chat</TooltipContent>
-    </Tooltip>
-  )
-
-  const editableTitle = chat
-    ? {
-        value: chat.title,
-        onRename: (next: string) => void renameChat(chat.id, next),
-      }
-    : 'Loading…'
+  const renderer = chat?.renderer ?? { renderer: 'maplibre' as const }
 
   return (
-    <AiLayout
-      viewMode={viewMode}
-      onViewModeChange={setViewMode}
-      onNewChat={() => void handleNewChat()}
-      panels={{
-        chat: {
-          title: editableTitle,
-          actions: exportActions,
-          body: (
-            <PaneErrorBoundary label="Chat" resetKey={chatId}>
-              {chat ? (
-                <AiChat
-                  chat={chat}
-                  messages={messages}
-                  activeMessageId={chat.activeMessageId}
-                  onSelectMessage={handleSelectMessage}
-                  onClear={handleClear}
-                  promptChips={PROMPT_CHIPS}
-                />
-              ) : (
-                <div className="p-3 text-xs text-muted-foreground">
-                  Loading chat…
-                </div>
-              )}
-            </PaneErrorBoundary>
-          ),
-        },
-        json: {
-          title: editableTitle,
-          actions: exportActions,
-          body: (
-            <PaneErrorBoundary label="JSON viewer" resetKey={schemaJson}>
-              <JsonViewer json={schemaJson} />
-            </PaneErrorBoundary>
-          ),
-        },
-        config: {
-          title: editableTitle,
-          actions: exportActions,
-          body: (
-            <PaneErrorBoundary label="Config" resetKey={chatId}>
-              {chat ? (
-                <ConfigPanel
-                  renderer={chat.renderer}
-                  onRendererChange={(r) => void handleRendererChange(r)}
-                />
-              ) : null}
-            </PaneErrorBoundary>
-          ),
-        },
-        'my-area': {
-          title: 'My area',
-          actions: newChatAction,
-          body: (
-            <PaneErrorBoundary label="My area" resetKey={chatId ?? 'none'}>
-              <MyAreaPanel
-                activeChatId={chatId}
-                onSelectChat={handleSelectChatFromMyArea}
+    <>
+      <AiLayout
+        mainTab={mainTab}
+        onMainTabChange={setMainTab}
+        chat={
+          <PaneErrorBoundary label="Chat" resetKey={chatId}>
+            {chat ? (
+              <AiChat
+                chat={chat}
+                messages={messages}
+                activeMessageId={chat.activeMessageId}
+                onSelectMessage={handleSelectMessage}
+                promptChips={PROMPT_CHIPS}
               />
-            </PaneErrorBoundary>
-          ),
-        },
-      }}
-      map={
-        <PaneErrorBoundary label="Map" resetKey={schemaJson}>
-          <RendererSwitch
-            resolvedConfig={resolved}
-            error={error}
-            renderer={chat?.renderer ?? { renderer: 'maplibre' }}
-          />
-        </PaneErrorBoundary>
-      }
-      params={
-        <PaneErrorBoundary label="Params" resetKey={schemaJson}>
-          {activeSnapshot ? (
-            <ParamsPanel
-              metadata={{
-                title: activeSnapshot.metadata.title,
-                tier: activeSnapshot.metadata.tier,
-              }}
-              paramsConfig={pipeline.inferredParams}
-              legendConfig={pipeline.resolvedLegendConfig}
-              legendParamMapping={pipeline.legendParamMapping}
-              orphanLegendParams={pipeline.orphanLegendParams}
-              values={paramValues}
-              onChange={handleParamChange}
-              currentJson={schemaJson}
-              onApply={handleSnapshotApply}
+            ) : (
+              <div className="p-3 text-xs text-muted-foreground">
+                Loading chat…
+              </div>
+            )}
+          </PaneErrorBoundary>
+        }
+        json={
+          <PaneErrorBoundary label="JSON viewer" resetKey={schemaJson}>
+            <JsonViewer json={schemaJson} />
+          </PaneErrorBoundary>
+        }
+        map={
+          <PaneErrorBoundary label="Map" resetKey={schemaJson}>
+            <MapHeader
+              view={liveView}
+              renderer={renderer}
+              onOpenConfig={() => setConfigOpen(true)}
             />
-          ) : (
-            <div className="p-3 text-xs text-muted-foreground">
-              No schema yet — describe a map in the chat.
-            </div>
-          )}
-        </PaneErrorBoundary>
-      }
-    />
+            <RendererSwitch
+              resolvedConfig={resolved}
+              error={error}
+              renderer={renderer}
+              onViewChange={setLiveView}
+            />
+          </PaneErrorBoundary>
+        }
+        params={
+          <PaneErrorBoundary label="Params" resetKey={schemaJson}>
+            {activeSnapshot ? (
+              <ParamsPanel
+                metadata={{
+                  title: activeSnapshot.metadata.title,
+                  tier: activeSnapshot.metadata.tier,
+                }}
+                paramsConfig={pipeline.inferredParams}
+                legendConfig={pipeline.resolvedLegendConfig}
+                legendParamMapping={pipeline.legendParamMapping}
+                orphanLegendParams={pipeline.orphanLegendParams}
+                values={paramValues}
+                onChange={handleParamChange}
+                currentJson={schemaJson}
+                onApply={handleSnapshotApply}
+              />
+            ) : (
+              <div className="p-3 text-xs text-muted-foreground">
+                No schema yet — describe a map in the chat.
+              </div>
+            )}
+          </PaneErrorBoundary>
+        }
+      />
+      <MapConfigDialog
+        open={configOpen}
+        onOpenChange={setConfigOpen}
+        value={renderer}
+        onSubmit={(next) => void handleRendererChange(next)}
+      />
+    </>
   )
 }
