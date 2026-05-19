@@ -130,6 +130,7 @@ export function LayerCard({
           checked={isVisible}
           onCheckedChange={handleVisibilityChange}
           className="shrink-0"
+          aria-label="Toggle layer visibility"
         />
       </div>
 
