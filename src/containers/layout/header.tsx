@@ -1,13 +1,24 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { ChevronDown, Download, Plus, Upload } from 'lucide-react'
+import { Check, ChevronDown, Download, Plus, Upload } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from '#/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '#/components/ui/dropdown-menu'
 import { Input } from '#/components/ui/input'
 import { Skeleton } from '#/components/ui/skeleton'
 import { useProject } from '#/lib/project-context'
 import { db } from '#/lib/ai/persistence/db'
-import { createChat, renameChat } from '#/lib/ai/persistence/chats'
+import {
+  createChat,
+  renameChat,
+  setActiveMessage,
+} from '#/lib/ai/persistence/chats'
+import { migrateMessage } from '#/lib/ai/persistence/migrations'
 
 export default function Header() {
   const { importJson, exportJson } = useProject()
@@ -21,6 +32,34 @@ export default function Header() {
     const chat = await db.chats.get(meta.value)
     return chat ?? null
   }, [])
+
+  const chatMessages = useLiveQuery(async () => {
+    if (!activeChat?.id) return []
+    const rows = await db.messages
+      .where('[chatId+createdAt]')
+      .between([activeChat.id, -Infinity], [activeChat.id, Infinity])
+      .toArray()
+    return rows.map(migrateMessage)
+  }, [activeChat?.id])
+
+  const versions = useMemo(() => {
+    if (!chatMessages) return []
+    const out: { id: string; index: number; title: string }[] = []
+    for (const m of chatMessages) {
+      if (m.role === 'assistant' && m.schemaSnapshot) {
+        out.push({
+          id: m.id,
+          index: out.length + 1,
+          title: m.schemaSnapshot.metadata.title,
+        })
+      }
+    }
+    return out
+  }, [chatMessages])
+
+  const activeVersion = versions.find(
+    (v) => v.id === activeChat?.activeMessageId,
+  )
 
   const [titleDraft, setTitleDraft] = useState('')
 
@@ -101,10 +140,43 @@ export default function Header() {
                 }}
                 className="min-w-[8ch] [field-sizing:content]"
               />
-              <Button variant="ghost">
-                Version 1
-                <ChevronDown />
-              </Button>
+              {versions.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    render={
+                      <Button variant="ghost">
+                        {activeVersion
+                          ? `Version ${activeVersion.index}`
+                          : 'Version'}
+                        <ChevronDown />
+                      </Button>
+                    }
+                  />
+                  <DropdownMenuContent align="center" className="min-w-56">
+                    {versions.map((v) => {
+                      const isActive = v.id === activeChat.activeMessageId
+                      return (
+                        <DropdownMenuItem
+                          key={v.id}
+                          onClick={() =>
+                            void setActiveMessage(activeChat.id, v.id)
+                          }
+                        >
+                          <span className="flex min-w-0 flex-1 flex-col">
+                            <span className="truncate text-sm font-medium">
+                              {v.title}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Version {v.index}
+                            </span>
+                          </span>
+                          {isActive && <Check className="size-4 shrink-0" />}
+                        </DropdownMenuItem>
+                      )
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </>
           ) : null}
         </div>
