@@ -31,7 +31,14 @@ function buildSyntheticStyle(style: unknown): Record<string, unknown> {
 
   const sources: Record<string, unknown> = {}
   for (const entry of explicitSourcesArray) {
-    const { id, ...rest } = entry as { id?: string } & Record<string, unknown>
+    const {
+      id,
+      legend_config: _legendConfig,
+      ...rest
+    } = entry as {
+      id?: string
+      legend_config?: unknown
+    } & Record<string, unknown>
     if (typeof id !== 'string') continue
     sources[id] = rest
   }
