@@ -9,7 +9,8 @@ import { MapHeader } from './map/map-header'
 import { MapConfigDialog } from './map/map-config-dialog'
 import { LayersPanel } from './layers/layers-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
-import { useResolutionPipeline, mergeParamValues } from '#/lib/pipeline'
+import { useResolutionPipeline } from '#/lib/pipeline'
+import { buildDefaultParams } from '#/lib/pipeline/build-default-params'
 import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
 import {
@@ -17,7 +18,7 @@ import {
   setActiveMessage,
   setRenderer,
 } from '#/lib/ai/persistence/chats'
-import { setMessageParamValues } from '#/lib/ai/persistence/messages'
+import { setMessageSnapshot } from '#/lib/ai/persistence/messages'
 import { db } from '#/lib/ai/persistence/db'
 import { DEFAULT_MAP_VIEW, initialBasemapForTheme } from '#/lib/ai/types'
 import type { MapView, RendererControls } from '#/lib/ai/types'
@@ -97,29 +98,14 @@ export function AiPage() {
     [activeSnapshot],
   )
 
-  const paramValues = useMemo<ResolvedParams>(() => {
-    if (!activeSnapshot) return {}
-    if (activeMessage?.paramValues) {
-      // Patch any gaps: new params_config keys not yet in the stored record get their defaults.
-      const stored = activeMessage.paramValues
-      const hasMissing = activeSnapshot.params_config.some(
-        (p) => !Object.prototype.hasOwnProperty.call(stored, p.key),
-      )
-      if (!hasMissing) return stored
-      return mergeParamValues(activeSnapshot.params_config, stored)
-    }
-    const legacy = chat?.activeParamValues ?? {}
-    const fallback: Record<string, unknown> = {}
-    for (const param of activeSnapshot.params_config) {
-      fallback[param.key] = Object.prototype.hasOwnProperty.call(
-        legacy,
-        param.key,
-      )
-        ? legacy[param.key]
-        : param.default
-    }
-    return fallback
-  }, [activeMessage?.paramValues, activeSnapshot, chat?.activeParamValues])
+  // Live param values are derived purely from the snapshot's params_config
+  // defaults. The snapshot is the single source of truth — every user edit
+  // rewrites a default rather than maintaining a sibling values record.
+  const paramValues = useMemo<ResolvedParams>(
+    () =>
+      activeSnapshot ? buildDefaultParams(activeSnapshot.params_config) : {},
+    [activeSnapshot],
+  )
 
   const pipeline = useResolutionPipeline(
     activeSnapshot as Readonly<Record<string, unknown>> | null,
@@ -129,10 +115,10 @@ export function AiPage() {
     pipeline.output.kind === 'map' ? pipeline.output.resolvedConfig : null
   const error = pipeline.output.error
 
-  const writeMessageParams = useCallback(
-    async (messageId: string, next: ResolvedParams) => {
+  const persistSnapshot = useCallback(
+    async (messageId: string, next: AiSchema) => {
       try {
-        await setMessageParamValues(messageId, next)
+        await setMessageSnapshot(messageId, next)
       } catch (err) {
         if ((err as Error).name === 'QuotaExceededError') {
           toast.error('Storage full — delete old chats to continue.')
@@ -145,11 +131,14 @@ export function AiPage() {
   const handleParamChange = useCallback(
     (key: string, value: unknown) => {
       const messageId = chat?.activeMessageId
-      if (!messageId) return
-      const next: ResolvedParams = { ...paramValues, [key]: value }
-      void writeMessageParams(messageId, next)
+      if (!messageId || !activeSnapshot) return
+      const nextParams = activeSnapshot.params_config.map((p) =>
+        p.key === key ? { ...p, default: value } : p,
+      )
+      const next: AiSchema = { ...activeSnapshot, params_config: nextParams }
+      void persistSnapshot(messageId, next)
     },
-    [chat?.activeMessageId, paramValues, writeMessageParams],
+    [chat?.activeMessageId, activeSnapshot, persistSnapshot],
   )
 
   const handleSnapshotApply = useCallback(
@@ -161,44 +150,13 @@ export function AiPage() {
         parsed = JSON.parse(updatedJson) as AiSchema
       } catch (err) {
         toast.error(
-          `Failed to apply gradient edit: ${err instanceof Error ? err.message : String(err)}`,
+          `Failed to apply edit: ${err instanceof Error ? err.message : String(err)}`,
         )
         return
       }
-      void (async () => {
-        try {
-          // Build a prior map that excludes keys whose default changed — those
-          // get the new default so the snapshot edit is reflected immediately.
-          const oldConfigByKey = new Map(
-            (activeSnapshot?.params_config ?? []).map((p) => [p.key, p]),
-          )
-          const effectivePrior: Record<string, unknown> = {}
-          for (const param of parsed.params_config) {
-            const old = oldConfigByKey.get(param.key)
-            const defaultChanged = old && old.default !== param.default
-            if (
-              !defaultChanged &&
-              Object.prototype.hasOwnProperty.call(paramValues, param.key)
-            ) {
-              effectivePrior[param.key] = paramValues[param.key]
-            }
-          }
-          const nextValues = mergeParamValues(
-            parsed.params_config,
-            effectivePrior,
-          )
-          await db.messages.update(messageId, {
-            schemaSnapshot: parsed,
-            paramValues: nextValues,
-          })
-        } catch (err) {
-          if ((err as Error).name === 'QuotaExceededError') {
-            toast.error('Storage full — delete old chats to continue.')
-          } else throw err
-        }
-      })()
+      void persistSnapshot(messageId, parsed)
     },
-    [chat?.activeMessageId, paramValues, activeSnapshot?.params_config],
+    [chat?.activeMessageId, persistSnapshot],
   )
 
   const handleRendererChange = useCallback(

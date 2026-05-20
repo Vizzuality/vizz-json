@@ -207,7 +207,7 @@ describe('AiChat', () => {
         role: 'user',
         text: 'hi there',
         createdAt: 1,
-        schemaVersion: 1,
+        schemaVersion: 2,
       },
       {
         id: 'm2',
@@ -215,7 +215,7 @@ describe('AiChat', () => {
         role: 'assistant',
         text: 'hello back',
         createdAt: 2,
-        schemaVersion: 1,
+        schemaVersion: 2,
       },
     ]
     render(<AiChat {...makeProps({ messages })} />)

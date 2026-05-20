@@ -3,7 +3,7 @@ import {
   appendUserMessage,
 } from '#/lib/ai/persistence/messages'
 import { renameChat } from '#/lib/ai/persistence/chats'
-import { reconcileParamValues } from '#/lib/ai/reconcile-param-values'
+import { reconcileSnapshot } from '#/lib/ai/reconcile-param-values'
 import type { AiSchema, Chat, Message } from '#/lib/ai/persistence/types'
 import { shouldRenameOnFirstUserMessage } from './auto-rename'
 
@@ -34,15 +34,12 @@ export async function ingestSnapshot(
       await renameChat(chat.id, snapshot.metadata.title)
     }
     const activeMessage = history.find((m) => m.id === chat.activeMessageId)
-    const currentParamValues =
-      activeMessage?.paramValues ?? chat.activeParamValues
-    const reconciled = reconcileParamValues(
+    const reconciled = reconcileSnapshot(
       activeMessage?.schemaSnapshot ?? null,
       snapshot,
-      currentParamValues,
     )
-    await appendAssistantMessage(chat.id, REPLY_TEXT, snapshot, reconciled)
-    return { kind: 'ok', snapshot, replyText: REPLY_TEXT }
+    await appendAssistantMessage(chat.id, REPLY_TEXT, reconciled)
+    return { kind: 'ok', snapshot: reconciled, replyText: REPLY_TEXT }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     return { kind: 'error', message }

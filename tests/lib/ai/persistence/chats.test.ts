@@ -7,7 +7,6 @@ import {
   listChats,
   renameChat,
   setActiveMessage,
-  setParamValues,
   setRenderer,
 } from '#/lib/ai/persistence/chats'
 
@@ -28,7 +27,7 @@ describe('chats CRUD', () => {
     expect(chat.title).toBe('New chat')
     expect(chat.activeMessageId).toBeNull()
     expect(chat.renderer.renderer).toBe('maplibre')
-    expect(chat.schemaVersion).toBe(1)
+    expect(chat.schemaVersion).toBe(2)
     const stored = await getChat(chat.id)
     expect(stored?.id).toBe(chat.id)
   })
@@ -59,25 +58,23 @@ describe('chats CRUD', () => {
       role: 'user',
       text: 'hi',
       createdAt: Date.now(),
-      schemaVersion: 1,
+      schemaVersion: 2,
     })
     await deleteChat(chat.id)
     expect(await getChat(chat.id)).toBeUndefined()
     expect(await db.messages.where('chatId').equals(chat.id).count()).toBe(0)
   })
 
-  it('setRenderer + setParamValues + setActiveMessage update fields', async () => {
+  it('setRenderer + setActiveMessage update fields', async () => {
     const chat = await createChat()
     await setRenderer(chat.id, {
       renderer: 'mapbox',
       mapboxToken: 'pk.test',
       mapboxStyleUrl: 'mapbox://styles/x/y',
     })
-    await setParamValues(chat.id, { opacity: 0.5 })
     await setActiveMessage(chat.id, 'msg-1')
     const after = await getChat(chat.id)
     expect(after?.renderer.renderer).toBe('mapbox')
-    expect(after?.activeParamValues.opacity).toBe(0.5)
     expect(after?.activeMessageId).toBe('msg-1')
   })
 })

@@ -1,7 +1,6 @@
 import { db } from './db'
 import { migrateMessage } from './migrations'
 import type { AiSchema, Message } from './types'
-import type { ResolvedParams } from '#/lib/types'
 
 function uuid(): string {
   return crypto.randomUUID()
@@ -18,7 +17,7 @@ export async function appendUserMessage(
     role: 'user',
     text,
     createdAt: now,
-    schemaVersion: 1,
+    schemaVersion: 2,
   }
   await db.transaction('rw', db.chats, db.messages, async () => {
     await db.messages.add(message)
@@ -31,7 +30,6 @@ export async function appendAssistantMessage(
   chatId: string,
   text: string,
   schemaSnapshot?: AiSchema,
-  paramValues?: ResolvedParams,
 ): Promise<Message> {
   const now = Date.now()
   const message: Message = {
@@ -40,9 +38,8 @@ export async function appendAssistantMessage(
     role: 'assistant',
     text,
     createdAt: now,
-    schemaVersion: 1,
+    schemaVersion: 2,
     schemaSnapshot,
-    ...(paramValues ? { paramValues } : {}),
   }
   await db.transaction('rw', db.chats, db.messages, async () => {
     await db.messages.add(message)
@@ -53,11 +50,18 @@ export async function appendAssistantMessage(
   return message
 }
 
-export async function setMessageParamValues(
+export async function setMessageSnapshot(
   messageId: string,
-  paramValues: ResolvedParams,
+  schemaSnapshot: AiSchema,
 ): Promise<void> {
-  await db.messages.update(messageId, { paramValues })
+  // Clear the legacy v1 `paramValues` field so the v1→v2 migration doesn't
+  // fold it back over a fresh snapshot. Dexie removes the field when the
+  // value is `undefined`.
+  await db.messages.update(messageId, {
+    schemaSnapshot,
+    schemaVersion: 2,
+    paramValues: undefined,
+  } as Partial<Message> & { paramValues?: undefined })
 }
 
 export async function listMessages(chatId: string): Promise<Message[]> {

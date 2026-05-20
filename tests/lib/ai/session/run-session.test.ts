@@ -85,7 +85,7 @@ describe('runAiSession', () => {
           role: 'user',
           text: 'prior',
           createdAt: 0,
-          schemaVersion: 1,
+          schemaVersion: 2,
         },
       ],
       prompt: 'tell me a joke',
