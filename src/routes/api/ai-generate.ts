@@ -87,6 +87,7 @@ export const Route = createFileRoute('/api/ai-generate')({
             agentLoopStrategy: maxIterations(3),
             stream: false,
             maxTokens: 4000,
+            modelOptions: { reasoning: { effort: 'high' } },
           })) as string
 
           let parsedJson: unknown
