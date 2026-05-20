@@ -378,6 +378,155 @@ describe('serializeGradientToJson', () => {
     expect(result).not.toHaveProperty('legend_config')
   })
 
+  it('leaves zoom-driven interpolate on same style untouched', () => {
+    // Same style holds two interpolates: a data-driven fill-color bound to
+    // the legend (rewrite expected) and a zoom-driven fill-translate
+    // (must NOT be rewritten).
+    const sameStyleJson = JSON.stringify({
+      config: {
+        sources: [
+          {
+            id: 'countries',
+            type: 'geojson',
+            legend_config: {
+              type: 'gradient',
+              items: [{ label: 'A', value: '@@#params.color_1' }],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'countries',
+            type: 'fill',
+            paint: {
+              'fill-color': [
+                'interpolate',
+                ['linear'],
+                ['get', 'pop'],
+                '@@#params.threshold_1',
+                '@@#params.color_1',
+              ],
+              'fill-translate': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                0,
+                ['literal', [0, 0]],
+                10,
+                ['literal', [0, 10]],
+              ],
+            },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'threshold_1', default: 0, group: 'legend' },
+        { key: 'color_1', default: '#000000', group: 'legend' },
+      ],
+    })
+
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'A',
+        colorParamKey: 'color_1',
+        thresholdParamKey: 'threshold_1',
+      },
+    ]
+    const result = JSON.parse(
+      serializeGradientToJson(sameStyleJson, stops, 'countries'),
+    )
+    const paint = result.config.styles[0].paint
+    // fill-color rewritten
+    expect(paint['fill-color'][3]).toBe('@@#params.threshold_1')
+    // fill-translate left alone — still uses zoom
+    expect(paint['fill-translate'][2]).toEqual(['zoom'])
+    expect(paint['fill-translate'][6]).toEqual(['literal', [0, 10]])
+  })
+
+  it('does not rewrite interpolates on styles bound to other sources', () => {
+    // Two sources, two styles. Source A is being edited. Source B has its
+    // own data-driven interpolate that must stay untouched.
+    const twoSourcesJson = JSON.stringify({
+      config: {
+        sources: [
+          {
+            id: 'src_a',
+            type: 'geojson',
+            legend_config: {
+              type: 'gradient',
+              items: [{ label: 'A', value: '@@#params.color_a' }],
+            },
+          },
+          {
+            id: 'src_b',
+            type: 'geojson',
+            legend_config: {
+              type: 'gradient',
+              items: [{ label: 'B', value: '@@#params.color_b' }],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'src_a',
+            type: 'fill',
+            paint: {
+              'fill-color': [
+                'interpolate',
+                ['linear'],
+                ['get', 'pop'],
+                '@@#params.threshold_a',
+                '@@#params.color_a',
+              ],
+            },
+          },
+          {
+            source: 'src_b',
+            type: 'fill',
+            paint: {
+              'fill-color': [
+                'interpolate',
+                ['linear'],
+                ['get', 'pop'],
+                '@@#params.threshold_b',
+                '@@#params.color_b',
+              ],
+            },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'threshold_a', default: 0, group: 'legend' },
+        { key: 'color_a', default: '#aaaaaa', group: 'legend' },
+        { key: 'threshold_b', default: 100, group: 'legend' },
+        { key: 'color_b', default: '#bbbbbb', group: 'legend' },
+      ],
+    })
+
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#ff0000',
+        position: 0,
+        dataValue: 0,
+        label: 'A',
+        colorParamKey: 'color_a',
+        thresholdParamKey: 'threshold_a',
+      },
+    ]
+    const result = JSON.parse(
+      serializeGradientToJson(twoSourcesJson, stops, 'src_a'),
+    )
+    // src_b's fill-color must still reference its original params
+    const paintB = result.config.styles[1].paint['fill-color']
+    expect(paintB[3]).toBe('@@#params.threshold_b')
+    expect(paintB[4]).toBe('@@#params.color_b')
+  })
+
   it('other sources are untouched when only one source is updated', () => {
     const multiSourceJson = JSON.stringify({
       config: {

@@ -17,7 +17,6 @@ type GradientEditorPopoverProps = {
   readonly values: Record<string, unknown>
   readonly currentJson: string
   readonly onApply: (updatedJson: string) => void
-  readonly onChange: (key: string, value: unknown) => void
   readonly onClose: () => void
   readonly sourceId: string
   readonly fullRange?: readonly [number, number]
@@ -30,7 +29,6 @@ export function GradientEditorPopover({
   values,
   currentJson,
   onApply,
-  onChange,
   onClose,
   sourceId,
   fullRange,
@@ -48,22 +46,16 @@ export function GradientEditorPopover({
     useGradientEditor(initialStops)
 
   const handleApply = () => {
-    const allParameterised = state.stops.every(
-      (s) => s.colorParamKey && s.thresholdParamKey,
+    // Always route through the serializer so every stop's color + threshold
+    // lands in a single JSON write. Looping `onChange` per stop caused later
+    // calls to overwrite earlier ones because each `onChange` rebuilds the
+    // snapshot from a closure-captured `activeSnapshot`.
+    const updatedJson = serializeGradientToJson(
+      currentJson,
+      [...state.stops],
+      sourceId,
     )
-    if (allParameterised) {
-      for (const stop of state.stops) {
-        onChange(stop.colorParamKey!, stop.color)
-        onChange(stop.thresholdParamKey!, stop.dataValue)
-      }
-    } else {
-      const updatedJson = serializeGradientToJson(
-        currentJson,
-        [...state.stops],
-        sourceId,
-      )
-      onApply(updatedJson)
-    }
+    onApply(updatedJson)
     onClose()
   }
 

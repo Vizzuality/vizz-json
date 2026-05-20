@@ -46,6 +46,22 @@ function syncBuildColormapStops(
   return node
 }
 
+function collectStringRefs(node: unknown, out: Set<string>): void {
+  if (typeof node === 'string') {
+    if (node.startsWith('@@#params.')) out.add(node)
+    return
+  }
+  if (Array.isArray(node)) {
+    for (const item of node) collectStringRefs(item, out)
+    return
+  }
+  if (node !== null && typeof node === 'object') {
+    for (const v of Object.values(node as Record<string, unknown>)) {
+      collectStringRefs(v, out)
+    }
+  }
+}
+
 type ParamEntry = Record<string, unknown> & { key: string; group?: string }
 
 export function serializeGradientToJson(
@@ -170,49 +186,14 @@ export function serializeGradientToJson(
   // is data-driven and its [threshold, color] pairs need to match the new
   // stop list. Without thresholds the interpolate inputs are not parameters
   // (e.g. heatmap-density, zoom literals) and must be left alone.
+  //
+  // Scope rewrites by sourceId AND by paint props whose interpolate
+  // currently references one of the managed param refs (the keys this
+  // legend owns). This protects unrelated styles on the same or other
+  // sources (e.g. zoom-driven heatmap-radius, another layer's gradient).
   const config = parsed.config as Record<string, unknown> | undefined
 
-  let newConfig = config
-  if (sourceHasThresholds && config) {
-    const interpolatePairs = stopsWithKeys.flatMap((stop) => [
-      `@@#params.${stop.thresholdParamKey}`,
-      `@@#params.${stop.colorParamKey}`,
-    ])
-    const styles = config.styles as Record<string, unknown>[] | undefined
-    if (styles) {
-      const newStyles = styles.map((style) => {
-        const paint = style.paint as Record<string, unknown> | undefined
-        if (!paint) return style
-
-        const newPaint = Object.fromEntries(
-          Object.entries(paint).map(([prop, val]) => {
-            if (Array.isArray(val) && val[0] === 'interpolate') {
-              return [prop, [...val.slice(0, 3), ...interpolatePairs]]
-            }
-            return [prop, val]
-          }),
-        )
-        return { ...style, paint: newPaint }
-      })
-      newConfig = { ...config, styles: newStyles }
-    }
-  }
-
-  const syncedConfig = sourceHasThresholds
-    ? syncBuildColormapStops(
-        newConfig ?? config,
-        stopsWithKeys.map((s) => ({
-          colorParamKey: s.colorParamKey,
-          thresholdParamKey: s.thresholdParamKey as string,
-        })),
-      )
-    : (newConfig ?? config)
-
-  // Write legend_config into the matching source (per-source model),
-  // not at the top level.
-  const configObj = syncedConfig as Record<string, unknown>
-  const rawSources = configObj.sources as readonly unknown[] | undefined
-
+  const rawSources = config?.sources as readonly unknown[] | undefined
   if (!Array.isArray(rawSources)) {
     throw new Error(
       'serializeGradientToJson: config.sources is missing or not an array',
@@ -228,13 +209,79 @@ export function serializeGradientToJson(
     )
   }
 
-  const newSources = rawSources.map((src) =>
-    (src as { id?: unknown }).id === sourceId
-      ? { ...(src as Record<string, unknown>), legend_config: newLegendConfig }
-      : src,
-  )
+  // Build the set of param refs this legend currently owns. Harvested from
+  // both the incoming stops (existing keys the user kept) and the matched
+  // source's current legend_config items (catches the case where stops were
+  // wiped but legend still references them).
+  const managedRefs = new Set<string>()
+  for (const stop of stopsWithKeys) {
+    managedRefs.add(`@@#params.${stop.colorParamKey}`)
+    if (stop.thresholdParamKey) {
+      managedRefs.add(`@@#params.${stop.thresholdParamKey}`)
+    }
+  }
+  const matchedSource = rawSources.find(
+    (src) => (src as { id?: unknown }).id === sourceId,
+  ) as Record<string, unknown> | undefined
+  const currentLegend = matchedSource?.legend_config as
+    | { items?: readonly { value?: unknown }[] }
+    | undefined
+  if (currentLegend?.items) {
+    for (const item of currentLegend.items) {
+      if (typeof item.value === 'string' && item.value.startsWith('@@#params.'))
+        managedRefs.add(item.value)
+    }
+  }
 
-  const finalConfig = { ...configObj, sources: newSources }
+  let newStylesArr = config?.styles as Record<string, unknown>[] | undefined
+  if (sourceHasThresholds && newStylesArr) {
+    const interpolatePairs = stopsWithKeys.flatMap((stop) => [
+      `@@#params.${stop.thresholdParamKey}`,
+      `@@#params.${stop.colorParamKey}`,
+    ])
+    newStylesArr = newStylesArr.map((style) => {
+      if (style.source !== sourceId) return style
+      const paint = style.paint as Record<string, unknown> | undefined
+      if (!paint) return style
+
+      const newPaint = Object.fromEntries(
+        Object.entries(paint).map(([prop, val]) => {
+          if (!Array.isArray(val) || val[0] !== 'interpolate')
+            return [prop, val]
+          const refs = new Set<string>()
+          collectStringRefs(val, refs)
+          const owns = [...refs].some((r) => managedRefs.has(r))
+          if (!owns) return [prop, val]
+          return [prop, [...val.slice(0, 3), ...interpolatePairs]]
+        }),
+      )
+      return { ...style, paint: newPaint }
+    })
+  }
+
+  // Sync buildColormap inside the matched source only — keeps other sources
+  // (which may have their own buildColormap on unrelated params) untouched.
+  const newSourcesArr = rawSources.map((src) => {
+    const s = src as Record<string, unknown>
+    if (s.id !== sourceId) return s
+    let next: Record<string, unknown> = s
+    if (sourceHasThresholds) {
+      next = syncBuildColormapStops(
+        s,
+        stopsWithKeys.map((stop) => ({
+          colorParamKey: stop.colorParamKey,
+          thresholdParamKey: stop.thresholdParamKey as string,
+        })),
+      ) as Record<string, unknown>
+    }
+    return { ...next, legend_config: newLegendConfig }
+  })
+
+  const finalConfig = {
+    ...(config ?? {}),
+    ...(newStylesArr ? { styles: newStylesArr } : {}),
+    sources: newSourcesArr,
+  }
 
   const result = {
     ...parsed,
