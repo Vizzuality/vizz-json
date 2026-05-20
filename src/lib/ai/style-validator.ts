@@ -81,6 +81,60 @@ function customSemanticErrors(style: unknown): readonly StyleError[] {
   return errors
 }
 
+function tokenizePath(path: string): readonly (string | number)[] {
+  const normalised = path.replace(/\[(\d+)\]/g, '.$1')
+  return normalised
+    .split('.')
+    .filter(Boolean)
+    .map((t) => (/^\d+$/.test(t) ? Number(t) : t))
+}
+
+export function validateParameterizeTargets(envelope: {
+  readonly style: unknown
+  readonly parameterize: ReadonlyArray<{ readonly path: string }>
+}): readonly StyleError[] {
+  const errors: StyleError[] = []
+  for (const entry of envelope.parameterize) {
+    const tokens = tokenizePath(entry.path)
+    if (tokens.length === 0) continue
+    let cursor: unknown = envelope.style
+    let ok = true
+    for (let i = 0; i < tokens.length - 1; i++) {
+      const t = tokens[i]
+      cursor =
+        typeof t === 'number'
+          ? Array.isArray(cursor)
+            ? cursor[t]
+            : undefined
+          : cursor && typeof cursor === 'object'
+            ? (cursor as Record<string, unknown>)[t]
+            : undefined
+      if (cursor === undefined || cursor === null) {
+        ok = false
+        break
+      }
+    }
+    if (!ok || !Array.isArray(cursor)) continue
+    const leaf = tokens[tokens.length - 1]
+    if (typeof leaf !== 'number') continue
+    if (cursor[0] !== 'match') continue
+    const N = cursor.length
+    if (leaf < 2) {
+      errors.push({
+        message: `parameterize path "${entry.path}" targets the "match" keyword or its input expression (index ${leaf}); only output slots are parameterizable. Move the entry to a colour slot at an odd index ≥ 3 (or the trailing default at index ${N - 1}).`,
+      })
+      continue
+    }
+    if (leaf === N - 1) continue
+    if (leaf % 2 === 0) {
+      errors.push({
+        message: `parameterize path "${entry.path}" targets a "match" label (index ${leaf}, value ${JSON.stringify(cursor[leaf])}) — labels are the literal data values matched against the input and MUST stay as the original strings/numbers. Only output values (odd indices ≥ 3 and the trailing default) can be parameterized. To parameterize the colour for this band, point the path at index ${leaf + 1} instead.`,
+      })
+    }
+  }
+  return errors
+}
+
 export function validateLegendColors(legend: unknown): readonly StyleError[] {
   if (!legend || typeof legend !== 'object') return []
   const items = (legend as { items?: unknown }).items

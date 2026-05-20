@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { validateLegendColors, validateStyle } from '#/lib/ai/style-validator'
+import {
+  validateLegendColors,
+  validateParameterizeTargets,
+  validateStyle,
+} from '#/lib/ai/style-validator'
 
 describe('validateStyle', () => {
   it('accepts an empty fragment (treated as no-op)', () => {
@@ -161,6 +165,71 @@ describe('validateLegendColors', () => {
         { label: '0', value: 0 },
         { label: '1', value: 1 },
       ],
+    })
+    expect(errors).toEqual([])
+  })
+})
+
+describe('validateParameterizeTargets', () => {
+  const matchStyle = {
+    sources: [{ id: 'wdpa', type: 'vector', url: 'mapbox://x' }],
+    styles: [
+      {
+        source: 'wdpa',
+        type: 'fill',
+        paint: {
+          'fill-color': [
+            'match',
+            ['get', 'IUCN_CAT'],
+            'Ia',
+            '#0b3c5d',
+            'Ib',
+            '#1f78b4',
+            '#9ca3af',
+          ],
+        },
+      },
+    ],
+  }
+
+  it('accepts parameterize entries that target output colour slots', () => {
+    const errors = validateParameterizeTargets({
+      style: matchStyle,
+      parameterize: [
+        { path: 'styles[0].paint.fill-color[3]' },
+        { path: 'styles[0].paint.fill-color[5]' },
+        { path: 'styles[0].paint.fill-color[6]' },
+      ],
+    })
+    expect(errors).toEqual([])
+  })
+
+  it('rejects parameterize entries that target match label slots', () => {
+    const errors = validateParameterizeTargets({
+      style: matchStyle,
+      parameterize: [{ path: 'styles[0].paint.fill-color[4]' }],
+    })
+    expect(errors).toHaveLength(1)
+    expect(errors[0].message).toMatch(/match.+label/i)
+    expect(errors[0].message).toContain('"Ib"')
+  })
+
+  it('rejects parameterize entries targeting the input expression slot', () => {
+    const errors = validateParameterizeTargets({
+      style: matchStyle,
+      parameterize: [{ path: 'styles[0].paint.fill-color[1]' }],
+    })
+    expect(errors).toHaveLength(1)
+    expect(errors[0].message).toMatch(/match.+input/i)
+  })
+
+  it('ignores parameterize entries pointing outside any match expression', () => {
+    const errors = validateParameterizeTargets({
+      style: {
+        sources: [{ id: 'a', type: 'geojson', data: 'https://a' }],
+        styles: [{ source: 'a', type: 'fill', paint: { 'fill-opacity': 0.5 } }],
+      },
+      parameterize: [{ path: 'styles[0].paint.fill-opacity' }],
     })
     expect(errors).toEqual([])
   })
