@@ -101,9 +101,9 @@ export function LayerCard({
   const LegendComponent = legend ? LEGEND_COMPONENTS[legend.type] : null
 
   return (
-    <div className="mx-3 overflow-hidden rounded-lg">
+    <div>
       {/* Header row */}
-      <div className="flex items-center gap-2 bg-primary px-3 py-2">
+      <div className="flex items-center gap-1 bg-primary py-3.5 pr-2 pl-1">
         {showHandle && (
           <TooltipProvider>
             <Tooltip>
@@ -139,7 +139,7 @@ export function LayerCard({
         LegendComponent ||
         standaloneColorParams.length > 0 ||
         bodyParams.length > 0) && (
-        <div className="flex flex-col pb-4">
+        <div className="flex flex-col px-4 pb-4">
           {/* Opacity slider */}
           {showOpacity && opacityValue !== null && (
             <div className="flex flex-col gap-2 py-2">

@@ -93,10 +93,10 @@ export function LayersPanel({
   const sortableIds = groups.map((g) => g.id)
 
   return (
-    <div className="flex flex-col gap-3 py-3">
+    <div className="flex flex-col gap-3">
       {/* Orphan / global params section */}
       {orphans.length > 0 && (
-        <div className="mx-3 flex flex-col px-4 pb-4">
+        <div className="flex flex-col px-4 pb-4">
           <span className="py-2 text-xs font-medium text-muted-foreground">
             Global
           </span>
