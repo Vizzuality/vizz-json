@@ -209,7 +209,7 @@ export function AiPage() {
         }
         json={
           <PaneErrorBoundary label="JSON viewer" resetKey={schemaJson}>
-            <JsonViewer json={schemaJson} />
+            <JsonViewer json={schemaJson} onApply={handleSnapshotApply} />
           </PaneErrorBoundary>
         }
         map={
