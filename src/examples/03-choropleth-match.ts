@@ -13,6 +13,19 @@ const config = {
         id: 'countries',
         type: 'geojson',
         data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
+        legend_config: {
+          type: 'choropleth',
+          items: [
+            { label: 'High income: OECD', value: '@@#params.high_oecd_color' },
+            {
+              label: 'High income: non-OECD',
+              value: '@@#params.high_non_oecd_color',
+            },
+            { label: 'Upper middle', value: '@@#params.upper_middle_color' },
+            { label: 'Lower middle', value: '@@#params.lower_middle_color' },
+            { label: 'Low income', value: '@@#params.low_income_color' },
+          ],
+        },
       },
     ],
     styles: [
@@ -57,19 +70,6 @@ const config = {
       options: ['visible', 'none'],
     },
   ],
-  legend_config: {
-    type: 'choropleth',
-    items: [
-      { label: 'High income: OECD', value: '@@#params.high_oecd_color' },
-      {
-        label: 'High income: non-OECD',
-        value: '@@#params.high_non_oecd_color',
-      },
-      { label: 'Upper middle', value: '@@#params.upper_middle_color' },
-      { label: 'Lower middle', value: '@@#params.lower_middle_color' },
-      { label: 'Low income', value: '@@#params.low_income_color' },
-    ],
-  },
 } satisfies ExampleConfig
 
 export default config

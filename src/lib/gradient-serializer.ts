@@ -51,6 +51,7 @@ type ParamEntry = Record<string, unknown> & { key: string; group?: string }
 export function serializeGradientToJson(
   currentJson: string,
   stops: readonly GradientStop[],
+  sourceId: string,
 ): string {
   const parsed = JSON.parse(currentJson) as Record<string, unknown>
   const sortedStops = [...stops].sort((a, b) => a.position - b.position)
@@ -207,11 +208,38 @@ export function serializeGradientToJson(
       )
     : (newConfig ?? config)
 
+  // Write legend_config into the matching source (per-source model),
+  // not at the top level.
+  const configObj = syncedConfig as Record<string, unknown>
+  const rawSources = configObj.sources as readonly unknown[] | undefined
+
+  if (!Array.isArray(rawSources)) {
+    throw new Error(
+      'serializeGradientToJson: config.sources is missing or not an array',
+    )
+  }
+
+  const matched = rawSources.some(
+    (src) => (src as { id?: unknown }).id === sourceId,
+  )
+  if (!matched) {
+    throw new Error(
+      `serializeGradientToJson: no source with id "${sourceId}" in config.sources`,
+    )
+  }
+
+  const newSources = rawSources.map((src) =>
+    (src as { id?: unknown }).id === sourceId
+      ? { ...(src as Record<string, unknown>), legend_config: newLegendConfig }
+      : src,
+  )
+
+  const finalConfig = { ...configObj, sources: newSources }
+
   const result = {
     ...parsed,
-    config: syncedConfig,
+    config: finalConfig,
     params_config: newParamsConfig,
-    legend_config: newLegendConfig,
   }
 
   return JSON.stringify(result, null, 2)

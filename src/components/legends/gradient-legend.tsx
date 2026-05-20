@@ -20,6 +20,7 @@ type GradientLegendProps = {
   readonly legendParams?: readonly InferredParam[]
   readonly currentJson?: string
   readonly onApply?: (updatedJson: string) => void
+  readonly sourceId?: string
 }
 
 const CHECKERBOARD_BG = [
@@ -108,6 +109,7 @@ export function GradientLegend({
   legendParams,
   currentJson,
   onApply,
+  sourceId,
 }: GradientLegendProps) {
   const [open, setOpen] = useState(false)
 
@@ -118,6 +120,7 @@ export function GradientLegend({
     legendParams &&
     currentJson &&
     onApply &&
+    sourceId &&
     paramMapping.size > 0
 
   const fullRange = useMemo(
@@ -162,6 +165,7 @@ export function GradientLegend({
           onApply={onApply}
           onChange={onChange}
           onClose={() => setOpen(false)}
+          sourceId={sourceId}
           fullRange={fullRange}
         />
       </PopoverContent>

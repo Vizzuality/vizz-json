@@ -23,6 +23,7 @@ import { DEFAULT_MAP_VIEW, initialBasemapForTheme } from '#/lib/ai/types'
 import type { MapView, RendererControls } from '#/lib/ai/types'
 import type { ResolvedParams } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
+import { migrateLegendShape } from '#/lib/ai/session/migrate-snapshot'
 
 const PROMPT_CHIPS = [
   {
@@ -83,7 +84,13 @@ export function AiPage() {
     return messages.find((m) => m.id === chat.activeMessageId) ?? null
   }, [chat?.activeMessageId, messages])
 
-  const activeSnapshot: AiSchema | null = activeMessage?.schemaSnapshot ?? null
+  const activeSnapshot: AiSchema | null = useMemo(
+    () =>
+      activeMessage?.schemaSnapshot
+        ? migrateLegendShape(activeMessage.schemaSnapshot)
+        : null,
+    [activeMessage?.schemaSnapshot],
+  )
 
   const schemaJson = useMemo(
     () => (activeSnapshot ? JSON.stringify(activeSnapshot, null, 2) : ''),

@@ -1,16 +1,10 @@
-import type {
-  ResolvedParams,
-  ExampleMetadata,
-  ParamConfig,
-  LegendConfig,
-} from '#/lib/types'
+import type { ResolvedParams, ExampleMetadata, ParamConfig } from '#/lib/types'
 import type { RendererControls } from '#/lib/ai/types'
 
 export type AiSchema = {
   readonly metadata: ExampleMetadata
   readonly config: Record<string, unknown>
   readonly params_config: readonly ParamConfig[]
-  readonly legend_config?: LegendConfig
 }
 
 export type Chat = {

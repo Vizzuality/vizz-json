@@ -51,7 +51,7 @@ function validateEnvelopeStyle(
   )
   const resolved = resolveParams(processed.config, defaults)
   const styleErrors = validateStyle(resolved, renderer).map((e) => e.message)
-  const legendErrors = validateLegendColors(envelope.legend_config).map(
+  const legendErrors = validateLegendColors({ style: envelope.style }).map(
     (e) => e.message,
   )
   return [...styleErrors, ...legendErrors]

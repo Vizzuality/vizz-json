@@ -4,16 +4,14 @@ import { ParamControl } from './param-control'
 import type {
   ExampleMetadata,
   InferredParam,
-  LegendConfig,
   ResolvedParams,
 } from '#/lib/types'
-import type { ItemParamMapping } from '#/lib/legend-param-mapping'
+import type { SourceLegendEntry } from '#/lib/pipeline/types'
 
 type ParamsPanelProps = {
   readonly metadata: Pick<ExampleMetadata, 'title' | 'tier'> | null
   readonly paramsConfig: readonly InferredParam[]
-  readonly legendConfig: LegendConfig | null
-  readonly legendParamMapping: ReadonlyMap<number, ItemParamMapping>
+  readonly sourceLegends: readonly SourceLegendEntry[]
   readonly orphanLegendParams: readonly InferredParam[]
   readonly values: ResolvedParams
   readonly onChange: (key: string, value: unknown) => void
@@ -26,8 +24,7 @@ const HEADER_KEYS = new Set(['opacity', 'visibility'])
 export function ParamsPanel({
   metadata,
   paramsConfig,
-  legendConfig,
-  legendParamMapping,
+  sourceLegends,
   orphanLegendParams,
   values,
   onChange,
@@ -36,9 +33,6 @@ export function ParamsPanel({
 }: ParamsPanelProps) {
   const opacityParam = paramsConfig.find((p) => p.key === 'opacity')
   const visibilityParam = paramsConfig.find((p) => p.key === 'visibility')
-  const legendParams = paramsConfig.filter(
-    (p) => p.group === 'legend' && !HEADER_KEYS.has(p.key),
-  )
   const remainingParams = paramsConfig.filter(
     (p) => p.group !== 'legend' && !HEADER_KEYS.has(p.key),
   )
@@ -55,9 +49,7 @@ export function ParamsPanel({
       />
       <div className="flex flex-col gap-3 py-3">
         <LegendCard
-          legendConfig={legendConfig}
-          legendParams={legendParams}
-          legendParamMapping={legendParamMapping}
+          sourceLegends={sourceLegends}
           orphanLegendParams={orphanLegendParams}
           values={values}
           onChange={onChange}

@@ -13,6 +13,14 @@ const config = {
         id: 'countries',
         type: 'geojson',
         data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
+        legend_config: {
+          type: 'gradient',
+          items: [
+            { label: 'Low population', value: '@@#params.color_1' },
+            { label: 'Mid population', value: '@@#params.color_2' },
+            { label: 'High population', value: '@@#params.color_3' },
+          ],
+        },
       },
     ],
     styles: [
@@ -79,14 +87,6 @@ const config = {
       options: ['visible', 'none'],
     },
   ],
-  legend_config: {
-    type: 'gradient',
-    items: [
-      { label: 'Low population', value: '@@#params.color_1' },
-      { label: 'Mid population', value: '@@#params.color_2' },
-      { label: 'High population', value: '@@#params.color_3' },
-    ],
-  },
 } satisfies ExampleConfig
 
 export default config

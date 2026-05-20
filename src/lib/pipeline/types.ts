@@ -16,11 +16,17 @@ export type PipelineOutput =
       readonly error: string | null
     }
 
+export type SourceLegendEntry = {
+  readonly sourceId: string
+  readonly rawLegend: RawLegendConfig
+  readonly resolvedLegend: LegendConfig
+  readonly paramMapping: ReadonlyMap<number, ItemParamMapping>
+  readonly thresholdParams: readonly InferredParam[]
+}
+
 export type PipelineResult = {
   readonly inferredParams: readonly InferredParam[]
-  readonly rawLegendConfig: RawLegendConfig | null
-  readonly resolvedLegendConfig: LegendConfig | null
-  readonly legendParamMapping: ReadonlyMap<number, ItemParamMapping>
+  readonly sourceLegends: readonly SourceLegendEntry[]
   readonly orphanLegendParams: readonly InferredParam[]
   readonly metadata: ExampleMetadata | null
   readonly previewMode: 'map' | 'components'

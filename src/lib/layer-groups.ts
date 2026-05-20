@@ -1,22 +1,29 @@
-import type { InferredParam, LegendConfig, LegendItem } from './types'
+import type { InferredParam, LegendItem, SourceConfig } from './types'
 import type { ItemParamMapping } from './legend-param-mapping'
+import type { SourceLegendEntry } from '#/lib/pipeline/types'
 
-export type LayerGroup = {
-  readonly id: string
+export type LayerGroupStyle = {
+  readonly index: number
   readonly name: string
-  readonly styleIndex: number
   readonly opacityParamKey: string | null
   readonly opacityLiteral: { paintKey: string; value: number } | null
   readonly visibilityParamKey: string | null
   readonly visibilityLiteral: 'visible' | 'none'
   readonly colorParams: readonly InferredParam[]
   readonly bodyParams: readonly InferredParam[]
+}
+
+export type LayerGroup = {
+  readonly id: string
+  readonly name: string
+  readonly sourceIndex: number
+  readonly styles: readonly LayerGroupStyle[]
   readonly legend: {
-    type: 'basic' | 'choropleth' | 'gradient'
-    items: readonly LegendItem[]
-    paramMapping: ReadonlyMap<number, ItemParamMapping>
-    /** Slider params with group='legend' that belong to this layer — used by gradient editor */
-    thresholdParams: readonly InferredParam[]
+    readonly type: 'basic' | 'choropleth' | 'gradient'
+    readonly items: readonly LegendItem[]
+    readonly paramMapping: ReadonlyMap<number, ItemParamMapping>
+    /** Slider params with group='legend' that belong to this source's styles — used by gradient editor */
+    readonly thresholdParams: readonly InferredParam[]
   } | null
 }
 
@@ -35,7 +42,7 @@ function extractParamRef(value: unknown): string | null {
 }
 
 /** Walk any JSON value and collect all @@#params.X keys referenced */
-function collectParamRefs(node: unknown, refs: Set<string>): void {
+export function collectParamRefs(node: unknown, refs: Set<string>): void {
   if (typeof node === 'string') {
     const key = extractParamRef(node)
     if (key) refs.add(key)
@@ -54,6 +61,15 @@ function collectParamRefs(node: unknown, refs: Set<string>): void {
 
 type StyleObject = Record<string, unknown>
 
+function getSourcesArray(
+  parsedConfig: Readonly<Record<string, unknown>>,
+): unknown[] | null {
+  const withConfig = parsedConfig.config as Record<string, unknown> | undefined
+  const sources = withConfig?.sources ?? parsedConfig.sources
+  if (!Array.isArray(sources) || sources.length === 0) return null
+  return sources
+}
+
 function getStylesArray(
   parsedConfig: Readonly<Record<string, unknown>>,
 ): unknown[] | null {
@@ -61,21 +77,6 @@ function getStylesArray(
   const styles = withConfig?.styles ?? parsedConfig.styles
   if (!Array.isArray(styles) || styles.length === 0) return null
   return styles
-}
-
-function buildId(style: StyleObject, index: number): string {
-  const src = typeof style.source === 'string' ? style.source : 'layer'
-  const typ = typeof style.type === 'string' ? style.type : 'style'
-  return `${src}-${typ}-${index}`
-}
-
-function buildName(style: StyleObject, index: number): string {
-  const src = typeof style.source === 'string' ? style.source : null
-  const typ = typeof style.type === 'string' ? style.type : null
-  if (!src && !typ) return `Layer ${index + 1}`
-  if (!src) return typ!
-  if (!typ) return src
-  return `${src} · ${typ}`.trim()
 }
 
 function detectOpacity(style: StyleObject): {
@@ -115,160 +116,128 @@ function detectVisibility(style: StyleObject): {
   return { visibilityParamKey: null, visibilityLiteral: 'visible' }
 }
 
-/**
- * Returns slider params with group='legend' from a group's bodyParams.
- * These drive the threshold handles in the gradient editor.
- * Color-param keys (from paramMapping) are excluded since they are color
- * stops, not threshold positions.
- */
-function buildThresholdParams(
-  group: LayerGroup,
-  paramMapping: ReadonlyMap<number, ItemParamMapping>,
-): readonly InferredParam[] {
-  const colorKeys = new Set<string>()
-  for (const mapping of paramMapping.values()) {
-    if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
+function buildStyleForSource(
+  rawStyle: unknown,
+  globalIndex: number,
+  inferredParams: readonly InferredParam[],
+): LayerGroupStyle {
+  const style = (rawStyle as StyleObject | null | undefined) ?? {}
+
+  const refs = new Set<string>()
+  collectParamRefs(style.paint, refs)
+  collectParamRefs(style.layout, refs)
+  collectParamRefs(style.filter, refs)
+  if (typeof style['source-layer'] === 'string') {
+    const key = extractParamRef(style['source-layer'])
+    if (key) refs.add(key)
   }
-  return group.bodyParams.filter(
-    (p) =>
-      p.control_type === 'slider' &&
-      p.group === 'legend' &&
-      !colorKeys.has(p.key),
+
+  const { opacityParamKey, opacityLiteral } = detectOpacity(style)
+  const { visibilityParamKey, visibilityLiteral } = detectVisibility(style)
+
+  const layerParams = inferredParams.filter((p) => refs.has(p.key))
+  const colorParams = layerParams.filter(
+    (p) => p.control_type === 'color_picker',
   )
-}
+  const bodyParams = layerParams.filter(
+    (p) =>
+      p.control_type !== 'color_picker' &&
+      p.key !== opacityParamKey &&
+      p.key !== visibilityParamKey,
+  )
 
-/**
- * Assigns legend ownership to the layer group with the most overlapping
- * color-param refs. Ties resolved by lowest styleIndex.
- */
-function assignLegend(
-  groups: LayerGroup[],
-  legendConfig: LegendConfig,
-  paramMapping: ReadonlyMap<number, ItemParamMapping>,
-): void {
-  // Collect legend item → value-param-key mapping
-  const legendValueKeys = new Set<string>()
-  for (const mapping of paramMapping.values()) {
-    if (mapping.valueParamKey) legendValueKeys.add(mapping.valueParamKey)
-  }
+  const typ = typeof style.type === 'string' ? style.type : 'style'
 
-  if (legendValueKeys.size === 0) {
-    // No param refs in legend — assign to group 0 if any
-    if (groups.length > 0) {
-      const g = groups[0]
-      groups[0] = {
-        ...g,
-        legend: {
-          type: legendConfig.type,
-          items: legendConfig.items,
-          paramMapping,
-          thresholdParams: buildThresholdParams(g, paramMapping),
-        },
-      }
-    }
-    return
-  }
-
-  // Count color-param overlap per group
-  let bestGroup: LayerGroup | null = null
-  let bestOverlap = -1
-
-  for (const g of groups) {
-    const groupColorKeys = new Set(g.colorParams.map((p) => p.key))
-    let overlap = 0
-    for (const key of legendValueKeys) {
-      if (groupColorKeys.has(key)) overlap++
-    }
-    if (overlap > bestOverlap) {
-      bestOverlap = overlap
-      bestGroup = g
-    }
-  }
-
-  if (!bestGroup) return
-
-  const idx = groups.indexOf(bestGroup)
-  groups[idx] = {
-    ...bestGroup,
-    legend: {
-      type: legendConfig.type,
-      items: legendConfig.items,
-      paramMapping,
-      thresholdParams: buildThresholdParams(bestGroup, paramMapping),
-    },
+  return {
+    index: globalIndex,
+    name: typ,
+    opacityParamKey,
+    opacityLiteral,
+    visibilityParamKey,
+    visibilityLiteral,
+    colorParams,
+    bodyParams,
   }
 }
 
 export function deriveLayerGroups(
   parsedConfig: Readonly<Record<string, unknown>> | null,
   inferredParams: readonly InferredParam[],
-  legendConfig: LegendConfig | null,
-  paramMapping: ReadonlyMap<number, ItemParamMapping>,
+  sourceLegends: readonly SourceLegendEntry[],
 ): LayerGroupsResult {
   if (!parsedConfig) {
     return { groups: [], orphans: [...inferredParams] }
   }
 
+  const sourcesArray = getSourcesArray(parsedConfig)
   const stylesArray = getStylesArray(parsedConfig)
-  if (!stylesArray) {
+
+  if (!sourcesArray || !stylesArray) {
     return { groups: [], orphans: [...inferredParams] }
   }
 
-  // Track which param keys are claimed by at least one layer
+  // Build a lookup from sourceId → SourceLegendEntry for O(1) access
+  const legendBySourceId = new Map<string, SourceLegendEntry>()
+  for (const entry of sourceLegends) {
+    legendBySourceId.set(entry.sourceId, entry)
+  }
+
+  // Track which param keys are claimed by at least one source's styles
   const claimedKeys = new Set<string>()
 
-  const groups: LayerGroup[] = stylesArray.map((rawStyle, i) => {
-    const style = (rawStyle as StyleObject | null | undefined) ?? {}
+  const groups: LayerGroup[] = []
 
-    const id = buildId(style, i)
-    const name = buildName(style, i)
+  for (let si = 0; si < sourcesArray.length; si++) {
+    const rawSource = sourcesArray[si] as SourceConfig | null | undefined
+    if (!rawSource || typeof rawSource.id !== 'string') continue
 
-    // Collect all @@#params.X refs in paint, layout, filter, source-layer
-    const refs = new Set<string>()
-    collectParamRefs(style.paint, refs)
-    collectParamRefs(style.layout, refs)
-    collectParamRefs(style.filter, refs)
-    if (typeof style['source-layer'] === 'string') {
-      const key = extractParamRef(style['source-layer'])
-      if (key) refs.add(key)
+    const sourceId = rawSource.id
+
+    // Find all styles whose `source` matches this source's id
+    const sourceStyles: { rawStyle: unknown; globalIndex: number }[] = []
+    for (let ti = 0; ti < stylesArray.length; ti++) {
+      const rawStyle = stylesArray[ti] as StyleObject | null | undefined
+      if (rawStyle && rawStyle.source === sourceId) {
+        sourceStyles.push({ rawStyle, globalIndex: ti })
+      }
     }
 
-    const { opacityParamKey, opacityLiteral } = detectOpacity(style)
-    const { visibilityParamKey, visibilityLiteral } = detectVisibility(style)
+    // Skip sources with no matching styles
+    if (sourceStyles.length === 0) continue
 
-    // Layer-scoped params: intersect inferredParams with refs
-    const layerParams = inferredParams.filter((p) => refs.has(p.key))
-
-    // Partition into color vs body (exclude opacity/visibility keys)
-    const colorParams = layerParams.filter(
-      (p) => p.control_type === 'color_picker',
-    )
-    const bodyParams = layerParams.filter(
-      (p) =>
-        p.control_type !== 'color_picker' &&
-        p.key !== opacityParamKey &&
-        p.key !== visibilityParamKey,
+    // Build LayerGroupStyle for each style
+    const groupStyles = sourceStyles.map(({ rawStyle, globalIndex }) =>
+      buildStyleForSource(rawStyle, globalIndex, inferredParams),
     )
 
-    for (const p of layerParams) claimedKeys.add(p.key)
-
-    return {
-      id,
-      name,
-      styleIndex: i,
-      opacityParamKey,
-      opacityLiteral,
-      visibilityParamKey,
-      visibilityLiteral,
-      colorParams,
-      bodyParams,
-      legend: null,
+    // Aggregate all param keys claimed by this source's styles
+    for (const gs of groupStyles) {
+      for (const p of gs.colorParams) claimedKeys.add(p.key)
+      for (const p of gs.bodyParams) claimedKeys.add(p.key)
+      if (gs.opacityParamKey) claimedKeys.add(gs.opacityParamKey)
+      if (gs.visibilityParamKey) claimedKeys.add(gs.visibilityParamKey)
     }
-  })
 
-  // Assign legend to the most-overlapping group
-  if (legendConfig) {
-    assignLegend(groups, legendConfig, paramMapping)
+    // Build legend from per-source resolved legend entry
+    const legendEntry = legendBySourceId.get(sourceId)
+    let legend: LayerGroup['legend'] = null
+
+    if (legendEntry) {
+      legend = {
+        type: legendEntry.resolvedLegend.type,
+        items: legendEntry.resolvedLegend.items,
+        paramMapping: legendEntry.paramMapping,
+        thresholdParams: legendEntry.thresholdParams,
+      }
+    }
+
+    groups.push({
+      id: sourceId,
+      name: sourceId,
+      sourceIndex: si,
+      styles: groupStyles,
+      legend,
+    })
   }
 
   const orphans = inferredParams.filter((p) => !claimedKeys.has(p.key))

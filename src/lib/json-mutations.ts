@@ -1,4 +1,4 @@
-/** Helpers that mutate config.styles[] in a JSON string and return the re-serialized result. */
+/** Helpers that mutate config.styles[] / config.sources[] in a JSON string and return the re-serialized result. */
 
 function getStylesRef(parsed: Record<string, unknown>): unknown[] {
   const config = parsed.config as Record<string, unknown> | undefined
@@ -7,10 +7,21 @@ function getStylesRef(parsed: Record<string, unknown>): unknown[] {
   throw new Error('No styles array found in parsed JSON')
 }
 
-function assertInRange(styles: unknown[], index: number): void {
-  if (index < 0 || index >= styles.length) {
+function getSourcesRef(parsed: Record<string, unknown>): unknown[] {
+  const config = parsed.config as Record<string, unknown> | undefined
+  if (config && Array.isArray(config.sources)) return config.sources
+  if (Array.isArray(parsed.sources)) return parsed.sources as unknown[]
+  throw new Error('No sources array found in parsed JSON')
+}
+
+function assertInRange(
+  arr: readonly unknown[],
+  index: number,
+  label: string,
+): void {
+  if (index < 0 || index >= arr.length) {
     throw new RangeError(
-      `Style index ${index} out of range (length: ${styles.length})`,
+      `${label} index ${index} out of range (length: ${arr.length})`,
     )
   }
 }
@@ -36,13 +47,37 @@ export function reorderStyles(
   const parsed = parse(jsonText)
   const styles = getStylesRef(parsed)
 
-  assertInRange(styles, fromIndex)
-  assertInRange(styles, toIndex)
+  assertInRange(styles, fromIndex, 'style')
+  assertInRange(styles, toIndex, 'style')
 
   if (fromIndex === toIndex) return serialize(parsed)
 
   const item = styles.splice(fromIndex, 1)[0]
   styles.splice(toIndex, 0, item)
+
+  return serialize(parsed)
+}
+
+/**
+ * Move a source from `fromIndex` to `toIndex` in the sources array.
+ * Parses jsonText, reorders config.sources[] (or top-level sources[]),
+ * and returns re-serialized JSON with 2-space indent.
+ */
+export function reorderSources(
+  jsonText: string,
+  fromIndex: number,
+  toIndex: number,
+): string {
+  const parsed = parse(jsonText)
+  const sources = getSourcesRef(parsed)
+
+  assertInRange(sources, fromIndex, 'source')
+  assertInRange(sources, toIndex, 'source')
+
+  if (fromIndex === toIndex) return serialize(parsed)
+
+  const item = sources.splice(fromIndex, 1)[0]
+  sources.splice(toIndex, 0, item)
 
   return serialize(parsed)
 }
@@ -59,7 +94,7 @@ export function setStyleVisibility(
   const parsed = parse(jsonText)
   const styles = getStylesRef(parsed)
 
-  assertInRange(styles, styleIndex)
+  assertInRange(styles, styleIndex, 'style')
 
   const style = styles[styleIndex] as Record<string, unknown>
   const existingLayout = (style.layout ?? {}) as Record<string, unknown>
@@ -81,7 +116,7 @@ export function setStyleOpacityLiteral(
   const parsed = parse(jsonText)
   const styles = getStylesRef(parsed)
 
-  assertInRange(styles, styleIndex)
+  assertInRange(styles, styleIndex, 'style')
 
   const style = styles[styleIndex] as Record<string, unknown>
   const existingPaint = (style.paint ?? {}) as Record<string, unknown>

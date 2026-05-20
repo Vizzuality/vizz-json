@@ -2,8 +2,8 @@ import { BasicLegend } from '#/components/legends/basic-legend'
 import { ChoroplethLegend } from '#/components/legends/choropleth-legend'
 import { GradientLegend } from '#/components/legends/gradient-legend'
 import { ParamControl } from './param-control'
-import type { LegendConfig, InferredParam } from '#/lib/types'
-import type { ItemParamMapping } from '#/lib/legend-param-mapping'
+import type { InferredParam } from '#/lib/types'
+import type { SourceLegendEntry } from '#/lib/pipeline/types'
 import { Separator } from '#/components/ui/separator'
 
 const LEGEND_COMPONENTS = {
@@ -13,9 +13,7 @@ const LEGEND_COMPONENTS = {
 } as const
 
 type LegendCardProps = {
-  readonly legendConfig: LegendConfig | null
-  readonly legendParams: readonly InferredParam[]
-  readonly legendParamMapping: ReadonlyMap<number, ItemParamMapping>
+  readonly sourceLegends: readonly SourceLegendEntry[]
   readonly orphanLegendParams: readonly InferredParam[]
   readonly values: Record<string, unknown>
   readonly onChange: (key: string, value: unknown) => void
@@ -24,44 +22,68 @@ type LegendCardProps = {
 }
 
 export function LegendCard({
-  legendConfig,
-  legendParams,
-  legendParamMapping,
+  sourceLegends,
   orphanLegendParams,
   values,
   onChange,
   currentJson,
   onApply,
 }: LegendCardProps) {
+  // Collect all param keys bound by any source's paramMapping
   const boundParamKeys = new Set<string>()
-  for (const mapping of legendParamMapping.values()) {
-    if (mapping.valueParamKey) boundParamKeys.add(mapping.valueParamKey)
+  for (const entry of sourceLegends) {
+    for (const mapping of entry.paramMapping.values()) {
+      if (mapping.valueParamKey) boundParamKeys.add(mapping.valueParamKey)
+    }
   }
   const filteredOrphans = orphanLegendParams.filter(
     (p) => !boundParamKeys.has(p.key),
   )
 
-  const hasPreview = legendConfig !== null
+  const hasPreview = sourceLegends.length > 0
   const hasOrphans = filteredOrphans.length > 0
 
   if (!hasPreview && !hasOrphans) return null
 
-  const LegendComponent = legendConfig
-    ? LEGEND_COMPONENTS[legendConfig.type]
-    : null
+  const showSourceLabels = sourceLegends.length > 1
 
   return (
     <div className="mx-3 rounded-lg border bg-muted/30 p-3">
-      {LegendComponent && legendConfig && (
-        <LegendComponent
-          items={legendConfig.items}
-          paramMapping={legendParamMapping}
-          values={values}
-          onChange={onChange}
-          {...(legendConfig.type === 'gradient'
-            ? { legendParams, currentJson, onApply }
-            : {})}
-        />
+      {hasPreview && (
+        <>
+          {sourceLegends.map((entry, idx) => {
+            const LegendComponent = LEGEND_COMPONENTS[entry.resolvedLegend.type]
+            return (
+              <div key={entry.sourceId}>
+                {idx > 0 && <Separator className="my-3" />}
+                {showSourceLabels && (
+                  <div className="mb-2 text-xs font-medium text-muted-foreground">
+                    {entry.sourceId}
+                  </div>
+                )}
+                {entry.resolvedLegend.type === 'gradient' ? (
+                  <GradientLegend
+                    items={entry.resolvedLegend.items}
+                    paramMapping={entry.paramMapping}
+                    values={values}
+                    onChange={onChange}
+                    legendParams={entry.thresholdParams}
+                    currentJson={currentJson}
+                    onApply={onApply}
+                    sourceId={entry.sourceId}
+                  />
+                ) : (
+                  <LegendComponent
+                    items={entry.resolvedLegend.items}
+                    paramMapping={entry.paramMapping}
+                    values={values}
+                    onChange={onChange}
+                  />
+                )}
+              </div>
+            )
+          })}
+        </>
       )}
       {hasOrphans && (
         <>

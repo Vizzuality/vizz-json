@@ -16,8 +16,7 @@ import {
 import { SortableLayer } from './sortable-layer'
 import { ParamControl } from '#/containers/playground/param-control'
 import { deriveLayerGroups } from '#/lib/layer-groups'
-import { extractLegendParamKeys } from '#/lib/legend-param-mapping'
-import { reorderStyles } from '#/lib/json-mutations'
+import { reorderSources } from '#/lib/json-mutations'
 import type { LayersPanelProps } from './types'
 
 // Restrict drag to vertical axis only (no x movement)
@@ -49,25 +48,14 @@ export function LayersPanel({
   currentJson,
   onApply,
 }: LayersPanelProps) {
-  const paramMapping = useMemo(
-    () => extractLegendParamKeys(pipeline.rawLegendConfig),
-    [pipeline.rawLegendConfig],
-  )
-
   const { groups, orphans } = useMemo(
     () =>
       deriveLayerGroups(
         parsedConfig,
         pipeline.inferredParams,
-        pipeline.resolvedLegendConfig,
-        paramMapping,
+        pipeline.sourceLegends,
       ),
-    [
-      parsedConfig,
-      pipeline.inferredParams,
-      pipeline.resolvedLegendConfig,
-      paramMapping,
-    ],
+    [parsedConfig, pipeline.inferredParams, pipeline.sourceLegends],
   )
 
   const sensors = useSensors(
@@ -85,7 +73,7 @@ export function LayersPanel({
     const newIndex = groups.findIndex((g) => g.id === over.id)
     if (oldIndex === -1 || newIndex === -1) return
 
-    onApply(reorderStyles(currentJson, oldIndex, newIndex))
+    onApply(reorderSources(currentJson, oldIndex, newIndex))
   }
 
   const showHandle = groups.length > 1

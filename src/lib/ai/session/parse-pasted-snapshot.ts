@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { AiSchema } from '#/lib/ai/persistence/types'
+import { migrateLegendShape } from './migrate-snapshot'
 
 const tierSchema = z.enum(['basic', 'intermediate', 'advanced'])
 
@@ -8,16 +9,6 @@ const metadataSchema = z.object({
   description: z.string(),
   tier: tierSchema,
   preview: z.literal('components').optional(),
-})
-
-const legendItemSchema = z.object({
-  label: z.string(),
-  value: z.union([z.string(), z.number()]),
-})
-
-const legendConfigSchema = z.object({
-  type: z.enum(['basic', 'choropleth', 'gradient']),
-  items: z.array(legendItemSchema),
 })
 
 const paramConfigSchema = z.object({
@@ -34,7 +25,6 @@ const snapshotSchema = z.object({
   metadata: metadataSchema,
   config: z.record(z.string(), z.unknown()),
   params_config: z.array(paramConfigSchema),
-  legend_config: legendConfigSchema.optional(),
 })
 
 export function parsePastedSnapshot(text: string): AiSchema | null {
@@ -48,5 +38,5 @@ export function parsePastedSnapshot(text: string): AiSchema | null {
   }
   const result = snapshotSchema.safeParse(raw)
   if (!result.success) return null
-  return result.data as AiSchema
+  return migrateLegendShape(result.data as AiSchema)
 }

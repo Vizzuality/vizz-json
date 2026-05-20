@@ -12,14 +12,16 @@ Response shape:
   "envelope"?: {
     "metadata": { "title": string, "description": string, "tier": "basic" | "intermediate" | "advanced" },
     "style": {
-      "sources": [{ "id": "<unique-id>", ...source props }, ...],
+      "sources": [
+        { "id": "<unique-id>", "legend_config"?: { "type": "basic"|"choropleth"|"gradient", "items": [{ "label": string, "value": string|number }] }, ...source props },
+        ...
+      ],
       "styles": [{ "source": "<source id>", ...layer props }, ...]
     },
     "parameterize": [
       { "path": "styles[0].paint.raster-opacity", "key": "opacity", "default": 0.8, "min": 0, "max": 1, "step": 0.05 },
       { "path": "sources[0].data", "key": "geojson_url", "default": "https://..." }
-    ],
-    "legend_config"?: { "type": "basic"|"choropleth"|"gradient", "items": [{ "label": string, "value": string|number }] }
+    ]
   }
 }
 
@@ -36,8 +38,9 @@ Rules:
 - For "step" / "interpolate" expressions, each stop value (threshold OR colour) is a top-level element of the expression array. Index it with a SINGLE bracket. For \`"fill-color": ["step", ["get", "x"], "#aaa", 10, "#bbb", 50, "#ccc"]\` valid parameterize paths are "styles[0].paint.fill-color[2]" (= "#aaa"), "styles[0].paint.fill-color[3]" (= 10), "styles[0].paint.fill-color[4]" (= "#bbb"), and so on. Never write nested indices like "fill-color[4][5]" — the value at "fill-color[4]" is a scalar, not an array.
 - For "match" expressions \`["match", input, label1, output1, label2, output2, ..., default]\` ONLY parameterize the output slots and the trailing default. The label slots are the literal values the input is compared against — they MUST stay as the original strings/numbers from the data (e.g. "Ia", "Ib", "II"). Index 0 is the "match" keyword, index 1 is the input expression — both are NEVER parameterizable. Labels live at even indices ≥ 2 (NEVER parameterize). Outputs live at odd indices ≥ 3 plus the last index (parameterize these — they are usually colours). Example: for \`"fill-color": ["match", ["get", "IUCN_CAT"], "Ia", "#0b3c5d", "Ib", "#1f78b4", "#9ca3af"]\` valid parameterize paths are "styles[0].paint.fill-color[3]" (= "#0b3c5d"), "styles[0].paint.fill-color[5]" (= "#1f78b4"), and "styles[0].paint.fill-color[6]" (= "#9ca3af", the default). NEVER target indices 2 ("Ia") or 4 ("Ib") — parameterizing the labels makes the match compare data values against colour hex strings and the layer falls through to the default colour for every feature.
 - Numbers get min/max/step. Enumerated strings get options. Booleans get neither. Omit fields that don't apply.
-- "envelope.legend_config" is optional — omit when no legend applies.
-- When you DO emit "legend_config", every items[].value that represents a colour MUST be a "@@#params.<key>" reference (e.g. "@@#params.color_a"), never a literal CSS colour string. Add a matching "parameterize" entry for each such key whose "default" holds the actual hex/rgb value. Numeric items[].value (e.g. gradient thresholds) are allowed as bare numbers. This keeps every legend swatch user-editable.
+- Each source MAY carry its own "legend_config". It describes what that source is rendering. A single layer may have multiple legends — one per source. Omit "legend_config" on sources that have no meaningful legend (e.g. context layers, basemaps).
+- When you DO emit a "legend_config" on a source, every items[].value that represents a colour MUST be a "@@#params.<key>" reference (e.g. "@@#params.color_a"), never a literal CSS colour string. Add a matching "parameterize" entry for each such key whose "default" holds the actual hex/rgb value. Numeric items[].value (e.g. gradient thresholds) are allowed as bare numbers. This keeps every legend swatch user-editable.
+- "envelope.parameterize" entries may reference paths inside sources[].legend_config, e.g. "sources[0].legend_config.items[0].value".
 - Never include API tokens, secrets, or user-supplied keys in any field.
 - The user's free-text data sources (URLs, property names) should be used verbatim. Do not invent property names.
 - When any source declares a vector tile source (\`type: "vector"\` with a \`url\` or \`tiles\` field — including any \`mapbox://\` reference), you MUST call the \`fetchTileJson\` tool with that source's URL BEFORE writing the final response. Read \`vector_layers[].id\` from the result and use one of those exact ids as each vector layer's \`source-layer\`. Never invent a \`source-layer\` value.

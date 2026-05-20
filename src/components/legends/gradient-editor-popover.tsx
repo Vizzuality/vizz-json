@@ -19,6 +19,7 @@ type GradientEditorPopoverProps = {
   readonly onApply: (updatedJson: string) => void
   readonly onChange: (key: string, value: unknown) => void
   readonly onClose: () => void
+  readonly sourceId: string
   readonly fullRange?: readonly [number, number]
 }
 
@@ -31,6 +32,7 @@ export function GradientEditorPopover({
   onApply,
   onChange,
   onClose,
+  sourceId,
   fullRange,
 }: GradientEditorPopoverProps) {
   const initialStops = useMemo(
@@ -55,7 +57,11 @@ export function GradientEditorPopover({
         onChange(stop.thresholdParamKey!, stop.dataValue)
       }
     } else {
-      const updatedJson = serializeGradientToJson(currentJson, [...state.stops])
+      const updatedJson = serializeGradientToJson(
+        currentJson,
+        [...state.stops],
+        sourceId,
+      )
       onApply(updatedJson)
     }
     onClose()

@@ -176,8 +176,7 @@ function PlaygroundPage() {
         <ParamsPanel
           metadata={pipeline.metadata}
           paramsConfig={pipeline.inferredParams}
-          legendConfig={pipeline.resolvedLegendConfig}
-          legendParamMapping={pipeline.legendParamMapping}
+          sourceLegends={pipeline.sourceLegends}
           orphanLegendParams={pipeline.orphanLegendParams}
           values={paramValues}
           onChange={handleParamChange}

@@ -2,21 +2,16 @@ import type {
   DraggableAttributes,
   DraggableSyntheticListeners,
 } from '@dnd-kit/core'
-import type { InferredParam, ResolvedParams, LegendConfig } from '#/lib/types'
+import type { InferredParam, ResolvedParams } from '#/lib/types'
 import type { LayerGroup } from '#/lib/layer-groups'
-import type {
-  ItemParamMapping,
-  RawLegendConfig,
-} from '#/lib/legend-param-mapping'
+import type { SourceLegendEntry } from '#/lib/pipeline/types'
 
 export type LayersPanelProps = {
   readonly metadata: { title: string; tier: string } | null
   readonly parsedConfig: Readonly<Record<string, unknown>> | null
   readonly pipeline: {
     readonly inferredParams: readonly InferredParam[]
-    readonly legendParamMapping: ReadonlyMap<number, ItemParamMapping>
-    readonly resolvedLegendConfig: LegendConfig | null
-    readonly rawLegendConfig: RawLegendConfig | null
+    readonly sourceLegends: readonly SourceLegendEntry[]
   }
   readonly values: ResolvedParams
   readonly onChange: (key: string, value: unknown) => void
