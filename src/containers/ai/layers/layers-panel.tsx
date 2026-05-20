@@ -58,6 +58,18 @@ export function LayersPanel({
     [parsedConfig, pipeline.inferredParams, pipeline.sourceLegends],
   )
 
+  const globalLegendParamKeys = useMemo(() => {
+    const set = new Set<string>()
+    for (const entry of pipeline.sourceLegends) {
+      for (const m of entry.paramMapping.values()) {
+        if (m.valueParamKey) set.add(m.valueParamKey)
+        if (m.labelParamKey) set.add(m.labelParamKey)
+      }
+      for (const p of entry.thresholdParams) set.add(p.key)
+    }
+    return set
+  }, [pipeline.sourceLegends])
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, {
@@ -134,6 +146,7 @@ export function LayersPanel({
                     onChange={onChange}
                     currentJson={currentJson}
                     onApply={onApply}
+                    globalLegendParamKeys={globalLegendParamKeys}
                   />
                 ))}
               </div>
@@ -150,6 +163,7 @@ export function LayersPanel({
                 onChange={onChange}
                 currentJson={currentJson}
                 onApply={onApply}
+                globalLegendParamKeys={globalLegendParamKeys}
               />
             ))}
           </div>

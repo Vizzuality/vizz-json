@@ -229,6 +229,13 @@ export function deriveLayerGroups(
         paramMapping: legendEntry.paramMapping,
         thresholdParams: legendEntry.thresholdParams,
       }
+
+      // Claim all params referenced by this source's legend so they don't fall to Global
+      for (const mapping of legendEntry.paramMapping.values()) {
+        if (mapping.valueParamKey) claimedKeys.add(mapping.valueParamKey)
+        if (mapping.labelParamKey) claimedKeys.add(mapping.labelParamKey)
+      }
+      for (const p of legendEntry.thresholdParams) claimedKeys.add(p.key)
     }
 
     groups.push({

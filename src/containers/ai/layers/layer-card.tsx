@@ -33,6 +33,7 @@ export function LayerCard({
   onChange,
   currentJson,
   onApply,
+  globalLegendParamKeys,
   dragHandleProps,
 }: LayerCardProps) {
   const { name, styles, legend } = group
@@ -40,8 +41,9 @@ export function LayerCard({
   // Build per-layer values record for legend components (they expect Record<string, unknown>)
   const valuesRecord = values as Record<string, unknown>
 
-  // Color params NOT already represented by legend item param mapping — compute once per group
-  const legendParamKeys = new Set<string>()
+  // Suppress any color/threshold param already owned by some legend (this card's
+  // or another card's), so the swatch isn't duplicated as a standalone control.
+  const legendParamKeys = new Set<string>(globalLegendParamKeys)
   if (legend) {
     for (const mapping of legend.paramMapping.values()) {
       if (mapping.valueParamKey) legendParamKeys.add(mapping.valueParamKey)
@@ -50,10 +52,31 @@ export function LayerCard({
 
   const LegendComponent = legend ? LEGEND_COMPONENTS[legend.type] : null
 
+  // Group-level visibility — true only when every style is visible
+  const groupIsVisible = styles.every((s) =>
+    s.visibilityParamKey
+      ? valuesRecord[s.visibilityParamKey] !== 'none'
+      : s.visibilityLiteral === 'visible',
+  )
+
+  const handleGroupVisibilityChange = (checked: boolean) => {
+    let json = currentJson
+    let needsApply = false
+    for (const style of styles) {
+      if (style.visibilityParamKey) {
+        onChange(style.visibilityParamKey, checked ? 'visible' : 'none')
+      } else {
+        json = setStyleVisibility(json, style.index, checked)
+        needsApply = true
+      }
+    }
+    if (needsApply) onApply(json)
+  }
+
   return (
     <div>
-      {/* Header row — source name + drag handle */}
-      <div className="flex items-center gap-1 bg-primary py-3.5 pr-2 pl-1">
+      {/* Header row — source name + drag handle + visibility */}
+      <div className="flex items-center gap-1 bg-primary px-4 py-3.5">
         {showHandle && (
           <TooltipProvider>
             <Tooltip>
@@ -73,15 +96,30 @@ export function LayerCard({
             </Tooltip>
           </TooltipProvider>
         )}
-        <span className="min-w-0 flex-1 truncate text-sm font-medium">
+        <span className="min-w-0 flex-1 truncate text-sm font-medium capitalize">
           {name}
         </span>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Switch
+                  checked={groupIsVisible}
+                  onCheckedChange={handleGroupVisibilityChange}
+                  className="shrink-0"
+                  aria-label={`Toggle ${name} visibility`}
+                />
+              }
+            />
+            <TooltipContent>Toggle visibility</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       {/* Body */}
       {(LegendComponent ||
         styles.some((s) => hasAnyContent(s, legendParamKeys))) && (
-        <div className="flex flex-col px-4 pb-4">
+        <div className="flex flex-col px-4 py-2">
           {/* Legend visualization — one per source group, at the top */}
           {LegendComponent && legend && (
             <div className="py-2">
@@ -164,24 +202,9 @@ function StyleRow({
     name: styleName,
     opacityParamKey,
     opacityLiteral,
-    visibilityParamKey,
-    visibilityLiteral,
     colorParams,
     bodyParams,
   } = style
-
-  // Resolve visibility state
-  const isVisible = visibilityParamKey
-    ? values[visibilityParamKey] !== 'none'
-    : visibilityLiteral === 'visible'
-
-  const handleVisibilityChange = (checked: boolean) => {
-    if (visibilityParamKey) {
-      onChange(visibilityParamKey, checked ? 'visible' : 'none')
-    } else {
-      onApply(setStyleVisibility(currentJson, styleIndex, checked))
-    }
-  }
 
   // Resolve opacity value
   const rawOpacity = opacityParamKey ? values[opacityParamKey] : undefined
@@ -226,34 +249,26 @@ function StyleRow({
         </div>
       )}
 
-      {/* Visibility + opacity row */}
-      <div className="flex items-center gap-2 py-1">
-        <Switch
-          checked={isVisible}
-          onCheckedChange={handleVisibilityChange}
-          className="shrink-0"
-          aria-label={`Toggle ${styleName} layer visibility`}
-        />
-        {showOpacity && opacityValue !== null && (
-          <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">
-                Opacity
-              </span>
-              <span className="font-mono text-xs text-foreground">
-                {formatCompact(opacityValue)}
-              </span>
-            </div>
-            <Slider
-              value={[opacityValue]}
-              min={0}
-              max={1}
-              step={0.05}
-              onValueChange={handleOpacityChange}
-            />
+      {/* Opacity row */}
+      {showOpacity && opacityValue !== null && (
+        <div className="flex flex-col gap-1 py-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">
+              Opacity
+            </span>
+            <span className="font-mono text-xs text-foreground">
+              {formatCompact(opacityValue)}
+            </span>
           </div>
-        )}
-      </div>
+          <Slider
+            value={[opacityValue]}
+            min={0}
+            max={1}
+            step={0.05}
+            onValueChange={handleOpacityChange}
+          />
+        </div>
+      )}
 
       {/* Standalone color params not in legend */}
       {standaloneColorParams.map((param) => {

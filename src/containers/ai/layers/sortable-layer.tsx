@@ -11,6 +11,7 @@ type SortableLayerProps = {
   readonly onChange: (key: string, value: unknown) => void
   readonly currentJson: string
   readonly onApply: (updatedJson: string) => void
+  readonly globalLegendParamKeys: ReadonlySet<string>
 }
 
 export function SortableLayer({
@@ -20,6 +21,7 @@ export function SortableLayer({
   onChange,
   currentJson,
   onApply,
+  globalLegendParamKeys,
 }: SortableLayerProps) {
   const {
     attributes,
@@ -46,6 +48,7 @@ export function SortableLayer({
         onChange={onChange}
         currentJson={currentJson}
         onApply={onApply}
+        globalLegendParamKeys={globalLegendParamKeys}
         dragHandleProps={{ listeners, attributes }}
       />
     </div>

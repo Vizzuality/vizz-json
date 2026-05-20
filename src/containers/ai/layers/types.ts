@@ -26,6 +26,9 @@ export type LayerCardProps = {
   readonly onChange: (key: string, value: unknown) => void
   readonly currentJson: string
   readonly onApply: (updatedJson: string) => void
+  /** Param keys owned by ANY source's legend — used to suppress duplicate controls
+   * in cards whose styles also reference them. */
+  readonly globalLegendParamKeys: ReadonlySet<string>
   /** Drag handle listeners + attributes from useSortable */
   readonly dragHandleProps?: {
     readonly listeners: DraggableSyntheticListeners
