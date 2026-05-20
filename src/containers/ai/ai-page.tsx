@@ -9,7 +9,7 @@ import { MapHeader } from './map/map-header'
 import { MapConfigDialog } from './map/map-config-dialog'
 import { LayersPanel } from './layers/layers-panel'
 import { PaneErrorBoundary } from '#/components/pane-error-boundary'
-import { useResolutionPipeline } from '#/lib/pipeline'
+import { useResolutionPipeline, mergeParamValues } from '#/lib/pipeline'
 import { useChat } from '#/hooks/use-chat'
 import { useActiveChatId } from '#/hooks/use-active-chat-id'
 import {
@@ -91,8 +91,16 @@ export function AiPage() {
   )
 
   const paramValues = useMemo<ResolvedParams>(() => {
-    if (activeMessage?.paramValues) return activeMessage.paramValues
     if (!activeSnapshot) return {}
+    if (activeMessage?.paramValues) {
+      // Patch any gaps: new params_config keys not yet in the stored record get their defaults.
+      const stored = activeMessage.paramValues
+      const hasMissing = activeSnapshot.params_config.some(
+        (p) => !Object.prototype.hasOwnProperty.call(stored, p.key),
+      )
+      if (!hasMissing) return stored
+      return mergeParamValues(activeSnapshot.params_config, stored)
+    }
     const legacy = chat?.activeParamValues ?? {}
     const fallback: Record<string, unknown> = {}
     for (const param of activeSnapshot.params_config) {
@@ -152,7 +160,30 @@ export function AiPage() {
       }
       void (async () => {
         try {
-          await db.messages.update(messageId, { schemaSnapshot: parsed })
+          // Build a prior map that excludes keys whose default changed — those
+          // get the new default so the snapshot edit is reflected immediately.
+          const oldConfigByKey = new Map(
+            (activeSnapshot?.params_config ?? []).map((p) => [p.key, p]),
+          )
+          const effectivePrior: Record<string, unknown> = {}
+          for (const param of parsed.params_config) {
+            const old = oldConfigByKey.get(param.key)
+            const defaultChanged = old && old.default !== param.default
+            if (
+              !defaultChanged &&
+              Object.prototype.hasOwnProperty.call(paramValues, param.key)
+            ) {
+              effectivePrior[param.key] = paramValues[param.key]
+            }
+          }
+          const nextValues = mergeParamValues(
+            parsed.params_config,
+            effectivePrior,
+          )
+          await db.messages.update(messageId, {
+            schemaSnapshot: parsed,
+            paramValues: nextValues,
+          })
         } catch (err) {
           if ((err as Error).name === 'QuotaExceededError') {
             toast.error('Storage full — delete old chats to continue.')
@@ -160,7 +191,7 @@ export function AiPage() {
         }
       })()
     },
-    [chat?.activeMessageId],
+    [chat?.activeMessageId, paramValues, activeSnapshot?.params_config],
   )
 
   const handleRendererChange = useCallback(
