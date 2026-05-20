@@ -2,6 +2,7 @@ import rasterOpacity from '#/examples/01-raster-opacity'
 import graduated from '#/examples/04-graduated-interpolate'
 import dataDriven from '#/examples/06-data-driven-circles'
 import multiSource from '#/examples/11-multi-source-heatmap'
+import crossfade from '#/examples/12-earthquakes-crossfade'
 
 type LayerSchemaExample = {
   metadata: {
@@ -115,4 +116,5 @@ export const FEW_SHOT_EXAMPLES = [
   toFewShot(graduated as LayerSchemaExample),
   toFewShot(dataDriven as LayerSchemaExample),
   toFewShot(multiSource as LayerSchemaExample),
+  toFewShot(crossfade as LayerSchemaExample),
 ] as const
