@@ -101,9 +101,9 @@ export function LayerCard({
   const LegendComponent = legend ? LEGEND_COMPONENTS[legend.type] : null
 
   return (
-    <div className="mx-3 rounded-lg border border-border bg-muted/30 overflow-hidden">
+    <div className="mx-3 overflow-hidden rounded-lg">
       {/* Header row */}
-      <div className="flex items-center gap-2 px-3 py-2">
+      <div className="flex items-center gap-2 bg-primary px-3 py-2">
         {showHandle && (
           <TooltipProvider>
             <Tooltip>
@@ -139,13 +139,15 @@ export function LayerCard({
         LegendComponent ||
         standaloneColorParams.length > 0 ||
         bodyParams.length > 0) && (
-        <div className="flex flex-col gap-3 px-3 pb-3">
+        <div className="flex flex-col pb-4">
           {/* Opacity slider */}
           {showOpacity && opacityValue !== null && (
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2 py-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Opacity</span>
-                <span className="font-mono text-xs text-muted-foreground">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Opacity
+                </span>
+                <span className="font-mono text-xs text-foreground">
                   {formatCompact(opacityValue)}
                 </span>
               </div>
@@ -161,7 +163,7 @@ export function LayerCard({
 
           {/* Legend visualization */}
           {LegendComponent && legend && (
-            <div>
+            <div className="py-2">
               {legend.type === 'gradient' ? (
                 <GradientLegend
                   items={legend.items}
@@ -192,7 +194,7 @@ export function LayerCard({
               ? values[param.key]
               : param.value
             return (
-              <div key={param.key} className="flex flex-col gap-1">
+              <div key={param.key} className="flex flex-col gap-2 py-2">
                 <label className="text-xs font-medium text-muted-foreground">
                   {param.key}
                 </label>
@@ -214,7 +216,7 @@ export function LayerCard({
               ? values[param.key]
               : param.value
             return (
-              <div key={param.key} className="flex flex-col gap-1">
+              <div key={param.key} className="flex flex-col gap-2 py-2">
                 <label className="text-xs font-medium text-muted-foreground">
                   {param.key}
                 </label>

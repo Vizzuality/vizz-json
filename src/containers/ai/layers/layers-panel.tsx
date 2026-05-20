@@ -96,8 +96,8 @@ export function LayersPanel({
     <div className="flex flex-col gap-3 py-3">
       {/* Orphan / global params section */}
       {orphans.length > 0 && (
-        <div className="mx-3 flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3">
-          <span className="text-xs font-medium text-muted-foreground">
+        <div className="mx-3 flex flex-col px-4 pb-4">
+          <span className="py-2 text-xs font-medium text-muted-foreground">
             Global
           </span>
           {orphans.map((param) => {
@@ -108,7 +108,7 @@ export function LayersPanel({
               ? values[param.key]
               : param.value
             return (
-              <div key={param.key} className="flex flex-col gap-1">
+              <div key={param.key} className="flex flex-col gap-2 py-2">
                 <label className="text-xs font-medium text-muted-foreground">
                   {param.key}
                 </label>
