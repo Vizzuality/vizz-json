@@ -462,3 +462,156 @@ describe('serializeGradientToJson with buildColormap', () => {
     expect(interpolate[0]).toBe('interpolate')
   })
 })
+
+// Regression: when the source schema has NO threshold params (e.g. example 11,
+// where heatmap-color interpolates on heatmap-density rather than a data
+// property bound to params), applying an edit through the gradient editor must
+// not fabricate threshold params or rewrite the interpolate expressions. The
+// previous behavior introduced threshold_1/2/3 all defaulting to 0, which made
+// the legend bar collapse to a single point (rendered as transparent) and
+// produced maplibre "Input/output pairs … must be defined using literal numeric
+// values" errors at the same time.
+describe('serializeGradientToJson — source without thresholds', () => {
+  const NO_THRESHOLD_JSON = JSON.stringify({
+    config: {
+      sources: [{ id: 'capitals', type: 'geojson', data: 'https://x' }],
+      styles: [
+        {
+          source: 'capitals',
+          type: 'heatmap',
+          paint: {
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0,
+              'rgba(0,0,0,0)',
+              0.2,
+              '@@#params.heatmap_color_low',
+              1.0,
+              '@@#params.heatmap_color_high',
+            ],
+            'heatmap-opacity': '@@#params.heatmap_opacity',
+          },
+        },
+      ],
+    },
+    params_config: [
+      { key: 'heatmap_color_low', default: '#2c7bb6', group: 'legend' },
+      { key: 'heatmap_color_high', default: '#d7191c', group: 'legend' },
+      {
+        key: 'heatmap_opacity',
+        default: 0.85,
+        min: 0,
+        max: 1,
+        step: 0.05,
+      },
+    ],
+    legend_config: {
+      type: 'gradient',
+      items: [
+        { label: 'Heatmap low', value: '@@#params.heatmap_color_low' },
+        { label: 'Heatmap high', value: '@@#params.heatmap_color_high' },
+      ],
+    },
+  })
+
+  it('does not fabricate threshold_* params when source has none', () => {
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#00ff00',
+        position: 0,
+        dataValue: 0,
+        label: 'Heatmap low',
+        colorParamKey: 'heatmap_color_low',
+      },
+      {
+        id: '2',
+        color: '#d7191c',
+        position: 1,
+        dataValue: 0,
+        label: 'Heatmap high',
+        colorParamKey: 'heatmap_color_high',
+      },
+    ]
+
+    const result = JSON.parse(serializeGradientToJson(NO_THRESHOLD_JSON, stops))
+
+    const paramsKeys = result.params_config.map((p: { key: string }) => p.key)
+    expect(paramsKeys).not.toContain('threshold_1')
+    expect(paramsKeys).not.toContain('threshold_2')
+    // Existing color params still present (with updated defaults)
+    expect(paramsKeys).toContain('heatmap_color_low')
+    expect(paramsKeys).toContain('heatmap_color_high')
+    // Non-legend params untouched
+    expect(paramsKeys).toContain('heatmap_opacity')
+
+    const low = result.params_config.find(
+      (p: { key: string }) => p.key === 'heatmap_color_low',
+    )
+    expect(low.default).toBe('#00ff00')
+  })
+
+  it('leaves the original interpolate expression untouched', () => {
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#00ff00',
+        position: 0,
+        dataValue: 0,
+        label: 'Heatmap low',
+        colorParamKey: 'heatmap_color_low',
+      },
+      {
+        id: '2',
+        color: '#d7191c',
+        position: 1,
+        dataValue: 0,
+        label: 'Heatmap high',
+        colorParamKey: 'heatmap_color_high',
+      },
+    ]
+
+    const result = JSON.parse(serializeGradientToJson(NO_THRESHOLD_JSON, stops))
+
+    const heatmapColor = result.config.styles[0].paint['heatmap-color']
+    // Untouched: still anchored on heatmap-density with original numeric inputs
+    expect(heatmapColor[0]).toBe('interpolate')
+    expect(heatmapColor[2]).toEqual(['heatmap-density'])
+    expect(heatmapColor[3]).toBe(0)
+    expect(heatmapColor[5]).toBe(0.2)
+    expect(heatmapColor[7]).toBe(1.0)
+    // Param refs preserved at their original positions
+    expect(heatmapColor[6]).toBe('@@#params.heatmap_color_low')
+    expect(heatmapColor[8]).toBe('@@#params.heatmap_color_high')
+  })
+
+  it('updates legend_config items to match new stop order/colors', () => {
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#00ff00',
+        position: 0,
+        dataValue: 0,
+        label: 'Heatmap low',
+        colorParamKey: 'heatmap_color_low',
+      },
+      {
+        id: '2',
+        color: '#d7191c',
+        position: 1,
+        dataValue: 0,
+        label: 'Heatmap high',
+        colorParamKey: 'heatmap_color_high',
+      },
+    ]
+
+    const result = JSON.parse(serializeGradientToJson(NO_THRESHOLD_JSON, stops))
+
+    expect(result.legend_config.items).toEqual([
+      { label: 'Heatmap low', value: '@@#params.heatmap_color_low' },
+      { label: 'Heatmap high', value: '@@#params.heatmap_color_high' },
+    ])
+  })
+})

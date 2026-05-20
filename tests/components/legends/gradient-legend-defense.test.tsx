@@ -52,6 +52,42 @@ describe('GradientLegend — defense against raw @@ param refs in CSS', () => {
     expect(bg).not.toContain('params.')
   })
 
+  it('does not collapse to all-transparent when serializer is given a no-threshold source', () => {
+    // Regression for the multi-source heatmap scenario: a legend whose only
+    // legend params are colors (no slider thresholds) must remain visible
+    // after the gradient editor applies a color edit. Before the fix, the
+    // serializer fabricated threshold_* params with identical defaults, which
+    // made buildTransparencyGradient project every stop onto the same
+    // percentage and rendered the bar fully transparent.
+    const items: LegendItem[] = [
+      { label: 'Heatmap low', value: '#00ff00' },
+      { label: 'Heatmap high', value: '#d7191c' },
+    ]
+    const paramMapping: ReadonlyMap<number, ItemParamMapping> = new Map([
+      [0, { valueParamKey: 'heatmap_color_low' }],
+      [1, { valueParamKey: 'heatmap_color_high' }],
+    ])
+    const values = {
+      heatmap_color_low: '#00ff00',
+      heatmap_color_high: '#d7191c',
+    }
+
+    const { container } = render(
+      <GradientLegend
+        items={items}
+        paramMapping={paramMapping}
+        values={values}
+      />,
+    )
+    const gradientDiv = container.querySelector(
+      '.absolute.inset-0',
+    ) as HTMLElement
+    const bg = gradientDiv.style.background
+    expect(bg).not.toContain('@@')
+    // The bar must not collapse to a transparent-bookended sandwich
+    expect(bg).not.toMatch(/transparent.*transparent.*transparent/)
+  })
+
   it('resolves colors correctly via paramMapping and values', () => {
     const items: LegendItem[] = [
       { label: 'Heatmap low', value: '@@#params.heatmap_color_low' },

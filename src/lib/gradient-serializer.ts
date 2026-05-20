@@ -55,6 +55,18 @@ export function serializeGradientToJson(
   const parsed = JSON.parse(currentJson) as Record<string, unknown>
   const sortedStops = [...stops].sort((a, b) => a.position - b.position)
 
+  // Source gradients that do not bind any stop to a threshold param (e.g.
+  // heatmap-color anchored on heatmap-density, or legends decoupled from a
+  // data property) must NOT be retro-fitted with synthetic threshold params.
+  // Fabricating them produces all-zero defaults, collapses the legend bar to
+  // a single point (renders as transparent), and breaks maplibre interpolate
+  // expressions ("Input/output pairs must be defined using literal numeric
+  // values"). Detect the no-threshold case up front and skip both the
+  // threshold-param generation and the interpolate rewrite.
+  const sourceHasThresholds = sortedStops.some(
+    (s) => s.thresholdParamKey !== undefined,
+  )
+
   const allExistingKeys = (
     (parsed.params_config as ParamEntry[] | undefined) ?? []
   ).map((p) => p.key)
@@ -64,15 +76,20 @@ export function serializeGradientToJson(
 
   const stopsWithKeys = sortedStops.map((stop) => {
     const colorParamKey = stop.colorParamKey ?? `color_${colorIdx++}`
-    const thresholdParamKey =
-      stop.thresholdParamKey ?? `threshold_${thresholdIdx++}`
+    const thresholdParamKey = sourceHasThresholds
+      ? (stop.thresholdParamKey ?? `threshold_${thresholdIdx++}`)
+      : undefined
     return { ...stop, colorParamKey, thresholdParamKey }
   })
 
   // --- Rebuild params_config ---
   const oldParams = (parsed.params_config as ParamEntry[] | undefined) ?? []
-  const newKeysSet = new Set(
-    stopsWithKeys.flatMap((s) => [s.colorParamKey, s.thresholdParamKey]),
+  const newKeysSet = new Set<string>(
+    stopsWithKeys.flatMap((s) =>
+      s.thresholdParamKey
+        ? [s.colorParamKey, s.thresholdParamKey]
+        : [s.colorParamKey],
+    ),
   )
 
   const preservedParams = oldParams.filter((p) => {
@@ -89,7 +106,9 @@ export function serializeGradientToJson(
   const dataRange = dataMax - dataMin || 1
 
   const existingThresholds = stopsWithKeys
-    .map((s) => oldParamsByKey.get(s.thresholdParamKey))
+    .map((s) =>
+      s.thresholdParamKey ? oldParamsByKey.get(s.thresholdParamKey) : undefined,
+    )
     .filter((p) => p != null)
 
   const sharedMin =
@@ -115,21 +134,25 @@ export function serializeGradientToJson(
       ? (existingThresholds[0].step as number)
       : Math.max(Math.round(dataRange / 100), 1)
 
-  const newParams: ParamEntry[] = stopsWithKeys.flatMap((stop) => [
-    {
-      key: stop.thresholdParamKey,
-      default: stop.dataValue,
-      min: sharedMin,
-      max: sharedMax,
-      step: sharedStep,
-      group: 'legend',
-    },
-    {
+  const newParams: ParamEntry[] = stopsWithKeys.flatMap((stop) => {
+    const colorParam: ParamEntry = {
       key: stop.colorParamKey,
       default: stop.color,
       group: 'legend',
-    },
-  ])
+    }
+    if (!stop.thresholdParamKey) return [colorParam]
+    return [
+      {
+        key: stop.thresholdParamKey,
+        default: stop.dataValue,
+        min: sharedMin,
+        max: sharedMax,
+        step: sharedStep,
+        group: 'legend',
+      },
+      colorParam,
+    ]
+  })
 
   const newParamsConfig = [...preservedParams, ...newParams]
 
@@ -142,14 +165,18 @@ export function serializeGradientToJson(
   }
 
   // --- Rebuild interpolate expression (immutable) ---
+  // Only when the source had threshold params: in that case the interpolate
+  // is data-driven and its [threshold, color] pairs need to match the new
+  // stop list. Without thresholds the interpolate inputs are not parameters
+  // (e.g. heatmap-density, zoom literals) and must be left alone.
   const config = parsed.config as Record<string, unknown> | undefined
-  const interpolatePairs = stopsWithKeys.flatMap((stop) => [
-    `@@#params.${stop.thresholdParamKey}`,
-    `@@#params.${stop.colorParamKey}`,
-  ])
 
   let newConfig = config
-  if (config) {
+  if (sourceHasThresholds && config) {
+    const interpolatePairs = stopsWithKeys.flatMap((stop) => [
+      `@@#params.${stop.thresholdParamKey}`,
+      `@@#params.${stop.colorParamKey}`,
+    ])
     const styles = config.styles as Record<string, unknown>[] | undefined
     if (styles) {
       const newStyles = styles.map((style) => {
@@ -170,10 +197,15 @@ export function serializeGradientToJson(
     }
   }
 
-  const syncedConfig = syncBuildColormapStops(
-    newConfig ?? config,
-    stopsWithKeys,
-  )
+  const syncedConfig = sourceHasThresholds
+    ? syncBuildColormapStops(
+        newConfig ?? config,
+        stopsWithKeys.map((s) => ({
+          colorParamKey: s.colorParamKey,
+          thresholdParamKey: s.thresholdParamKey as string,
+        })),
+      )
+    : (newConfig ?? config)
 
   const result = {
     ...parsed,
