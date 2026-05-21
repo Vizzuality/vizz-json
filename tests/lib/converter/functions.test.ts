@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { registeredFunctions } from '#/lib/converter/functions'
+import { describe, it, expect, expectTypeOf } from 'vitest'
+import { registeredFunctions, getFunctionMeta } from '#/lib/converter/functions'
+import type { ParamConfig } from '#/lib/types'
 
 describe('setQueryParams', () => {
   const fn = registeredFunctions.setQueryParams
@@ -71,5 +72,48 @@ describe('buildColormap', () => {
 
   it('returns empty array for empty stops', () => {
     expect(fn({ stops: [] })).toEqual([])
+  })
+})
+
+// ── ParamConfig.source type-level tests ────────────────────────────
+
+describe('ParamConfig.source', () => {
+  it('has an optional source field typed as string | undefined', () => {
+    expectTypeOf<ParamConfig>().toHaveProperty('source')
+    expectTypeOf<ParamConfig['source']>().toEqualTypeOf<string | undefined>()
+  })
+
+  it('accepts a ParamConfig without source', () => {
+    const p: ParamConfig = { key: 'opacity', default: 0.8 }
+    expect(p.source).toBeUndefined()
+  })
+
+  it('accepts a ParamConfig with source', () => {
+    const p: ParamConfig = { key: 'opacity', default: 0.8, source: 'layer-1' }
+    expect(p.source).toBe('layer-1')
+  })
+})
+
+// ── getFunctionMeta ────────────────────────────────────────────────
+
+describe('getFunctionMeta', () => {
+  it('returns colorArgPaths for buildColormap', () => {
+    expect(getFunctionMeta('buildColormap')).toEqual({
+      colorArgPaths: ['stops[*][1]'],
+    })
+  })
+
+  it('returns undefined for setQueryParams (no meta registered)', () => {
+    expect(getFunctionMeta('setQueryParams')).toBeUndefined()
+  })
+
+  it('returns undefined for an unknown function name', () => {
+    expect(getFunctionMeta('nonExistentFn')).toBeUndefined()
+  })
+
+  it('registered functions without meta are still callable', () => {
+    const fn = registeredFunctions.ifParam
+    expect(fn({ condition: true, then: 'a', else: 'b' })).toBe('a')
+    expect(getFunctionMeta('ifParam')).toBeUndefined()
   })
 })

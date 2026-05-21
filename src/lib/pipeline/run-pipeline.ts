@@ -1,11 +1,13 @@
 import { getConverter, resolveConfig } from '#/lib/converter'
 import { resolveParams } from '#/lib/converter/params-resolver'
+import { getFunctionMeta } from '#/lib/converter/functions'
 import { inferParamControl } from '#/lib/param-inference'
 import {
   extractSourceLegendMappings,
   getOrphanLegendParamsAcrossSources,
 } from '#/lib/legend-param-mapping'
 import { collectParamRefs } from '#/lib/layer-groups'
+import { validate } from '#/lib/validator'
 import type {
   ExampleMetadata,
   InferredParam,
@@ -23,6 +25,7 @@ const EMPTY_RESULT: PipelineResult = {
   previewMode: 'map',
   output: { kind: 'map', resolvedConfig: null, error: null },
   parsedConfig: null,
+  diagnostics: [],
 }
 
 function readStylesArray(
@@ -167,6 +170,9 @@ export function runResolutionPipeline(
       ? runComponentsBranch(parsedConfig, paramValues)
       : runMapBranch(parsedConfig, paramValues)
 
+  // Run validator on the snapshot (diagnostics are for the author, not the runtime)
+  const diagnostics = validate(parsedConfig, { getFunctionMeta })
+
   return {
     inferredParams,
     sourceLegends,
@@ -175,5 +181,6 @@ export function runResolutionPipeline(
     previewMode,
     output,
     parsedConfig,
+    diagnostics,
   }
 }

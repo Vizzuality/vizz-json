@@ -102,3 +102,38 @@ Canonical defaults (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 ### Domain docs
 
 Single-context: `CONTEXT.md` at root, `docs/adr/` for ADRs. See `docs/agents/domain.md`.
+
+## stack:
+
+Monorepo with three packages. Root is the main TanStack Start web app. Internal packages are `@vizzuality/vizz-json` (core JSON templating engine) and `@vizzuality/vizz-map` (MapLibre rendering primitives).
+
+**default** (TanStack Start app)
+
+- **framework**: `@tanstack/react-start`, `@tanstack/react-router`, `react@19`, `react-dom@19`
+- **state**: `@tanstack/react-query`, `@tanstack/ai`, `@tanstack/ai-openai`, `@tanstack/ai-react`
+- **forms-validation**: `zod`
+- **ui**: `shadcn@4`, `@base-ui/react`, `lucide-react`
+- **styling**: `tailwindcss@4`, `@tailwindcss/vite`, `tailwind-merge`, `class-variance-authority`
+- **maps**: `react-map-gl`, `maplibre-gl`, `@maplibre/maplibre-gl-style-spec`, `@mapbox/mapbox-gl-style-spec`
+- **editor**: `@monaco-editor/react`
+- **theme**: `next-themes`
+- **ui-extras**: `sonner` (toasts), `react-resizable-panels` (draggable layout), `@dnd-kit/*` (drag-drop)
+- **database**: `dexie`, `dexie-react-hooks`
+- **i18n**: `@inlang/paraglide-js`
+- **compiler**: `babel-plugin-react-compiler`
+
+**packages/vizz-json**
+
+- **core**: Zod-free JSON templating engine; optional React export
+- **devOnly**: `vitest`
+
+**packages/vizz-map**
+
+- **react-integration**: React wrappers for vizz-json + react-map-gl
+- **devOnly**: `vitest`, `@testing-library/react`
+
+**packages/vizz-figma-map**
+
+- **figma-plugin**: Renders vizz-json maps, snapshots to Figma
+- **deps**: `@vizzuality/vizz-json`, `@vizzuality/vizz-map`, `react@19`, `maplibre-gl`, `react-map-gl`
+- **devOnly**: `@figma/plugin-typings`, `vite`, `vitest`, `concurrently`

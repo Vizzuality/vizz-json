@@ -19,8 +19,16 @@ import {
 } from '#/lib/ai/style-validator'
 import { resolveParams } from '#/lib/converter/params-resolver'
 import type { RendererId } from '#/lib/ai/types'
+// Row 2 validator — imported against the contract; the module will exist once
+// feat/color-binding-validator Row 2 lands. TypeScript will error until then,
+// which is expected and documented in the branch strategy.
+import { getFunctionMeta } from '#/lib/converter'
+import { validateAndRetry } from '#/lib/ai/validate-and-retry'
 
-const MAX_VALIDATION_RETRIES = 2
+// Total schema-validation attempts (initial + retries) for JSON/envelope-schema/
+// style failures inside the main loop below. Distinct from the color-binding
+// retry, which is handled separately by `validateAndRetry()` (1 retry budget).
+const MAX_SCHEMA_ATTEMPTS = 3
 
 function stripCodeFences(text: string): string {
   const trimmed = text.trim()
@@ -83,7 +91,13 @@ export const Route = createFileRoute('/api/ai-generate')({
         const conversation: UIMessage[] = [...messages] as UIMessage[]
         let lastFailure: { raw: unknown; issues: unknown } | null = null
 
-        for (let attempt = 0; attempt <= MAX_VALIDATION_RETRIES; attempt++) {
+        let successEnvelope: AiOutput | null = null
+        let successText: string | null = null
+        let successValidation: ReturnType<
+          typeof aiResponseSchema.safeParse
+        > | null = null
+
+        for (let attempt = 0; attempt < MAX_SCHEMA_ATTEMPTS; attempt++) {
           const modelMessages = convertMessagesToModelMessages(conversation)
 
           const text = (await chat({
@@ -199,17 +213,89 @@ export const Route = createFileRoute('/api/ai-generate')({
             }
           }
 
-          return Response.json(validation.data)
+          successEnvelope = envelope ?? null
+          successText = text
+          successValidation = validation
+          break
         }
 
-        return Response.json(
-          {
-            error: 'Model could not produce a valid response after retries',
-            issues: lastFailure?.issues ?? [],
-            raw: lastFailure?.raw ?? null,
+        if (successValidation === null) {
+          return Response.json(
+            {
+              error: 'Model could not produce a valid response after retries',
+              issues: lastFailure?.issues ?? [],
+              raw: lastFailure?.raw ?? null,
+            },
+            { status: 502 },
+          )
+        }
+
+        if (!successEnvelope) {
+          // Model replied without an envelope — return the validated reply as-is.
+          return Response.json(successValidation.data)
+        }
+
+        // ── Color-binding gate via validateAndRetry ──────────────────────
+        // The helper handles its own one-shot retry internally.
+        let processed: ReturnType<typeof postProcess>
+        try {
+          processed = postProcess(successEnvelope)
+        } catch {
+          // postProcess errors are already caught by the style-validation step
+          // inside the loop; reaching here means the path was clean.
+          return Response.json(successValidation.data)
+        }
+
+        const result = await validateAndRetry(
+          processed,
+          async (retryMessage) => {
+            conversation.push(
+              {
+                id: 'cb-retry-assistant',
+                role: 'assistant',
+                parts: [{ type: 'text', content: successText ?? '' }],
+              } as unknown as UIMessage,
+              {
+                id: 'cb-retry-user',
+                role: 'user',
+                parts: [{ type: 'text', content: retryMessage }],
+              } as unknown as UIMessage,
+            )
+            const retryText = (await chat({
+              adapter: openaiText('gpt-5.2'),
+              messages: convertMessagesToModelMessages(conversation) as never,
+              systemPrompts: [...systemPrompts],
+              tools: [fetchTileJsonTool],
+              agentLoopStrategy: maxIterations(3),
+              stream: false,
+              maxTokens: 4000,
+            })) as string
+            // Best-effort parse + schema + postProcess. If any step fails, return
+            // the raw text — validateAndRetry's second validate() call will emit
+            // diagnostics and surface validation_failed: true.
+            try {
+              const retryParsed = JSON.parse(stripCodeFences(retryText))
+              const retryValid = aiResponseSchema.safeParse(retryParsed)
+              if (!retryValid.success || !retryValid.data.envelope)
+                return retryText
+              return postProcess(retryValid.data.envelope)
+            } catch {
+              return retryText
+            }
           },
-          { status: 502 },
+          { getFunctionMeta },
         )
+
+        const responsePayload: Record<string, unknown> = {
+          ...successValidation.data,
+        }
+        if (result.diagnostics && result.diagnostics.length > 0) {
+          responsePayload.diagnostics = result.diagnostics
+        }
+        if (result.validation_failed) {
+          responsePayload.validation_failed = true
+        }
+        return Response.json(responsePayload)
       },
     },
   },

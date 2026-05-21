@@ -16,6 +16,7 @@ type AiLayoutProps = {
   readonly json: ReactNode
   readonly map: ReactNode
   readonly params: ReactNode
+  readonly validationOverlay?: ReactNode
 }
 
 export function AiLayout({
@@ -25,6 +26,7 @@ export function AiLayout({
   json,
   map,
   params,
+  validationOverlay,
 }: AiLayoutProps) {
   return (
     <div className="flex h-full bg-background px-4 pb-4">
@@ -75,6 +77,7 @@ export function AiLayout({
             </div>
             <div className="relative h-full min-w-0 flex-1 overflow-hidden">
               {map}
+              {validationOverlay}
             </div>
           </div>
         </ResizablePanel>

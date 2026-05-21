@@ -90,40 +90,40 @@ describe('resolveItemColor', () => {
     expect(result).toBe('#dbeafe')
   })
 
-  it('returns transparent when item.value is @@ ref and no mapping', () => {
+  it('returns sentinel when item.value is @@ ref and no mapping (broken color position)', () => {
     const result = resolveItemColor(
       { value: '@@#params.heatmap_color_low' },
       undefined,
       undefined,
     )
-    expect(result).toBe('transparent')
+    expect(result).toBe('#ff00ff')
   })
 
-  it('returns transparent when item.value is @@ ref and mapping has no valueParamKey', () => {
+  it('returns sentinel when item.value is @@ ref and mapping has no valueParamKey', () => {
     const result = resolveItemColor(
       { value: '@@#params.heatmap_color_low' },
       { labelParamKey: 'label_key' },
       { label_key: 'hello' },
     )
-    expect(result).toBe('transparent')
+    expect(result).toBe('#ff00ff')
   })
 
-  it('returns transparent when item.value is @@ ref and values is undefined', () => {
+  it('returns sentinel when item.value is @@ ref and values is undefined', () => {
     const result = resolveItemColor(
       { value: '@@#params.heatmap_color_low' },
       { valueParamKey: 'heatmap_color_low' },
       undefined,
     )
-    expect(result).toBe('transparent')
+    expect(result).toBe('#ff00ff')
   })
 
-  it('returns transparent when valueParamKey present but resolved value is not a string', () => {
+  it('returns sentinel when valueParamKey present but resolved value is not a string', () => {
     const result = resolveItemColor(
       { value: '@@#params.some_param' },
       { valueParamKey: 'some_param' },
       { some_param: 42 },
     )
-    expect(result).toBe('transparent')
+    expect(result).toBe('#ff00ff')
   })
 
   it('returns transparent for garbage string input', () => {
@@ -140,13 +140,14 @@ describe('resolveItemColor', () => {
     expect(result).toBe('transparent')
   })
 
-  it('NEVER returns a raw @@ string', () => {
+  it('NEVER returns a raw @@ string — returns sentinel instead', () => {
     const result = resolveItemColor(
       { value: '@@#params.color' },
       { valueParamKey: 'color' },
       { color: '@@#params.other' }, // malformed — resolved value is itself a ref
     )
-    // resolved value is itself an @@ ref — must not leak
-    expect(result).toBe('transparent')
+    // resolved value is itself an @@ ref — not a valid CSS color → broken position → sentinel
+    expect(result).not.toMatch(/^@@/)
+    expect(result).toBe('#ff00ff')
   })
 })
