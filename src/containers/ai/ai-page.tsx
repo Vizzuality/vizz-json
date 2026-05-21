@@ -36,6 +36,7 @@ import {
 import {
   extractLiteralColors,
   scaffoldLegendFromLayer,
+  wireLayerToLegendParams,
 } from '#/containers/playground/scaffold-actions'
 
 type IStandaloneCodeEditor = Monaco['editor']['IStandaloneCodeEditor']
@@ -216,6 +217,18 @@ export function AiPage() {
     handleSnapshotApply(JSON.stringify(next, null, 2))
   }, [chat?.activeMessageId, activeSnapshot, handleSnapshotApply])
 
+  const handleWireLegendParams = useCallback(() => {
+    const messageId = chat?.activeMessageId
+    if (!messageId || !activeSnapshot) return
+    const { snapshot: next, warnings } = wireLayerToLegendParams(
+      activeSnapshot as unknown as LayerSchema,
+    )
+    for (const w of warnings) toast.warning(w)
+    if (next !== (activeSnapshot as unknown as LayerSchema)) {
+      handleSnapshotApply(JSON.stringify(next, null, 2))
+    }
+  }, [chat?.activeMessageId, activeSnapshot, handleSnapshotApply])
+
   const handleJumpTo = useCallback(
     (path: string) => {
       setMainTab('json')
@@ -323,6 +336,7 @@ export function AiPage() {
             onJumpTo={handleJumpTo}
             onExtractLiterals={handleExtractLiterals}
             onScaffoldLegend={handleScaffoldLegend}
+            onWireLegendParams={handleWireLegendParams}
           />
         }
       />

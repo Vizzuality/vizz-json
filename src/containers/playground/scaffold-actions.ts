@@ -436,6 +436,175 @@ function deriveLegendFromFunctionCall(
   return null
 }
 
+// ── wireLayerToLegendParams ───────────────────────────────────────────────────
+
+/**
+ * Walk a MapLibre paint expression, visiting each color output slot.
+ * Always returns a fresh copy of the expression array (and of any nested
+ * expression arrays at output slot positions) so the visit setters can mutate
+ * after the walk returns without touching the original input. Non-expression
+ * (or unrecognized op) values are returned as-is.
+ */
+function walkOutputSlots(
+  expr: unknown,
+  visit: (value: unknown, setter: (newVal: unknown) => void) => void,
+): unknown {
+  if (!Array.isArray(expr) || expr.length === 0) return expr
+  const op = expr[0]
+
+  const slotIndices: number[] = []
+  if (op === 'match') {
+    for (let i = 3; i < expr.length - 1; i += 2) slotIndices.push(i)
+    if (expr.length >= 3) slotIndices.push(expr.length - 1)
+  } else if (op === 'step') {
+    if (expr.length >= 3) slotIndices.push(2)
+    for (let i = 4; i < expr.length; i += 2) slotIndices.push(i)
+  } else if (op === 'interpolate' || op === 'interpolate-rgb') {
+    for (let i = 4; i < expr.length; i += 2) slotIndices.push(i)
+  } else if (op === 'case') {
+    for (let i = 2; i < expr.length - 1; i += 2) slotIndices.push(i)
+    if (expr.length >= 3) slotIndices.push(expr.length - 1)
+  } else {
+    return expr
+  }
+
+  const next = [...expr]
+  for (const idx of slotIndices) {
+    const slot = next[idx]
+    if (Array.isArray(slot)) {
+      next[idx] = walkOutputSlots(slot, visit)
+    } else {
+      visit(slot, (v) => {
+        next[idx] = v
+      })
+    }
+  }
+  return next
+}
+
+export type WireResult = {
+  readonly snapshot: LayerSchema
+  readonly warnings: readonly string[]
+}
+
+/**
+ * For each source: walk paint color expressions and the source's legend
+ * param refs. If the count of literal output slots matches the count of legend
+ * param refs, replace each literal at slot N with the corresponding param ref
+ * and move the literal's value into the matching `params_config` default
+ * (preserving visual output pre/post-action).
+ *
+ * If counts differ for a source, that source is left untouched and a warning
+ * is emitted. Other sources still get wired.
+ */
+export function wireLayerToLegendParams(snapshot: LayerSchema): WireResult {
+  const config = snapshot.config as {
+    sources: Record<string, unknown>[]
+    styles: Record<string, unknown>[]
+  }
+  const sources = Array.isArray(config.sources) ? config.sources : []
+  const styles = Array.isArray(config.styles) ? config.styles : []
+
+  const newStyles: Record<string, unknown>[] = [...styles]
+  const paramDefaults = new Map<string, string>()
+  const warnings: string[] = []
+  let anyMutation = false
+
+  for (const source of sources) {
+    const sourceId = source.id as string
+    const legend = source.legend_config as LegendConfig | undefined
+    const legendKeys: string[] = []
+    if (legend?.items) {
+      for (const item of legend.items) {
+        const key = paramRefKey(item.value)
+        if (key) legendKeys.push(key)
+      }
+    }
+    if (legendKeys.length === 0) continue
+
+    type Slot = {
+      literal: string
+      replace: (newVal: string) => void
+    }
+    const slots: Slot[] = []
+    const provisionalStyles = new Map<number, Record<string, unknown>>()
+
+    for (let idx = 0; idx < styles.length; idx++) {
+      const style = styles[idx]
+      if (style.source !== sourceId) continue
+      const paint = style.paint as Record<string, unknown> | undefined
+      if (!paint) continue
+      const newPaint: Record<string, unknown> = { ...paint }
+
+      for (const prop of COLOR_PAINT_PROPS) {
+        const val = paint[prop]
+        if (val === undefined) continue
+
+        if (isColorLiteral(val)) {
+          slots.push({
+            literal: val,
+            replace: (newVal) => {
+              newPaint[prop] = newVal
+            },
+          })
+        } else if (Array.isArray(val)) {
+          const newExpr = walkOutputSlots(val, (slotVal, setter) => {
+            if (isColorLiteral(slotVal)) {
+              slots.push({ literal: slotVal, replace: setter })
+            }
+          })
+          newPaint[prop] = newExpr
+        }
+      }
+      provisionalStyles.set(idx, { ...style, paint: newPaint })
+    }
+
+    if (slots.length === 0) continue
+
+    if (slots.length !== legendKeys.length) {
+      warnings.push(
+        `Source "${sourceId}": ${slots.length} paint literal slot${
+          slots.length === 1 ? '' : 's'
+        } but ${legendKeys.length} legend param${
+          legendKeys.length === 1 ? '' : 's'
+        } — cannot auto-wire, please align manually.`,
+      )
+      continue
+    }
+
+    for (let i = 0; i < slots.length; i++) {
+      const { literal, replace } = slots[i]
+      const key = legendKeys[i]
+      replace(`@@#params.${key}`)
+      paramDefaults.set(key, literal)
+    }
+
+    for (const [idx, newStyle] of provisionalStyles) {
+      newStyles[idx] = newStyle
+    }
+    anyMutation = true
+  }
+
+  if (!anyMutation) {
+    return { snapshot, warnings }
+  }
+
+  const newParamsConfig = snapshot.params_config.map((p) => {
+    const newDefault = paramDefaults.get(p.key)
+    if (newDefault === undefined) return p
+    return { ...p, default: newDefault }
+  })
+
+  return {
+    snapshot: {
+      ...snapshot,
+      config: { ...config, sources, styles: newStyles },
+      params_config: newParamsConfig,
+    },
+    warnings,
+  }
+}
+
 /**
  * For each source: inspect color paint expression(s), derive a legend_config,
  * and insert it — replacing any existing block (replace semantics, not patch).

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   extractLiteralColors,
   scaffoldLegendFromLayer,
+  wireLayerToLegendParams,
 } from '#/containers/playground/scaffold-actions'
 import type { LayerSchema } from '#/lib/types'
 
@@ -379,5 +380,241 @@ describe('scaffoldLegendFromLayer', () => {
     ).sources
     expect(origSources[0].legend_config).toBeUndefined()
     expect(result).not.toBe(NO_LEGEND_SNAPSHOT)
+  })
+})
+
+// ── wireLayerToLegendParams ───────────────────────────────────────────────────
+
+describe('wireLayerToLegendParams', () => {
+  // Mimic the AI's "broken match" shape from the handoff: legend refs declared
+  // and matching params_config entries exist, but paint outputs are hardcoded
+  // hex literals — the params never flow into the layer.
+  const BROKEN_MATCH_SNAPSHOT: LayerSchema = {
+    config: {
+      sources: [
+        {
+          id: 'world',
+          type: 'geojson',
+          legend_config: {
+            type: 'choropleth',
+            items: [
+              {
+                label: 'High income: OECD',
+                value: '@@#params.high_oecd_color',
+              },
+              {
+                label: 'High income: nonOECD',
+                value: '@@#params.high_non_oecd_color',
+              },
+              {
+                label: 'Upper middle income',
+                value: '@@#params.upper_middle_color',
+              },
+              {
+                label: 'Lower middle income',
+                value: '@@#params.lower_middle_color',
+              },
+              {
+                label: 'Low income',
+                value: '@@#params.low_income_color',
+              },
+              { label: 'Fallback', value: '@@#params.fallback_color' },
+            ],
+          },
+        },
+      ],
+      styles: [
+        {
+          source: 'world',
+          type: 'fill',
+          paint: {
+            'fill-color': [
+              'match',
+              ['get', 'income_grp'],
+              '1. High income: OECD',
+              '#FCFFA4',
+              '2. High income: nonOECD',
+              '#FCA50A',
+              '3. Upper middle income',
+              '#DD513A',
+              '4. Lower middle income',
+              '#8B1C62',
+              '5. Low income',
+              '#2D0B59',
+              '#ffffff',
+            ],
+          },
+        },
+      ],
+    },
+    params_config: [
+      { key: 'high_oecd_color', default: '#000000', group: 'legend' },
+      { key: 'high_non_oecd_color', default: '#000000', group: 'legend' },
+      { key: 'upper_middle_color', default: '#000000', group: 'legend' },
+      { key: 'lower_middle_color', default: '#000000', group: 'legend' },
+      { key: 'low_income_color', default: '#000000', group: 'legend' },
+      { key: 'fallback_color', default: '#000000', group: 'legend' },
+    ],
+  }
+
+  it('wires literal paint outputs to legend params in ordinal order', () => {
+    const { snapshot, warnings } = wireLayerToLegendParams(
+      BROKEN_MATCH_SNAPSHOT,
+    )
+    expect(warnings).toEqual([])
+    const styles = (
+      snapshot.config as { styles: { paint: Record<string, unknown> }[] }
+    ).styles
+    const expr = styles[0].paint['fill-color'] as unknown[]
+    // ["match", input, v1, out1, v2, out2, ..., default]
+    expect(expr[3]).toBe('@@#params.high_oecd_color')
+    expect(expr[5]).toBe('@@#params.high_non_oecd_color')
+    expect(expr[7]).toBe('@@#params.upper_middle_color')
+    expect(expr[9]).toBe('@@#params.lower_middle_color')
+    expect(expr[11]).toBe('@@#params.low_income_color')
+    expect(expr[12]).toBe('@@#params.fallback_color')
+  })
+
+  it('moves each literal value into the matching param default', () => {
+    const { snapshot } = wireLayerToLegendParams(BROKEN_MATCH_SNAPSHOT)
+    const byKey = Object.fromEntries(
+      snapshot.params_config.map((p) => [p.key, p.default]),
+    )
+    expect(byKey['high_oecd_color']).toBe('#FCFFA4')
+    expect(byKey['high_non_oecd_color']).toBe('#FCA50A')
+    expect(byKey['upper_middle_color']).toBe('#DD513A')
+    expect(byKey['lower_middle_color']).toBe('#8B1C62')
+    expect(byKey['low_income_color']).toBe('#2D0B59')
+    expect(byKey['fallback_color']).toBe('#ffffff')
+  })
+
+  it('returns a warning and leaves the source untouched when counts differ', () => {
+    const snapshot: LayerSchema = {
+      config: {
+        sources: [
+          {
+            id: 's',
+            type: 'geojson',
+            legend_config: {
+              type: 'choropleth',
+              items: [
+                { label: 'A', value: '@@#params.a_color' },
+                { label: 'B', value: '@@#params.b_color' },
+              ],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 's',
+            type: 'fill',
+            paint: {
+              'fill-color': [
+                'match',
+                ['get', 'type'],
+                'x',
+                '#111111',
+                'y',
+                '#222222',
+                'z',
+                '#333333',
+                '#444444',
+              ],
+            },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'a_color', default: '#aaa', group: 'legend' },
+        { key: 'b_color', default: '#bbb', group: 'legend' },
+      ],
+    }
+
+    const result = wireLayerToLegendParams(snapshot)
+    expect(result.warnings.length).toBe(1)
+    expect(result.warnings[0]).toContain('"s"')
+    expect(result.warnings[0]).toContain('4 paint literal slots')
+    expect(result.warnings[0]).toContain('2 legend params')
+    // No mutation
+    expect(result.snapshot).toBe(snapshot)
+  })
+
+  it('skips sources with no legend param refs and no literals to wire', () => {
+    const result = wireLayerToLegendParams(BASE_SNAPSHOT)
+    expect(result.warnings).toEqual([])
+    expect(result.snapshot).toBe(BASE_SNAPSHOT)
+  })
+
+  it('wires interpolate gradient stops in order', () => {
+    const snapshot: LayerSchema = {
+      config: {
+        sources: [
+          {
+            id: 'q',
+            type: 'geojson',
+            legend_config: {
+              type: 'gradient',
+              items: [
+                { label: 'low', value: '@@#params.low_c' },
+                { label: 'mid', value: '@@#params.mid_c' },
+                { label: 'high', value: '@@#params.high_c' },
+              ],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'q',
+            type: 'circle',
+            paint: {
+              'circle-color': [
+                'interpolate',
+                ['linear'],
+                ['get', 'mag'],
+                1,
+                '#fee5d9',
+                4,
+                '#fc9272',
+                8,
+                '#cb181d',
+              ],
+            },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'low_c', default: '#000', group: 'legend' },
+        { key: 'mid_c', default: '#000', group: 'legend' },
+        { key: 'high_c', default: '#000', group: 'legend' },
+      ],
+    }
+
+    const { snapshot: next, warnings } = wireLayerToLegendParams(snapshot)
+    expect(warnings).toEqual([])
+    const expr = (
+      next.config as { styles: { paint: Record<string, unknown> }[] }
+    ).styles[0].paint['circle-color'] as unknown[]
+    expect(expr[4]).toBe('@@#params.low_c')
+    expect(expr[6]).toBe('@@#params.mid_c')
+    expect(expr[8]).toBe('@@#params.high_c')
+    const byKey = Object.fromEntries(
+      next.params_config.map((p) => [p.key, p.default]),
+    )
+    expect(byKey['low_c']).toBe('#fee5d9')
+    expect(byKey['mid_c']).toBe('#fc9272')
+    expect(byKey['high_c']).toBe('#cb181d')
+  })
+
+  it('skips already-wired paint slots (no literals = nothing to do)', () => {
+    const result = wireLayerToLegendParams(NO_LEGEND_SNAPSHOT)
+    // Source has no legend_config → no legend keys → skip
+    expect(result.warnings).toEqual([])
+    expect(result.snapshot).toBe(NO_LEGEND_SNAPSHOT)
+  })
+
+  it('does not mutate the original snapshot when wiring succeeds', () => {
+    const snapshotJson = JSON.stringify(BROKEN_MATCH_SNAPSHOT)
+    wireLayerToLegendParams(BROKEN_MATCH_SNAPSHOT)
+    expect(JSON.stringify(BROKEN_MATCH_SNAPSHOT)).toBe(snapshotJson)
   })
 })

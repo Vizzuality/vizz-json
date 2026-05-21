@@ -6,6 +6,7 @@ import {
   ChevronUp,
   Wand2,
   Layers,
+  Link2,
 } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Badge } from '#/components/ui/badge'
@@ -22,6 +23,7 @@ type Props = {
   readonly onJumpTo: (path: string) => void
   readonly onExtractLiterals: () => void
   readonly onScaffoldLegend: () => void
+  readonly onWireLegendParams: () => void
 }
 
 function hasCode(
@@ -31,11 +33,19 @@ function hasCode(
   return diagnostics.some((d) => codes.includes(d.code))
 }
 
+function hasLegendOnlyMismatch(diagnostics: readonly Diagnostic[]): boolean {
+  return diagnostics.some(
+    (d) =>
+      d.code === 'LEGEND_LAYER_MISMATCH' && d.meta?.direction === 'legend-only',
+  )
+}
+
 export function ValidationBanner({
   diagnostics,
   onJumpTo,
   onExtractLiterals,
   onScaffoldLegend,
+  onWireLegendParams,
 }: Props) {
   const [expanded, setExpanded] = useState(false)
 
@@ -54,6 +64,9 @@ export function ValidationBanner({
     'MISSING_LEGEND_CONFIG',
     'LEGEND_LAYER_MISMATCH',
   )
+  const showWire =
+    hasCode(diagnostics, 'COLOR_LITERAL_IN_PAINT') &&
+    hasLegendOnlyMismatch(diagnostics)
 
   return (
     <TooltipProvider>
@@ -118,6 +131,24 @@ export function ValidationBanner({
                   <Layers />
                 </TooltipTrigger>
                 <TooltipContent>Scaffold legend from layer</TooltipContent>
+              </Tooltip>
+            )}
+
+            {showWire && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="outline"
+                      size="icon-sm"
+                      onClick={onWireLegendParams}
+                      aria-label="Wire layer to legend params by ordinal"
+                    />
+                  }
+                >
+                  <Link2 />
+                </TooltipTrigger>
+                <TooltipContent>Wire layer to legend params</TooltipContent>
               </Tooltip>
             )}
 
