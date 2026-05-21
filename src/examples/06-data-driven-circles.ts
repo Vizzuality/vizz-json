@@ -30,7 +30,6 @@ const config = {
       {
         source: 'earthquakes',
         type: 'heatmap',
-        maxzoom: 8,
         paint: {
           'heatmap-weight': [
             'interpolate',
@@ -68,7 +67,15 @@ const config = {
             '@@#params.color_high',
           ],
           'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
-          'heatmap-opacity': '@@#params.opacity',
+          'heatmap-opacity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            '@@#params.transition_start',
+            '@@#params.opacity',
+            '@@#params.transition_end',
+            0,
+          ],
         },
         layout: {
           visibility: '@@#params.visibility',
@@ -105,7 +112,15 @@ const config = {
             7,
             '@@#params.color_high',
           ],
-          'circle-opacity': '@@#params.opacity',
+          'circle-opacity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            '@@#params.transition_start',
+            0,
+            '@@#params.transition_end',
+            '@@#params.opacity',
+          ],
         },
         layout: {
           visibility: '@@#params.visibility',
@@ -143,6 +158,20 @@ const config = {
       key: 'color_high',
       default: '#d7191c',
       group: 'legend' as const,
+    },
+    {
+      key: 'transition_start',
+      default: 5,
+      min: 0,
+      max: 14,
+      step: 1,
+    },
+    {
+      key: 'transition_end',
+      default: 7,
+      min: 2,
+      max: 16,
+      step: 1,
     },
     {
       key: 'circle_scale',
