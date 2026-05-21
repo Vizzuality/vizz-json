@@ -53,18 +53,13 @@ export function LayerCard({
 
   const LegendComponent = legend ? LEGEND_COMPONENTS[legend.type] : null
 
-  // Source-level opacity + visibility — pick the first style that has them
+  // Source-level opacity — pick the first style that has it
   const sourceOpacityStyle = styles.find(
     (s) => s.opacityParamKey !== null || s.opacityLiteral !== null,
   )
-  const sourceVisibilityStyle = styles.find(
-    (s) => s.visibilityParamKey !== null,
-  )
 
-  // Keys surfaced in SourceControls — suppress them from StyleRow
+  // Key surfaced in SourceControls — suppress it from StyleRow
   const sourceControlOpacityKey = sourceOpacityStyle?.opacityParamKey ?? null
-  const sourceControlVisibilityKey =
-    sourceVisibilityStyle?.visibilityParamKey ?? null
 
   // Group-level visibility — true only when every style is visible
   const groupIsVisible = styles.every((s) =>
@@ -134,17 +129,13 @@ export function LayerCard({
       {(LegendComponent ||
         styles.some((s) => hasAnyContent(s, legendParamKeys))) && (
         <div className="flex flex-col px-4 py-2">
-          {/* Source-level opacity + visibility — always at the top */}
-          {(sourceOpacityStyle || sourceVisibilityStyle) && (
+          {/* Source-level opacity — always at the top */}
+          {sourceOpacityStyle && (
             <div className="pt-1">
               <SourceControls
-                opacityParamKey={sourceOpacityStyle?.opacityParamKey ?? null}
-                opacityLiteral={sourceOpacityStyle?.opacityLiteral ?? null}
-                styleIndex={sourceOpacityStyle?.index ?? 0}
-                visibilityParamKey={sourceControlVisibilityKey}
-                visibilityLiteral={
-                  sourceVisibilityStyle?.visibilityLiteral ?? 'visible'
-                }
+                opacityParamKey={sourceOpacityStyle.opacityParamKey}
+                opacityLiteral={sourceOpacityStyle.opacityLiteral}
+                styleIndex={sourceOpacityStyle.index}
                 values={valuesRecord}
                 onChange={onChange}
                 currentJson={currentJson}

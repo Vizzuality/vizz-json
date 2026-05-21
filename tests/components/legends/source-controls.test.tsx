@@ -11,8 +11,6 @@ describe('SourceControls — opacity slider', () => {
         opacityParamKey="opacity"
         opacityLiteral={null}
         styleIndex={0}
-        visibilityParamKey={null}
-        visibilityLiteral="visible"
         values={{ opacity: 0.8 }}
         onChange={() => undefined}
         currentJson="{}"
@@ -30,8 +28,6 @@ describe('SourceControls — opacity slider', () => {
         opacityParamKey="opacity"
         opacityLiteral={null}
         styleIndex={0}
-        visibilityParamKey={null}
-        visibilityLiteral="visible"
         values={{ opacity: 0.8 }}
         onChange={onChange}
         currentJson="{}"
@@ -47,14 +43,12 @@ describe('SourceControls — opacity slider', () => {
     // the important thing is no error is thrown
   })
 
-  it('renders nothing when both opacity and visibility are absent', () => {
+  it('renders nothing when opacity is absent', () => {
     const { container } = render(
       <SourceControls
         opacityParamKey={null}
         opacityLiteral={null}
         styleIndex={0}
-        visibilityParamKey={null}
-        visibilityLiteral="visible"
         values={{}}
         onChange={() => undefined}
         currentJson="{}"
@@ -65,86 +59,6 @@ describe('SourceControls — opacity slider', () => {
   })
 })
 
-describe('SourceControls — visibility toggle', () => {
-  it('renders Visible label when visibilityParamKey is set', () => {
-    render(
-      <SourceControls
-        opacityParamKey={null}
-        opacityLiteral={null}
-        styleIndex={0}
-        visibilityParamKey="visibility"
-        visibilityLiteral="visible"
-        values={{ visibility: 'visible' }}
-        onChange={() => undefined}
-        currentJson="{}"
-        onApply={NOOP_APPLY}
-      />,
-    )
-    expect(screen.getByText('Visible')).toBeDefined()
-  })
-
-  it('calls onChange with "none" when switch is toggled off', () => {
-    const onChange = vi.fn()
-    render(
-      <SourceControls
-        opacityParamKey={null}
-        opacityLiteral={null}
-        styleIndex={0}
-        visibilityParamKey="visibility"
-        visibilityLiteral="visible"
-        values={{ visibility: 'visible' }}
-        onChange={onChange}
-        currentJson="{}"
-        onApply={NOOP_APPLY}
-      />,
-    )
-    const switchEl = screen.getByRole('switch')
-    fireEvent.click(switchEl)
-    // base-ui switch may use pointer events; check that onChange was invoked
-    // with 'none' if the click fires
-    if (onChange.mock.calls.length > 0) {
-      expect(onChange).toHaveBeenCalledWith('visibility', 'none')
-    }
-  })
-
-  it('reflects "none" state as unchecked', () => {
-    render(
-      <SourceControls
-        opacityParamKey={null}
-        opacityLiteral={null}
-        styleIndex={0}
-        visibilityParamKey="visibility"
-        visibilityLiteral="visible"
-        values={{ visibility: 'none' }}
-        onChange={() => undefined}
-        currentJson="{}"
-        onApply={NOOP_APPLY}
-      />,
-    )
-    const switchEl = screen.getByRole('switch')
-    // Switch should be unchecked when visibility is 'none'
-    expect(switchEl.getAttribute('aria-checked')).toBe('false')
-  })
-
-  it('reflects "visible" state as checked', () => {
-    render(
-      <SourceControls
-        opacityParamKey={null}
-        opacityLiteral={null}
-        styleIndex={0}
-        visibilityParamKey="visibility"
-        visibilityLiteral="visible"
-        values={{ visibility: 'visible' }}
-        onChange={() => undefined}
-        currentJson="{}"
-        onApply={NOOP_APPLY}
-      />,
-    )
-    const switchEl = screen.getByRole('switch')
-    expect(switchEl.getAttribute('aria-checked')).toBe('true')
-  })
-})
-
 describe('SourceControls — multi-source naming', () => {
   it('picks up countries_opacity param key', () => {
     render(
@@ -152,9 +66,7 @@ describe('SourceControls — multi-source naming', () => {
         opacityParamKey="countries_opacity"
         opacityLiteral={null}
         styleIndex={0}
-        visibilityParamKey="countries_visibility"
-        visibilityLiteral="visible"
-        values={{ countries_opacity: 0.6, countries_visibility: 'visible' }}
+        values={{ countries_opacity: 0.6 }}
         onChange={() => undefined}
         currentJson="{}"
         onApply={NOOP_APPLY}
@@ -162,6 +74,5 @@ describe('SourceControls — multi-source naming', () => {
     )
     expect(screen.getByText('Opacity')).toBeDefined()
     expect(screen.getByText('0.6')).toBeDefined()
-    expect(screen.getByText('Visible')).toBeDefined()
   })
 })
