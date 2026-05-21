@@ -23,29 +23,30 @@ export type {
  *                 `{ getFunctionMeta }` from `src/lib/converter`. In tests
  *                 pass a stub.
  */
+function runCheck(
+  name: string,
+  fn: () => readonly Diagnostic[],
+  sink: Diagnostic[],
+): void {
+  try {
+    fn().forEach((d) => sink.push(d))
+  } catch (err) {
+    // Production: never crash the caller. Dev: surface the bug so a logic
+    // error inside a check doesn't get silently swallowed.
+    if (import.meta.env.DEV) {
+      throw err
+    }
+    console.error(`[validator] check "${name}" threw and was skipped:`, err)
+  }
+}
+
 export function validate(
   snapshot: unknown,
   registry: ValidatorRegistry,
 ): readonly Diagnostic[] {
   const all: Diagnostic[] = []
-
-  try {
-    checkColorBinding(snapshot, registry).forEach((d) => all.push(d))
-  } catch {
-    // Never crash the caller — silently skip this check
-  }
-
-  try {
-    checkOpacityVisibility(snapshot).forEach((d) => all.push(d))
-  } catch {
-    // Never crash the caller — silently skip this check
-  }
-
-  try {
-    checkDeadRef(snapshot).forEach((d) => all.push(d))
-  } catch {
-    // Never crash the caller — silently skip this check
-  }
-
+  runCheck('color-binding', () => checkColorBinding(snapshot, registry), all)
+  runCheck('opacity-visibility', () => checkOpacityVisibility(snapshot), all)
+  runCheck('dead-ref', () => checkDeadRef(snapshot), all)
   return all
 }
