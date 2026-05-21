@@ -19,6 +19,12 @@ import {
 } from '#/lib/ai/style-validator'
 import { resolveParams } from '#/lib/converter/params-resolver'
 import type { RendererId } from '#/lib/ai/types'
+// Row 2 validator — imported against the contract; the module will exist once
+// feat/color-binding-validator Row 2 lands. TypeScript will error until then,
+// which is expected and documented in the branch strategy.
+import { validate } from '#/lib/validator'
+import { getFunctionMeta } from '#/lib/converter'
+import type { Diagnostic } from '#/lib/validator'
 
 const MAX_VALIDATION_RETRIES = 2
 
@@ -82,6 +88,10 @@ export const Route = createFileRoute('/api/ai-generate')({
         const fetchTileJsonTool = createFetchTileJsonTool({ mapboxToken })
         const conversation: UIMessage[] = [...messages] as UIMessage[]
         let lastFailure: { raw: unknown; issues: unknown } | null = null
+        // Tracks whether we already burned the single color-binding retry.
+        // Separate from the existing MAX_VALIDATION_RETRIES loop so the two
+        // retry budgets don't interfere.
+        let colorBindingRetried = false
 
         for (let attempt = 0; attempt <= MAX_VALIDATION_RETRIES; attempt++) {
           const modelMessages = convertMessagesToModelMessages(conversation)
@@ -199,7 +209,64 @@ export const Route = createFileRoute('/api/ai-generate')({
             }
           }
 
-          return Response.json(validation.data)
+          // ── Color-binding validator gate ────────────────────────────
+          // Run the new validator on the post-processed snapshot so it sees
+          // the resolved @@#params.* placeholders in context. If Row 2's
+          // validate() isn't available yet (import error at build time), this
+          // will fail loudly at compile time — do not work around it.
+          let allDiagnostics: Diagnostic[] = []
+          if (envelope) {
+            try {
+              const processed = postProcess(envelope)
+              allDiagnostics = [...validate(processed, { getFunctionMeta })]
+            } catch {
+              // If postProcess threw it was caught above as a style error —
+              // we won't reach here in that case. Silently continue.
+            }
+          }
+
+          const errorDiagnostics = allDiagnostics.filter(
+            (d) => d.severity === 'error',
+          )
+
+          if (errorDiagnostics.length > 0 && !colorBindingRetried) {
+            // First color-binding failure: retry exactly once.
+            colorBindingRetried = true
+            const lines = errorDiagnostics
+              .map((d) => `- ${d.code}: ${d.message} at ${d.path}`)
+              .join('\n')
+            conversation.push(
+              {
+                id: `cb-retry-assistant-${attempt}`,
+                role: 'assistant',
+                parts: [{ type: 'text', content: text }],
+              } as unknown as UIMessage,
+              {
+                id: `cb-retry-user-${attempt}`,
+                role: 'user',
+                parts: [
+                  {
+                    type: 'text',
+                    content: `Validation failed:\n${lines}\n\nFix every issue above and re-emit the entire snapshot. Do not include partial output or commentary.`,
+                  },
+                ],
+              } as unknown as UIMessage,
+            )
+            continue
+          }
+
+          // Either no errors, or the retry also had errors (validation_failed).
+          const responsePayload: Record<string, unknown> = {
+            ...validation.data,
+          }
+          if (allDiagnostics.length > 0) {
+            responsePayload.diagnostics = allDiagnostics
+          }
+          if (errorDiagnostics.length > 0) {
+            // Second attempt still has errors — surface to client.
+            responsePayload.validation_failed = true
+          }
+          return Response.json(responsePayload)
         }
 
         return Response.json(
