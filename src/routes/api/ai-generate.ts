@@ -22,9 +22,8 @@ import type { RendererId } from '#/lib/ai/types'
 // Row 2 validator — imported against the contract; the module will exist once
 // feat/color-binding-validator Row 2 lands. TypeScript will error until then,
 // which is expected and documented in the branch strategy.
-import { validate } from '#/lib/validator'
 import { getFunctionMeta } from '#/lib/converter'
-import type { Diagnostic } from '#/lib/validator'
+import { validateAndRetry } from '#/lib/ai/validate-and-retry'
 
 const MAX_VALIDATION_RETRIES = 2
 
@@ -88,10 +87,12 @@ export const Route = createFileRoute('/api/ai-generate')({
         const fetchTileJsonTool = createFetchTileJsonTool({ mapboxToken })
         const conversation: UIMessage[] = [...messages] as UIMessage[]
         let lastFailure: { raw: unknown; issues: unknown } | null = null
-        // Tracks whether we already burned the single color-binding retry.
-        // Separate from the existing MAX_VALIDATION_RETRIES loop so the two
-        // retry budgets don't interfere.
-        let colorBindingRetried = false
+
+        let successEnvelope: AiOutput | null = null
+        let successText: string | null = null
+        let successValidation: ReturnType<
+          typeof aiResponseSchema.safeParse
+        > | null = null
 
         for (let attempt = 0; attempt <= MAX_VALIDATION_RETRIES; attempt++) {
           const modelMessages = convertMessagesToModelMessages(conversation)
@@ -209,74 +210,89 @@ export const Route = createFileRoute('/api/ai-generate')({
             }
           }
 
-          // ── Color-binding validator gate ────────────────────────────
-          // Run the new validator on the post-processed snapshot so it sees
-          // the resolved @@#params.* placeholders in context. If Row 2's
-          // validate() isn't available yet (import error at build time), this
-          // will fail loudly at compile time — do not work around it.
-          let allDiagnostics: Diagnostic[] = []
-          if (envelope) {
-            try {
-              const processed = postProcess(envelope)
-              allDiagnostics = [...validate(processed, { getFunctionMeta })]
-            } catch {
-              // If postProcess threw it was caught above as a style error —
-              // we won't reach here in that case. Silently continue.
-            }
-          }
-
-          const errorDiagnostics = allDiagnostics.filter(
-            (d) => d.severity === 'error',
-          )
-
-          if (errorDiagnostics.length > 0 && !colorBindingRetried) {
-            // First color-binding failure: retry exactly once.
-            colorBindingRetried = true
-            const lines = errorDiagnostics
-              .map((d) => `- ${d.code}: ${d.message} at ${d.path}`)
-              .join('\n')
-            conversation.push(
-              {
-                id: `cb-retry-assistant-${attempt}`,
-                role: 'assistant',
-                parts: [{ type: 'text', content: text }],
-              } as unknown as UIMessage,
-              {
-                id: `cb-retry-user-${attempt}`,
-                role: 'user',
-                parts: [
-                  {
-                    type: 'text',
-                    content: `Validation failed:\n${lines}\n\nFix every issue above and re-emit the entire snapshot. Do not include partial output or commentary.`,
-                  },
-                ],
-              } as unknown as UIMessage,
-            )
-            continue
-          }
-
-          // Either no errors, or the retry also had errors (validation_failed).
-          const responsePayload: Record<string, unknown> = {
-            ...validation.data,
-          }
-          if (allDiagnostics.length > 0) {
-            responsePayload.diagnostics = allDiagnostics
-          }
-          if (errorDiagnostics.length > 0) {
-            // Second attempt still has errors — surface to client.
-            responsePayload.validation_failed = true
-          }
-          return Response.json(responsePayload)
+          successEnvelope = envelope ?? null
+          successText = text
+          successValidation = validation
+          break
         }
 
-        return Response.json(
-          {
-            error: 'Model could not produce a valid response after retries',
-            issues: lastFailure?.issues ?? [],
-            raw: lastFailure?.raw ?? null,
+        if (successValidation === null) {
+          return Response.json(
+            {
+              error: 'Model could not produce a valid response after retries',
+              issues: lastFailure?.issues ?? [],
+              raw: lastFailure?.raw ?? null,
+            },
+            { status: 502 },
+          )
+        }
+
+        if (!successEnvelope) {
+          // Model replied without an envelope — return the validated reply as-is.
+          return Response.json(successValidation.data)
+        }
+
+        // ── Color-binding gate via validateAndRetry ──────────────────────
+        // The helper handles its own one-shot retry internally.
+        let processed: ReturnType<typeof postProcess>
+        try {
+          processed = postProcess(successEnvelope)
+        } catch {
+          // postProcess errors are already caught by the style-validation step
+          // inside the loop; reaching here means the path was clean.
+          return Response.json(successValidation.data)
+        }
+
+        const result = await validateAndRetry(
+          processed,
+          async (retryMessage) => {
+            conversation.push(
+              {
+                id: 'cb-retry-assistant',
+                role: 'assistant',
+                parts: [{ type: 'text', content: successText ?? '' }],
+              } as unknown as UIMessage,
+              {
+                id: 'cb-retry-user',
+                role: 'user',
+                parts: [{ type: 'text', content: retryMessage }],
+              } as unknown as UIMessage,
+            )
+            const retryText = (await chat({
+              adapter: openaiText('gpt-5.2'),
+              messages: convertMessagesToModelMessages(conversation) as never,
+              systemPrompts: [...systemPrompts],
+              tools: [fetchTileJsonTool],
+              agentLoopStrategy: maxIterations(3),
+              stream: false,
+              maxTokens: 4000,
+            })) as string
+            // Best-effort parse + schema + postProcess. If any step fails, return
+            // the raw text — validateAndRetry's second validate() call will emit
+            // diagnostics and surface validation_failed: true.
+            try {
+              const retryParsed = JSON.parse(stripCodeFences(retryText))
+              const retryValid = aiResponseSchema.safeParse(retryParsed)
+              if (!retryValid.success || !retryValid.data.envelope)
+                return retryText
+              return postProcess(retryValid.data.envelope)
+            } catch {
+              return retryText
+            }
           },
-          { status: 502 },
+          { getFunctionMeta },
         )
+
+        const responsePayload: Record<string, unknown> = {
+          ...successValidation.data,
+        }
+        if (result.diagnostics && result.diagnostics.length > 0) {
+          responsePayload.diagnostics = result.diagnostics
+        }
+        if (result.validation_failed) {
+          responsePayload.validation_failed = true
+        }
+        return Response.json(responsePayload)
       },
     },
   },
