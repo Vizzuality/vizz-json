@@ -80,14 +80,13 @@ export const Route = createFileRoute('/api/ai-generate')({
           const modelMessages = convertMessagesToModelMessages(conversation)
 
           const text = (await chat({
-            adapter: openaiText('gpt-5.2'),
+            adapter: openaiText('gpt-5.2-pro'),
             messages: modelMessages as never,
             systemPrompts: [...systemPrompts],
             tools: [fetchTileJsonTool],
             agentLoopStrategy: maxIterations(3),
             stream: false,
             maxTokens: 4000,
-            modelOptions: { reasoning: { effort: 'high' } },
           })) as string
 
           let parsedJson: unknown
