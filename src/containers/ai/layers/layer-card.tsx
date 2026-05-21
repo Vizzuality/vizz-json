@@ -11,6 +11,7 @@ import {
 import { BasicLegend } from '#/components/legends/basic-legend'
 import { ChoroplethLegend } from '#/components/legends/choropleth-legend'
 import { GradientLegend } from '#/components/legends/gradient-legend'
+import { SourceControls } from '#/components/legends/source-controls'
 import { ParamControl } from '#/containers/playground/param-control'
 import { formatCompact } from '#/lib/utils'
 import {
@@ -51,6 +52,19 @@ export function LayerCard({
   }
 
   const LegendComponent = legend ? LEGEND_COMPONENTS[legend.type] : null
+
+  // Source-level opacity + visibility — pick the first style that has them
+  const sourceOpacityStyle = styles.find(
+    (s) => s.opacityParamKey !== null || s.opacityLiteral !== null,
+  )
+  const sourceVisibilityStyle = styles.find(
+    (s) => s.visibilityParamKey !== null,
+  )
+
+  // Keys surfaced in SourceControls — suppress them from StyleRow
+  const sourceControlOpacityKey = sourceOpacityStyle?.opacityParamKey ?? null
+  const sourceControlVisibilityKey =
+    sourceVisibilityStyle?.visibilityParamKey ?? null
 
   // Group-level visibility — true only when every style is visible
   const groupIsVisible = styles.every((s) =>
@@ -120,7 +134,25 @@ export function LayerCard({
       {(LegendComponent ||
         styles.some((s) => hasAnyContent(s, legendParamKeys))) && (
         <div className="flex flex-col px-4 py-2">
-          {/* Legend visualization — one per source group, at the top */}
+          {/* Source-level opacity + visibility — always at the top */}
+          {(sourceOpacityStyle || sourceVisibilityStyle) && (
+            <div className="pt-1">
+              <SourceControls
+                opacityParamKey={sourceOpacityStyle?.opacityParamKey ?? null}
+                opacityLiteral={sourceOpacityStyle?.opacityLiteral ?? null}
+                styleIndex={sourceOpacityStyle?.index ?? 0}
+                visibilityParamKey={sourceControlVisibilityKey}
+                visibilityLiteral={
+                  sourceVisibilityStyle?.visibilityLiteral ?? 'visible'
+                }
+                values={valuesRecord}
+                onChange={onChange}
+                currentJson={currentJson}
+                onApply={onApply}
+              />
+            </div>
+          )}
+          {/* Legend visualization */}
           {LegendComponent && legend && (
             <div className="py-2">
               {legend.type === 'gradient' ? (
@@ -158,6 +190,11 @@ export function LayerCard({
               onApply={onApply}
               isLast={loopIndex === styles.length - 1}
               showSeparator={loopIndex < styles.length - 1}
+              sourceControlOpacityKey={sourceControlOpacityKey}
+              sourceControlHandlesLiteral={
+                sourceOpacityStyle?.index === style.index &&
+                style.opacityLiteral !== null
+              }
             />
           ))}
         </div>
@@ -185,6 +222,10 @@ type StyleRowProps = {
   readonly onApply: (updatedJson: string) => void
   readonly isLast: boolean
   readonly showSeparator: boolean
+  /** Opacity param key already rendered in SourceControls at the top — skip it here */
+  readonly sourceControlOpacityKey: string | null
+  /** Whether the style's opacity literal was already surfaced in SourceControls */
+  readonly sourceControlHandlesLiteral: boolean
 }
 
 function StyleRow({
@@ -196,6 +237,8 @@ function StyleRow({
   currentJson,
   onApply,
   showSeparator,
+  sourceControlOpacityKey,
+  sourceControlHandlesLiteral,
 }: StyleRowProps) {
   const {
     index: styleIndex,
@@ -230,7 +273,13 @@ function StyleRow({
     }
   }
 
-  const showOpacity = opacityParamKey !== null || opacityLiteral !== null
+  // Skip opacity when it's already rendered in SourceControls at the card top
+  const opacityAlreadySurfaced =
+    (opacityParamKey !== null && opacityParamKey === sourceControlOpacityKey) ||
+    sourceControlHandlesLiteral
+  const showOpacity =
+    !opacityAlreadySurfaced &&
+    (opacityParamKey !== null || opacityLiteral !== null)
 
   const standaloneColorParams = colorParams.filter(
     (p) => !legendParamKeys.has(p.key),
