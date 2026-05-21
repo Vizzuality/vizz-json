@@ -269,6 +269,78 @@ type SourceColorInfo = {
   diagnostics: Diagnostic[]
 }
 
+/**
+ * Recursively walk a node looking for objects with a `@@function` field.
+ * For each match, resolve colorArgPaths from the registry and collect param
+ * refs / literal diagnostics from the function's args.
+ */
+function collectFunctionCallColors(
+  node: unknown,
+  nodePath: string,
+  registry: ValidatorRegistry,
+): { paramRefs: Set<string>; diagnostics: Diagnostic[] } {
+  const paramRefs = new Set<string>()
+  const diagnostics: Diagnostic[] = []
+
+  if (node === null || node === undefined) return { paramRefs, diagnostics }
+
+  if (Array.isArray(node)) {
+    for (let i = 0; i < node.length; i++) {
+      const child = collectFunctionCallColors(
+        node[i],
+        `${nodePath}[${i}]`,
+        registry,
+      )
+      child.paramRefs.forEach((k) => paramRefs.add(k))
+      child.diagnostics.forEach((d) => diagnostics.push(d))
+    }
+    return { paramRefs, diagnostics }
+  }
+
+  if (typeof node === 'object') {
+    const obj = node as Record<string, unknown>
+
+    if (typeof obj['@@function'] === 'string') {
+      const fnName = obj['@@function']
+      const meta = registry.getFunctionMeta(fnName)
+      if (meta?.colorArgPaths) {
+        for (const colorPath of meta.colorArgPaths) {
+          const results = walk(obj, colorPath)
+          for (const { value: slotVal, path: slotRelPath } of results) {
+            const slotPath = `${nodePath}.${slotRelPath}`
+            if (isColorLiteral(slotVal)) {
+              diagnostics.push({
+                code: 'COLOR_LITERAL_IN_PAINT',
+                severity: 'error',
+                path: slotPath,
+                message: `Color literal "${slotVal}" found in function arg color slot. Use @@#params.<key> instead.`,
+                meta: { literal: slotVal },
+              })
+            } else {
+              const key = paramRefKey(slotVal)
+              if (key) paramRefs.add(key)
+            }
+          }
+        }
+      }
+    }
+
+    // Recurse into all values — a function call can appear anywhere in the source tree
+    for (const [k, v] of Object.entries(obj)) {
+      if (k === '@@function') continue
+      const child = collectFunctionCallColors(
+        v,
+        nodePath ? `${nodePath}.${k}` : k,
+        registry,
+      )
+      child.paramRefs.forEach((key) => paramRefs.add(key))
+      child.diagnostics.forEach((d) => diagnostics.push(d))
+    }
+  }
+
+  return { paramRefs, diagnostics }
+}
+
 function checkSourceColorBinding(
   source: Record<string, unknown>,
   sourceIndex: number,
@@ -305,6 +377,20 @@ function checkSourceColorBinding(
       result.diagnostics.forEach((d) => diagnostics.push(d))
     }
   }
+
+  // Also walk the source object itself for @@function calls with colorArgPaths.
+  // Colors used in tile-URL-building functions (e.g. buildColormap) are invisible
+  // to the layer-side paint walk above, causing false LEGEND_LAYER_MISMATCH.
+  const sourceFnResult = collectFunctionCallColors(
+    source,
+    `config.sources[${sourceIndex}]`,
+    registry,
+  )
+  sourceFnResult.paramRefs.forEach((k) => {
+    layerColorParams.add(k)
+    exemptCandidates.delete(k)
+  })
+  sourceFnResult.diagnostics.forEach((d) => diagnostics.push(d))
 
   return { layerColorParams, exemptOnlyParams: exemptCandidates, diagnostics }
 }

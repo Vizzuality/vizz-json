@@ -598,3 +598,194 @@ describe('MISSING_LEGEND_CONFIG', () => {
     expect(codesOf(diags)).not.toContain('MISSING_LEGEND_CONFIG')
   })
 })
+
+// ── Source-level @@function colorArgPaths (Gap 2) ────────────────────
+
+describe('LEGEND_LAYER_MISMATCH — source-level @@function colorArgPaths', () => {
+  it('does not emit when color params come from buildColormap in source.tiles', () => {
+    // Example 07 pattern: colors are in source.tiles[0].query.colormap.stops[*][1]
+    // The validator must walk source-level function calls via colorArgPaths.
+    const snapshot = {
+      config: {
+        sources: [
+          {
+            id: 'imagery',
+            type: 'raster',
+            tiles: [
+              {
+                '@@function': 'setQueryParams',
+                url: 'https://example.com/tiles/{z}/{x}/{y}.png',
+                query: {
+                  colormap: {
+                    '@@function': 'buildColormap',
+                    stops: [
+                      [0, '@@#params.color_1'],
+                      [50, '@@#params.color_2'],
+                      [100, '@@#params.color_3'],
+                    ],
+                  },
+                },
+              },
+            ],
+            legend_config: {
+              type: 'gradient',
+              items: [
+                { label: 'Low', value: '@@#params.color_1' },
+                { label: 'Mid', value: '@@#params.color_2' },
+                { label: 'High', value: '@@#params.color_3' },
+              ],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'imagery',
+            type: 'raster',
+            paint: { 'raster-opacity': '@@#params.opacity' },
+            layout: { visibility: '@@#params.visibility' },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'color_1', default: '#08306b', group: 'legend' },
+        { key: 'color_2', default: '#08519c', group: 'legend' },
+        { key: 'color_3', default: '#2171b5', group: 'legend' },
+        { key: 'opacity', default: 1.0, min: 0, max: 1, step: 0.05 },
+        { key: 'visibility', default: 'visible', options: ['visible', 'none'] },
+      ],
+    }
+    const diags = validate(snapshot, stubRegistry)
+    expect(codesOf(diags)).not.toContain('LEGEND_LAYER_MISMATCH')
+  })
+
+  it('emits COLOR_LITERAL_IN_PAINT when buildColormap stop has a literal color', () => {
+    const snapshot = {
+      config: {
+        sources: [
+          {
+            id: 'imagery',
+            type: 'raster',
+            tiles: [
+              {
+                '@@function': 'buildColormap',
+                stops: [
+                  [0, '#ff0000'],
+                  [100, '@@#params.color_2'],
+                ],
+              },
+            ],
+            legend_config: {
+              type: 'gradient',
+              items: [{ label: 'High', value: '@@#params.color_2' }],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'imagery',
+            type: 'raster',
+            paint: { 'raster-opacity': '@@#params.opacity' },
+            layout: { visibility: '@@#params.visibility' },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'color_2', default: '#2171b5', group: 'legend' },
+        { key: 'opacity', default: 1.0, min: 0, max: 1, step: 0.05 },
+        { key: 'visibility', default: 'visible', options: ['visible', 'none'] },
+      ],
+    }
+    const diags = validate(snapshot, stubRegistry)
+    expect(codesOf(diags)).toContain('COLOR_LITERAL_IN_PAINT')
+  })
+
+  it('detects buildColormap nested deeper in source (source.tiles[0])', () => {
+    const snapshot = {
+      config: {
+        sources: [
+          {
+            id: 'src',
+            type: 'raster',
+            tiles: [
+              {
+                '@@function': 'buildColormap',
+                stops: [
+                  [0, '@@#params.color_low'],
+                  [100, '@@#params.color_high'],
+                ],
+              },
+            ],
+            legend_config: {
+              type: 'gradient',
+              items: [
+                { label: 'Low', value: '@@#params.color_low' },
+                { label: 'High', value: '@@#params.color_high' },
+              ],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'src',
+            type: 'raster',
+            paint: { 'raster-opacity': '@@#params.opacity' },
+            layout: { visibility: '@@#params.visibility' },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'color_low', default: '#08306b', group: 'legend' },
+        { key: 'color_high', default: '#f5f5f5', group: 'legend' },
+        { key: 'opacity', default: 1.0, min: 0, max: 1, step: 0.05 },
+        { key: 'visibility', default: 'visible', options: ['visible', 'none'] },
+      ],
+    }
+    const diags = validate(snapshot, stubRegistry)
+    expect(codesOf(diags)).not.toContain('LEGEND_LAYER_MISMATCH')
+  })
+
+  it('ignores function calls with no colorArgPaths registered', () => {
+    const registryNoColorArgs: ValidatorRegistry = {
+      getFunctionMeta: (name) => (name === 'setQueryParams' ? {} : undefined),
+    }
+    const snapshot = {
+      config: {
+        sources: [
+          {
+            id: 'src',
+            type: 'geojson',
+            legend_config: {
+              type: 'basic',
+              items: [{ label: 'Fill', value: '@@#params.fill_color' }],
+            },
+            // A function call in the source that has no colorArgPaths
+            someField: {
+              '@@function': 'setQueryParams',
+              url: 'https://example.com',
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'src',
+            type: 'fill',
+            paint: {
+              'fill-color': '@@#params.fill_color',
+              'fill-opacity': '@@#params.opacity',
+            },
+            layout: { visibility: '@@#params.visibility' },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'fill_color', default: '#3b82f6', group: 'legend' },
+        { key: 'opacity', default: 0.8, min: 0, max: 1, step: 0.05 },
+        { key: 'visibility', default: 'visible', options: ['visible', 'none'] },
+      ],
+    }
+    const diags = validate(snapshot, registryNoColorArgs)
+    // No false errors from the no-colorArgPaths function
+    expect(codesOf(diags)).not.toContain('LEGEND_LAYER_MISMATCH')
+    expect(codesOf(diags)).not.toContain('COLOR_LITERAL_IN_PAINT')
+  })
+})
