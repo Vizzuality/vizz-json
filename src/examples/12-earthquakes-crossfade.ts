@@ -43,7 +43,6 @@ const config = {
       {
         source: 'earthquakes_heatmap',
         type: 'heatmap',
-        maxzoom: 9,
         paint: {
           'heatmap-weight': [
             'interpolate',
@@ -75,7 +74,15 @@ const config = {
             '@@#params.heatmap_high',
           ],
           'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 6, 9, 30],
-          'heatmap-opacity': '@@#params.earthquakes_heatmap_opacity',
+          'heatmap-opacity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            6,
+            '@@#params.earthquakes_heatmap_opacity',
+            8,
+            0,
+          ],
         },
         layout: {
           visibility: '@@#params.earthquakes_heatmap_visibility',
@@ -84,7 +91,6 @@ const config = {
       {
         source: 'earthquakes_circles',
         type: 'circle',
-        minzoom: 6,
         paint: {
           'circle-radius': [
             'interpolate',
@@ -114,7 +120,15 @@ const config = {
             8,
             0.5,
           ],
-          'circle-opacity': '@@#params.earthquakes_circles_opacity',
+          'circle-opacity': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            6,
+            0,
+            8,
+            '@@#params.earthquakes_circles_opacity',
+          ],
           'circle-stroke-opacity': [
             'interpolate',
             ['linear'],
