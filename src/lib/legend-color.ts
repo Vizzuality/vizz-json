@@ -62,22 +62,35 @@ type MappingShape = {
   readonly labelParamKey?: string
 }
 
+/**
+ * Sentinel magenta — rendered when a color position fails to resolve so the
+ * author sees the broken position visually on the map rather than invisible
+ * 'transparent' fill.
+ */
+export const SENTINEL_COLOR = '#ff00ff'
+
 export function resolveItemColor(
   item: { readonly value: string | number },
   mapping: MappingShape | undefined,
   values: Record<string, unknown> | undefined,
 ): string {
-  if (mapping?.valueParamKey && values !== undefined) {
+  if (mapping?.valueParamKey) {
+    if (values === undefined) return SENTINEL_COLOR
     const resolved = values[mapping.valueParamKey]
     if (typeof resolved === 'string' && isValidCssColor(resolved)) {
       return resolved
     }
-    // If valueParamKey is present but resolved value is not a valid CSS color,
-    // fall through to item.value check (covers missing key case).
+    // valueParamKey present but resolved value is not a valid CSS color → broken position
+    return SENTINEL_COLOR
   }
 
   if (isValidCssColor(item.value)) {
     return item.value as string
+  }
+
+  // item.value is an @@ ref that was never wired up → broken position
+  if (typeof item.value === 'string' && item.value.startsWith('@@')) {
+    return SENTINEL_COLOR
   }
 
   return 'transparent'

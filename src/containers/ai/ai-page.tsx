@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { Monaco } from '@monaco-editor/react'
 import { toast } from 'sonner'
 import { AiLayout } from './ai-layout'
 import type { MainTab } from './ai-layout'
@@ -23,10 +24,21 @@ import { db } from '#/lib/ai/persistence/db'
 import { DEFAULT_MAP_VIEW, initialBasemapForTheme } from '#/lib/ai/types'
 import type { MapView, RendererControls } from '#/lib/ai/types'
 import { isComponentExample } from '#/lib/types'
-import type { MapExample, ResolvedParams } from '#/lib/types'
+import type { MapExample, ResolvedParams, LayerSchema } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
 import { migrateLegendShape } from '#/lib/ai/session/migrate-snapshot'
 import { examples } from '#/examples'
+import { ValidationBanner } from '#/containers/playground/validation-banner'
+import {
+  setValidationMarkers,
+  jumpTo,
+} from '#/containers/playground/monaco-markers'
+import {
+  extractLiteralColors,
+  scaffoldLegendFromLayer,
+} from '#/containers/playground/scaffold-actions'
+
+type IStandaloneCodeEditor = Monaco['editor']['IStandaloneCodeEditor']
 
 const EXAMPLE_CHIPS: readonly { label: string; snapshot: AiSchema }[] = examples
   .filter((e): e is MapExample => !isComponentExample(e))
@@ -46,11 +58,13 @@ export function AiPage() {
   const { chat, messages } = useChat(chatId)
   const [liveView, setLiveView] = useState<MapView>(DEFAULT_MAP_VIEW)
 
+  const editorRef = useRef<IStandaloneCodeEditor | null>(null)
+  const monacoApiRef = useRef<Monaco | null>(null)
+
   useEffect(() => {
     if (chat?.renderer.mapView) setLiveView(chat.renderer.mapView)
   }, [chat?.id, chat?.renderer.mapView])
 
-  // Lazy-create first chat if none exists.
   useEffect(() => {
     if (chatId) return
     const state: { cancelled: boolean } = { cancelled: false }
@@ -88,9 +102,6 @@ export function AiPage() {
     [activeSnapshot],
   )
 
-  // Live param values are derived purely from the snapshot's params_config
-  // defaults. The snapshot is the single source of truth — every user edit
-  // rewrites a default rather than maintaining a sibling values record.
   const paramValues = useMemo<ResolvedParams>(
     () =>
       activeSnapshot ? buildDefaultParams(activeSnapshot.params_config) : {},
@@ -104,6 +115,7 @@ export function AiPage() {
   const resolved =
     pipeline.output.kind === 'map' ? pipeline.output.resolvedConfig : null
   const error = pipeline.output.error
+  const diagnostics = pipeline.diagnostics
 
   const persistSnapshot = useCallback(
     async (messageId: string, next: AiSchema) => {
@@ -173,6 +185,47 @@ export function AiPage() {
     [chatId, messages],
   )
 
+  useEffect(() => {
+    const editorInstance = editorRef.current
+    const monacoApi = monacoApiRef.current
+    if (!editorInstance || !monacoApi) return
+    const model = editorInstance.getModel()
+    if (!model) return
+    setValidationMarkers(
+      editorInstance,
+      monacoApi,
+      model,
+      schemaJson,
+      diagnostics,
+    )
+  }, [diagnostics, schemaJson])
+
+  const handleExtractLiterals = useCallback(() => {
+    const messageId = chat?.activeMessageId
+    if (!messageId || !activeSnapshot) return
+    const next = extractLiteralColors(activeSnapshot as unknown as LayerSchema)
+    handleSnapshotApply(JSON.stringify(next, null, 2))
+  }, [chat?.activeMessageId, activeSnapshot, handleSnapshotApply])
+
+  const handleScaffoldLegend = useCallback(() => {
+    const messageId = chat?.activeMessageId
+    if (!messageId || !activeSnapshot) return
+    const next = scaffoldLegendFromLayer(
+      activeSnapshot as unknown as LayerSchema,
+    )
+    handleSnapshotApply(JSON.stringify(next, null, 2))
+  }, [chat?.activeMessageId, activeSnapshot, handleSnapshotApply])
+
+  const handleJumpTo = useCallback(
+    (path: string) => {
+      setMainTab('json')
+      setTimeout(() => {
+        jumpTo(editorRef.current, schemaJson, path)
+      }, 100)
+    },
+    [schemaJson],
+  )
+
   const renderer = chat?.renderer ?? { renderer: 'maplibre' as const }
 
   return (
@@ -199,7 +252,24 @@ export function AiPage() {
         }
         json={
           <PaneErrorBoundary label="JSON viewer" resetKey={schemaJson}>
-            <JsonViewer json={schemaJson} onApply={handleSnapshotApply} />
+            <JsonViewer
+              json={schemaJson}
+              onApply={handleSnapshotApply}
+              onEditorMount={(editorInstance, monacoApi) => {
+                editorRef.current = editorInstance
+                monacoApiRef.current = monacoApi
+                const model = editorInstance.getModel()
+                if (model) {
+                  setValidationMarkers(
+                    editorInstance,
+                    monacoApi,
+                    model,
+                    schemaJson,
+                    diagnostics,
+                  )
+                }
+              }}
+            />
           </PaneErrorBoundary>
         }
         map={
@@ -246,6 +316,14 @@ export function AiPage() {
               </div>
             )}
           </PaneErrorBoundary>
+        }
+        validationOverlay={
+          <ValidationBanner
+            diagnostics={diagnostics}
+            onJumpTo={handleJumpTo}
+            onExtractLiterals={handleExtractLiterals}
+            onScaffoldLegend={handleScaffoldLegend}
+          />
         }
       />
       <MapConfigDialog

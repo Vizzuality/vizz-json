@@ -1,14 +1,21 @@
 import Editor from '@monaco-editor/react'
+import type { Monaco, OnMount } from '@monaco-editor/react'
 import { useEffect, useState } from 'react'
 import { Button } from '#/components/ui/button'
 import { useResolvedTheme } from '#/hooks/use-resolved-theme'
 
+type IStandaloneCodeEditor = Monaco['editor']['IStandaloneCodeEditor']
+
 type Props = {
   readonly json: string
   readonly onApply?: (next: string) => void
+  readonly onEditorMount?: (
+    editorInstance: IStandaloneCodeEditor,
+    monacoApi: Monaco,
+  ) => void
 }
 
-export function JsonViewer({ json, onApply }: Props) {
+export function JsonViewer({ json, onApply, onEditorMount }: Props) {
   const theme = useResolvedTheme()
   const editable = Boolean(onApply)
   const [draft, setDraft] = useState(json)
@@ -25,6 +32,10 @@ export function JsonViewer({ json, onApply }: Props) {
     } catch (err) {
       parseError = err instanceof Error ? err.message : String(err)
     }
+  }
+
+  const handleMount: OnMount = (editorInstance, monacoApi) => {
+    onEditorMount?.(editorInstance, monacoApi)
   }
 
   return (
@@ -70,6 +81,7 @@ export function JsonViewer({ json, onApply }: Props) {
             fontSize: 12,
             scrollBeyondLastLine: false,
           }}
+          onMount={handleMount}
         />
       </div>
     </div>
