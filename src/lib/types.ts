@@ -6,6 +6,8 @@ export type ParamConfig = {
   readonly step?: number
   readonly options?: readonly string[]
   readonly group?: 'legend'
+  /** Optional source id this param is bound to. Absent = global/shared across sources. */
+  readonly source?: string
 }
 
 export type LegendItem = {
