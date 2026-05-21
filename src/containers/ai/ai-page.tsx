@@ -22,32 +22,22 @@ import { setMessageSnapshot } from '#/lib/ai/persistence/messages'
 import { db } from '#/lib/ai/persistence/db'
 import { DEFAULT_MAP_VIEW, initialBasemapForTheme } from '#/lib/ai/types'
 import type { MapView, RendererControls } from '#/lib/ai/types'
-import type { ResolvedParams } from '#/lib/types'
+import { isComponentExample } from '#/lib/types'
+import type { MapExample, ResolvedParams } from '#/lib/types'
 import type { AiSchema } from '#/lib/ai/persistence/types'
 import { migrateLegendShape } from '#/lib/ai/session/migrate-snapshot'
+import { examples } from '#/examples'
 
-const PROMPT_CHIPS = [
-  {
-    label: 'Sentinel-2 imagery with opacity slider',
-    prompt:
-      'Add Sentinel-2 cloudless satellite imagery as a raster tile layer. Use the WMTS endpoint https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg with tileSize 256. Expose an opacity slider parameter (range 0 to 1, default 1).',
-  },
-  {
-    label: 'Earthquake heatmap from Mapbox sample',
-    prompt:
-      'Render a heatmap of earthquakes. Use a single GeoJSON source pointing to https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson. Add one style layer of type "heatmap" with paint properties: heatmap-weight as ["interpolate", ["linear"], ["get", "mag"], 0, 0, 6, 1]; heatmap-intensity interpolated on ["zoom"]; heatmap-color interpolated on ["heatmap-density"] from transparent through a blue→yellow→red ramp; heatmap-radius interpolated on ["zoom"]; heatmap-opacity bound to an opacity parameter (0–1, default 0.8). Initial camera near zoom 1, centered globally.',
-  },
-  {
-    label: 'US states choropleth by population',
-    prompt:
-      'Build a choropleth of US states using the GeoJSON at https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json. Color the states by the "density" numeric property as a proxy for population, using a graduated color scale, and include a legend.',
-  },
-  {
-    label: 'Vector circles sized by magnitude',
-    prompt:
-      'Render earthquake points as circles. Use a single GeoJSON source pointing to https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson. Add one style layer of type "circle" with paint properties: circle-radius as ["interpolate", ["linear"], ["get", "mag"], 1, 2, 7, 14]; circle-color as ["interpolate", ["linear"], ["get", "mag"], 1, "#2c7bb6", 3, "#abd9e9", 5, "#fdae61", 7, "#d7191c"]; circle-opacity bound to an opacity parameter (0–1, default 0.8); circle-stroke-width 1; circle-stroke-color "#ffffff". Add a gradient legend mapping low→high magnitude.',
-  },
-] as const
+const EXAMPLE_CHIPS: readonly { label: string; snapshot: AiSchema }[] = examples
+  .filter((e): e is MapExample => !isComponentExample(e))
+  .map((e) => ({
+    label: e.metadata.title,
+    snapshot: {
+      metadata: e.metadata,
+      config: e.config as Record<string, unknown>,
+      params_config: e.params_config,
+    },
+  }))
 
 export function AiPage() {
   const [mainTab, setMainTab] = useState<MainTab>('chat')
@@ -198,7 +188,7 @@ export function AiPage() {
                 messages={messages}
                 activeMessageId={chat.activeMessageId}
                 onSelectMessage={handleSelectMessage}
-                promptChips={PROMPT_CHIPS}
+                chips={EXAMPLE_CHIPS}
               />
             ) : (
               <div className="p-3 text-xs text-muted-foreground">

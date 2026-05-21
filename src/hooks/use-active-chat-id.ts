@@ -6,7 +6,7 @@ export function useActiveChatId(): {
   chatId: string | null
   setChatId: (id: string | null) => void
 } {
-  const search = useSearch({ from: '/ai' })
+  const search = useSearch({ from: '/playground' })
   const navigate = useNavigate()
   const chatId = search.chat ?? null
 
@@ -21,7 +21,7 @@ export function useActiveChatId(): {
       const exists = await db.chats.get(row.value)
       if (!exists) return
       void navigate({
-        to: '/ai',
+        to: '/playground',
         search: { chat: row.value },
         replace: true,
       })
@@ -33,7 +33,7 @@ export function useActiveChatId(): {
 
   function setChatId(id: string | null) {
     void navigate({
-      to: '/ai',
+      to: '/playground',
       search: id ? { chat: id } : {},
       replace: false,
     })

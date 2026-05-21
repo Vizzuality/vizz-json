@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Check, ChevronDown, Download, Plus, Upload } from 'lucide-react'
+import { Check, ChevronDown, Plus } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from '#/components/ui/button'
 import {
@@ -11,7 +11,6 @@ import {
 } from '#/components/ui/dropdown-menu'
 import { Input } from '#/components/ui/input'
 import { Skeleton } from '#/components/ui/skeleton'
-import { useProject } from '#/lib/project-context'
 import { db } from '#/lib/ai/persistence/db'
 import {
   createChat,
@@ -22,10 +21,7 @@ import { migrateMessage } from '#/lib/ai/persistence/migrations'
 import { initialBasemapForTheme } from '#/lib/ai/types'
 
 export default function Header() {
-  const { importJson, exportJson } = useProject()
-
   const navigate = useNavigate()
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const activeChat = useLiveQuery(async () => {
     const meta = await db.meta.get('lastActiveChatId')
@@ -84,23 +80,7 @@ export default function Header() {
       basemap: initialBasemapForTheme(),
     })
     await db.meta.put({ key: 'lastActiveChatId', value: fresh.id })
-    void navigate({ to: '/ai', search: { chat: fresh.id } })
-  }
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click()
-  }
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    await importJson(file)
-    e.target.value = ''
-    void navigate({ to: '/playground' })
-  }
-
-  const handleExport = () => {
-    exportJson(activeChat?.title)
+    void navigate({ to: '/playground', search: { chat: fresh.id } })
   }
 
   const isLoadingChat = activeChat === undefined
@@ -190,24 +170,6 @@ export default function Header() {
           <Button onClick={() => void handleNewProject()}>
             <Plus />
             New project
-          </Button>
-
-          <Button onClick={handleImportClick}>
-            <Download />
-            Import
-          </Button>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="application/json"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-
-          <Button onClick={handleExport}>
-            <Upload />
-            Export
           </Button>
         </div>
       </div>

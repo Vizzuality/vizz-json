@@ -3,7 +3,22 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { AiChat } from '#/containers/ai/chat/ai-chat'
 import { db } from '#/lib/ai/persistence/db'
 import { createChat } from '#/lib/ai/persistence/chats'
-import type { Chat, Message } from '#/lib/ai/persistence/types'
+import type { AiSchema, Chat, Message } from '#/lib/ai/persistence/types'
+
+const CHIP_SNAPSHOT: AiSchema = {
+  metadata: { title: 'Sentinel-2', tier: 'basic', description: 'd' },
+  config: {
+    sources: [
+      {
+        id: 'imagery',
+        type: 'raster',
+        tiles: ['https://example.com/{z}/{y}/{x}.jpg'],
+      },
+    ],
+    styles: [{ source: 'imagery', type: 'raster' }],
+  },
+  params_config: [],
+}
 
 const ENVELOPE = {
   metadata: { title: 'Test', tier: 'basic' as const, description: 'd' },
@@ -44,15 +59,13 @@ async function setupChat(): Promise<Chat> {
   return await createChat()
 }
 
-const PROMPT_CHIPS = [
-  { label: 'Show Sentinel-2', prompt: 'Show Sentinel-2 imagery' },
-]
+const CHIPS = [{ label: 'Show Sentinel-2', snapshot: CHIP_SNAPSHOT }]
 
 function makeProps(
   overrides: Partial<{
     chat: Chat
     messages: readonly Message[]
-    promptChips: readonly { label: string; prompt: string }[]
+    chips: readonly { label: string; snapshot: AiSchema }[]
     activeMessageId: string | null
     onSelectMessage: (id: string) => void
   }> = {},
@@ -60,7 +73,7 @@ function makeProps(
   return {
     chat,
     messages: [] as readonly Message[],
-    promptChips: PROMPT_CHIPS,
+    chips: CHIPS,
     activeMessageId: null,
     onSelectMessage: vi.fn(),
     ...overrides,
@@ -122,31 +135,27 @@ describe('AiChat', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
-  it('submits immediately when a prompt chip is clicked', async () => {
-    const fetchSpy = mockFetchOnce(SUCCESS_BODY)
+  it('ingests example snapshot without hitting the AI endpoint', async () => {
+    const fetchSpy = vi.spyOn(global, 'fetch')
     render(<AiChat {...makeProps()} />)
     await flushLiveQuery()
     fireEvent.click(screen.getByText('Show Sentinel-2'))
-    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
-    const [, init] = fetchSpy.mock.calls[0]
-    const body = JSON.parse(init!.body as string)
-    expect(body.messages.at(-1).parts[0].content).toBe(
-      'Show Sentinel-2 imagery',
-    )
+    await waitFor(async () => {
+      const msgs = await db.messages.where('chatId').equals(chat.id).toArray()
+      const assistant = msgs.find((m) => m.role === 'assistant')
+      expect(assistant?.schemaSnapshot?.metadata.title).toBe('Sentinel-2')
+    })
+    expect(fetchSpy).not.toHaveBeenCalled()
   })
 
-  it('replaces the current draft when a chip is clicked', async () => {
-    const fetchSpy = mockFetchOnce(SUCCESS_BODY)
+  it('clears the current draft when a chip is clicked', async () => {
     render(<AiChat {...makeProps()} />)
     await flushLiveQuery()
-    fireEvent.change(screen.getByPlaceholderText(/how would you like/i), {
-      target: { value: 'previous draft' },
-    })
+    const textarea = screen.getByPlaceholderText(/how would you like/i)
+    fireEvent.change(textarea, { target: { value: 'previous draft' } })
     fireEvent.click(screen.getByText('Show Sentinel-2'))
-    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1))
-    const body = JSON.parse(fetchSpy.mock.calls[0][1]!.body as string)
-    expect(body.messages.at(-1).parts[0].content).toBe(
-      'Show Sentinel-2 imagery',
+    await waitFor(() =>
+      expect((textarea as HTMLTextAreaElement).value).toBe(''),
     )
   })
 

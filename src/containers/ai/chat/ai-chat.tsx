@@ -4,12 +4,12 @@ import { Button } from '#/components/ui/button'
 import { Textarea } from '#/components/ui/textarea'
 import { useAiSession, parsePastedSnapshot } from '#/lib/ai/session'
 import { cn } from '#/lib/utils'
-import type { Chat, Message } from '#/lib/ai/persistence/types'
+import type { AiSchema, Chat, Message } from '#/lib/ai/persistence/types'
 
 type Props = {
   readonly chat: Chat
   readonly messages: readonly Message[]
-  readonly promptChips: readonly { label: string; prompt: string }[]
+  readonly chips: readonly { label: string; snapshot: AiSchema }[]
   readonly activeMessageId: string | null
   readonly onSelectMessage: (id: string) => void
 }
@@ -19,7 +19,7 @@ type InputStatus = 'empty' | 'has-message' | 'stop'
 export function AiChat({
   chat,
   messages,
-  promptChips,
+  chips,
   activeMessageId,
   onSelectMessage,
 }: Props) {
@@ -83,15 +83,19 @@ export function AiChat({
           ref={scrollRef}
           className="absolute inset-0 flex flex-col gap-1 overflow-y-auto px-4 pt-4 pb-10"
         >
-          {!hasAssistant && promptChips.length > 0 && (
+          {!hasAssistant && chips.length > 0 && (
             <div className="flex flex-col gap-[9px] pb-2">
-              <p className="text-xs text-muted">Try asking:</p>
+              <p className="text-xs text-muted">Load an example:</p>
               <div className="flex flex-col items-start gap-[9px]">
-                {promptChips.map((chip) => (
+                {chips.map((chip) => (
                   <Button
                     key={chip.label}
                     variant="chip"
-                    onClick={() => submit(chip.prompt)}
+                    onClick={() => {
+                      setDraft('')
+                      scrollToBottom()
+                      void session.ingest(chip.snapshot, chip.label)
+                    }}
                     disabled={session.isLoading}
                   >
                     <Bot className="text-accent" />
