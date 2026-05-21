@@ -68,15 +68,26 @@ function paramValuesAddendum(
 ): string | null {
   if (!paramValues || Object.keys(paramValues).length === 0) return null
   const json = JSON.stringify(paramValues, null, 2)
-  return `Current user parameter values (live state of the previous envelope after any user edits):\n${json}\n\nWhen you produce the next envelope, treat these values as the ground truth for every parameter key the user has not explicitly asked you to change. For every "parameterize" entry whose "key" appears above and whose role you intend to KEEP, set "default" to the value shown here verbatim — do NOT pick a fresh colour or number, and do NOT regenerate the key name. Only emit a different "default" when the user explicitly asked you to change that specific parameter (e.g. "make the highest band red"). Param keys absent from this object are new and start fresh.`
+  return `Current user parameter values (live state of the previous envelope after any user edits):\n${json}\n\nWhen you produce the next envelope, treat these values as the ground truth for every parameter key the user has not explicitly asked you to change. For every "parameterize" entry whose "key" appears above and whose role you intend to KEEP, set "default" to the value shown here verbatim — do NOT pick a fresh colour or number, and do NOT regenerate the key name. Only emit a different "default" when the user explicitly asked you to change that specific parameter (e.g. "make the highest band red", "use a viridis ramp", "make it bigger"). Param keys absent from this object are new and start fresh.`
+}
+
+function currentSnapshotAddendum(
+  snapshot: Readonly<Record<string, unknown>> | undefined,
+): string | null {
+  if (!snapshot) return null
+  const json = JSON.stringify(snapshot, null, 2)
+  return `Current envelope (the snapshot the user is editing right now — already post-processed: every @@#params.<key> placeholder in "config" was substituted from a "parameterize" entry whose default lives in "params_config"):\n${json}\n\nGround rules for the next envelope:\n- REUSE the same param keys whenever the role is unchanged. Do NOT rename "low_income_color" to "color_1" — reconciliation matches by key.\n- When the user asks to change a visual ramp (colours, sizes, opacities), KEEP the param keys, KEEP the legend item order, and emit NEW "default" values on the matching "parameterize" entries. The new defaults must also appear as literals at the corresponding paths inside "style".\n- When the user asks to change ONLY a subset of bands ("make low income purple"), change only those defaults and leave the rest at their current values.\n- Preserve "sources[].legend_config.items" order and labels unless the user explicitly asked to reorder/relabel them.\n- The current "config" shows you the structure (match arrays, step expressions, paint paths). Use it to compute correct "parameterize[].path" indices for the next envelope.\n- If you keep a paint expression structurally identical and only swap colours, you can copy the path layout 1:1 — only the literal values at the colour slots change.`
 }
 
 type SystemPromptOpts = RendererControls & {
   readonly paramValues?: Readonly<Record<string, unknown>>
+  readonly currentSnapshot?: Readonly<Record<string, unknown>>
 }
 
 export function buildSystemPrompts(opts: SystemPromptOpts): readonly string[] {
   const parts: string[] = [STATIC_PROMPT, rendererAddendum(opts)]
+  const snapshotAddendum = currentSnapshotAddendum(opts.currentSnapshot)
+  if (snapshotAddendum) parts.push(snapshotAddendum)
   const paramAddendum = paramValuesAddendum(opts.paramValues)
   if (paramAddendum) parts.push(paramAddendum)
   return parts

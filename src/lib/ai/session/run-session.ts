@@ -44,6 +44,7 @@ export async function runAiSession(
       mapboxToken: chat.renderer.mapboxToken,
       mapboxStyleUrl: chat.renderer.mapboxStyleUrl,
       paramValues: currentParamValues,
+      currentSnapshot: activeSnapshot ?? undefined,
     }
 
     const res = await fetch('/api/ai-generate', {

@@ -62,13 +62,20 @@ export const Route = createFileRoute('/api/ai-generate')({
     handlers: {
       POST: async ({ request }) => {
         const body = await request.json()
-        const { messages, renderer, mapboxToken, mapboxStyleUrl, paramValues } =
-          aiGenerateInputSchema.parse(body)
+        const {
+          messages,
+          renderer,
+          mapboxToken,
+          mapboxStyleUrl,
+          paramValues,
+          currentSnapshot,
+        } = aiGenerateInputSchema.parse(body)
 
         const systemPrompts = buildSystemPrompts({
           renderer,
           mapboxStyleUrl,
           paramValues,
+          currentSnapshot,
           // mapboxToken intentionally omitted from system prompts
         })
 
@@ -80,7 +87,7 @@ export const Route = createFileRoute('/api/ai-generate')({
           const modelMessages = convertMessagesToModelMessages(conversation)
 
           const text = (await chat({
-            adapter: openaiText('gpt-5.2-pro'),
+            adapter: openaiText('gpt-5.2'),
             messages: modelMessages as never,
             systemPrompts: [...systemPrompts],
             tools: [fetchTileJsonTool],
