@@ -57,11 +57,11 @@ const config = {
     ],
   },
   params_config: [
-    { key: 'high_oecd_color', default: '#2563eb', group: 'legend' },
-    { key: 'high_non_oecd_color', default: '#60a5fa', group: 'legend' },
-    { key: 'upper_middle_color', default: '#fbbf24', group: 'legend' },
-    { key: 'lower_middle_color', default: '#f97316', group: 'legend' },
-    { key: 'low_income_color', default: '#dc2626', group: 'legend' },
+    { key: 'high_oecd_color', default: '#fde725', group: 'legend' },
+    { key: 'high_non_oecd_color', default: '#5ec962', group: 'legend' },
+    { key: 'upper_middle_color', default: '#21918c', group: 'legend' },
+    { key: 'lower_middle_color', default: '#3b528b', group: 'legend' },
+    { key: 'low_income_color', default: '#440154', group: 'legend' },
     { key: 'default_color', default: '#6b7280', group: 'legend' },
     { key: 'opacity', default: 0.8, min: 0, max: 1, step: 0.05 },
     {
