@@ -302,3 +302,137 @@ describe('VISIBILITY_NOT_WIRED', () => {
     expect(codesOf(diags)).not.toContain('VISIBILITY_NOT_WIRED')
   })
 })
+
+// ── Nested expression ref detection (Gap 1) ───────────────────────────
+
+describe('OPACITY_NOT_WIRED — nested expression refs', () => {
+  it('does not emit when opacity ref is nested inside an interpolate expression', () => {
+    // Pattern from example 12: heatmap-opacity is a zoom-interpolate with a
+    // param ref nested at the output position, not a top-level string.
+    const snapshot = {
+      config: {
+        sources: [
+          {
+            id: 'src',
+            type: 'geojson',
+            legend_config: {
+              type: 'gradient',
+              items: [{ label: 'x', value: '@@#params.fill_color' }],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'src',
+            type: 'heatmap',
+            paint: {
+              'heatmap-color': '@@#params.fill_color',
+              'heatmap-opacity': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                5,
+                '@@#params.opacity',
+                9,
+                0,
+              ],
+            },
+            layout: { visibility: '@@#params.visibility' },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'fill_color', default: '#3b82f6', group: 'legend' },
+        { key: 'opacity', default: 0.9, min: 0, max: 1, step: 0.05 },
+        { key: 'visibility', default: 'visible', options: ['visible', 'none'] },
+      ],
+    }
+    const diags = validate(snapshot, stubRegistry)
+    expect(codesOf(diags)).not.toContain('OPACITY_NOT_WIRED')
+  })
+
+  it('still emits OPACITY_NOT_WIRED when no ref exists anywhere (plain literal value)', () => {
+    const snapshot = {
+      config: {
+        sources: [
+          {
+            id: 'src',
+            type: 'geojson',
+            legend_config: {
+              type: 'gradient',
+              items: [{ label: 'x', value: '@@#params.fill_color' }],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'src',
+            type: 'heatmap',
+            paint: {
+              'heatmap-color': '@@#params.fill_color',
+              // heatmap-opacity is a literal number — no param ref
+              'heatmap-opacity': 0.8,
+            },
+            layout: { visibility: '@@#params.visibility' },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'fill_color', default: '#3b82f6', group: 'legend' },
+        { key: 'opacity', default: 0.9, min: 0, max: 1, step: 0.05 },
+        { key: 'visibility', default: 'visible', options: ['visible', 'none'] },
+      ],
+    }
+    const diags = validate(snapshot, stubRegistry)
+    expect(codesOf(diags)).toContain('OPACITY_NOT_WIRED')
+  })
+
+  it('still works for plain top-level ref (regression guard)', () => {
+    const diags = validate(validSingleSource, stubRegistry)
+    expect(codesOf(diags)).not.toContain('OPACITY_NOT_WIRED')
+  })
+})
+
+describe('VISIBILITY_NOT_WIRED — nested expression refs', () => {
+  it('does not emit when visibility ref is nested inside a case expression', () => {
+    const snapshot = {
+      config: {
+        sources: [
+          {
+            id: 'src',
+            type: 'geojson',
+            legend_config: {
+              type: 'basic',
+              items: [{ label: 'x', value: '@@#params.fill_color' }],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'src',
+            type: 'fill',
+            paint: {
+              'fill-color': '@@#params.fill_color',
+              'fill-opacity': '@@#params.opacity',
+            },
+            layout: {
+              visibility: [
+                'case',
+                ['get', 'active'],
+                '@@#params.visibility',
+                'none',
+              ],
+            },
+          },
+        ],
+      },
+      params_config: [
+        { key: 'fill_color', default: '#3b82f6', group: 'legend' },
+        { key: 'opacity', default: 0.8, min: 0, max: 1, step: 0.05 },
+        { key: 'visibility', default: 'visible', options: ['visible', 'none'] },
+      ],
+    }
+    const diags = validate(snapshot, stubRegistry)
+    expect(codesOf(diags)).not.toContain('VISIBILITY_NOT_WIRED')
+  })
+})

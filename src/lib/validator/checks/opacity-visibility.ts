@@ -9,6 +9,22 @@ function paramRefKey(value: unknown): string | undefined {
 }
 
 /**
+ * Recursively collect all @@#params.X keys from a value.
+ * Handles nested MapLibre expressions (arrays) so refs in interpolate/step/case
+ * are not missed.
+ */
+function collectParamRefsDeep(value: unknown): string[] {
+  if (typeof value === 'string') {
+    const key = paramRefKey(value)
+    return key ? [key] : []
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(collectParamRefsDeep)
+  }
+  return []
+}
+
+/**
  * For single-source snapshots: require exact key 'opacity' / 'visibility'.
  * For multi-source snapshots: for each source S, require ONE ParamConfig with
  * source === S.id and a key matching opacity/visibility by suffix or exact name.
@@ -68,17 +84,17 @@ function collectStyleRefs(
     const paint = style.paint as Record<string, unknown> | undefined
     if (paint) {
       for (const prop of OPACITY_PAINT_PROPS) {
-        const val = paint[prop]
-        const key = paramRefKey(val)
-        if (key) opacityPropRefs.add(key)
+        for (const key of collectParamRefsDeep(paint[prop])) {
+          opacityPropRefs.add(key)
+        }
       }
     }
 
     const layout = style.layout as Record<string, unknown> | undefined
     if (layout) {
-      const visVal = layout.visibility
-      const key = paramRefKey(visVal)
-      if (key) layoutVisibilityRefs.add(key)
+      for (const key of collectParamRefsDeep(layout.visibility)) {
+        layoutVisibilityRefs.add(key)
+      }
     }
   }
 
