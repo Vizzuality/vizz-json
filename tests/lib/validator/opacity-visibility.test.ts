@@ -292,9 +292,9 @@ describe('VISIBILITY_NOT_WIRED', () => {
       ],
     }
     const diags = validate(snapshot, stubRegistry)
-    const d = diags.find((d) => d.code === 'VISIBILITY_NOT_WIRED')
-    expect(d).toBeDefined()
-    expect(d!.severity).toBe('error')
+    const found = diags.find((diag) => diag.code === 'VISIBILITY_NOT_WIRED')
+    expect(found).toBeDefined()
+    expect(found!.severity).toBe('error')
   })
 
   it('does not emit when visibility is properly wired', () => {

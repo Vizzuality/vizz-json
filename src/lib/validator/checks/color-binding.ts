@@ -283,8 +283,7 @@ function checkSourceColorBinding(
 
   const sourceStyles = styles.filter((s) => s.source === sourceId)
 
-  for (let si = 0; si < sourceStyles.length; si++) {
-    const style = sourceStyles[si]
+  for (const style of sourceStyles) {
     const styleIndex = styles.indexOf(style)
     const paint = style.paint as Record<string, unknown> | undefined
     if (!paint) continue
