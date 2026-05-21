@@ -25,7 +25,10 @@ import type { RendererId } from '#/lib/ai/types'
 import { getFunctionMeta } from '#/lib/converter'
 import { validateAndRetry } from '#/lib/ai/validate-and-retry'
 
-const MAX_VALIDATION_RETRIES = 2
+// Total schema-validation attempts (initial + retries) for JSON/envelope-schema/
+// style failures inside the main loop below. Distinct from the color-binding
+// retry, which is handled separately by `validateAndRetry()` (1 retry budget).
+const MAX_SCHEMA_ATTEMPTS = 3
 
 function stripCodeFences(text: string): string {
   const trimmed = text.trim()
@@ -94,7 +97,7 @@ export const Route = createFileRoute('/api/ai-generate')({
           typeof aiResponseSchema.safeParse
         > | null = null
 
-        for (let attempt = 0; attempt <= MAX_VALIDATION_RETRIES; attempt++) {
+        for (let attempt = 0; attempt < MAX_SCHEMA_ATTEMPTS; attempt++) {
           const modelMessages = convertMessagesToModelMessages(conversation)
 
           const text = (await chat({

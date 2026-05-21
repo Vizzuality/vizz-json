@@ -194,8 +194,11 @@ export function LayerCard({
   )
 }
 
-/** Returns true if a style contributes any visible UI content.
- * Every style has at least a visibility switch, so this is always true. */
+/** Returns true if a style contributes any visible UI content in the card body.
+ * Visibility is now driven exclusively by the header switch, so the body has
+ * no per-style mandatory control — but every style still renders a row (label,
+ * opacity slider, group params), so this stays true and is kept as a hook
+ * for future "hide empty styles" filtering. */
 function hasAnyContent(
   _style: LayerGroupStyle,
   _legendParamKeys: Set<string>,

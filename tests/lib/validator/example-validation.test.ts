@@ -25,6 +25,10 @@ const examples = [
   { name: '06-data-driven-circles', mod: example06 },
   { name: '07-raster-function', mod: example07 },
   { name: '09-conditional-case', mod: example09 },
+  // 10-react-components is a ComponentExample — no `config.sources`. The
+  // validator walks sources; with none present, every check is a no-op and
+  // diagnostics are trivially zero. Kept in this suite so future regressions
+  // (e.g. a check that crashes on the ComponentExample shape) get caught.
   { name: '10-react-components', mod: example10 },
   { name: '11-multi-source-heatmap', mod: example11 },
   { name: '12-earthquakes-crossfade', mod: example12 },
