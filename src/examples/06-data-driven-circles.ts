@@ -4,7 +4,7 @@ const config = {
   metadata: {
     title: 'Multi-Layer — Zoom Crossfade',
     description:
-      'Heatmap at low zoom crossfades to magnitude-scaled circles — transition range is fully controllable',
+      'Heatmap at low zoom crossfades to magnitude-scaled circles — two styles share one source',
     tier: 'intermediate',
   },
   config: {
@@ -16,8 +16,12 @@ const config = {
         legend_config: {
           type: 'gradient',
           items: [
-            { label: 'Low magnitude', value: '@@#params.color_low' },
-            { label: 'High magnitude', value: '@@#params.color_high' },
+            { label: '', value: '@@#params.color_bg' },
+            { label: 'Low', value: '@@#params.color_low' },
+            { label: '', value: '@@#params.color_mid1' },
+            { label: '', value: '@@#params.color_mid2' },
+            { label: '', value: '@@#params.color_mid3' },
+            { label: 'High', value: '@@#params.color_high' },
           ],
         },
       },
@@ -50,15 +54,15 @@ const config = {
             ['linear'],
             ['heatmap-density'],
             0,
-            'rgba(0, 0, 0, 0)',
+            '@@#params.color_bg',
             0.2,
             '@@#params.color_low',
             0.4,
-            '#abd9e9',
+            '@@#params.color_mid1',
             0.6,
-            '#ffffbf',
+            '@@#params.color_mid2',
             0.8,
-            '#fdae61',
+            '@@#params.color_mid3',
             1.0,
             '@@#params.color_high',
           ],
@@ -73,10 +77,14 @@ const config = {
             0,
           ],
         },
+        layout: {
+          visibility: '@@#params.visibility',
+        },
       },
       {
         source: 'earthquakes',
         type: 'circle',
+        minzoom: 5,
         paint: {
           'circle-radius': [
             'interpolate',
@@ -98,9 +106,9 @@ const config = {
             1,
             '@@#params.color_low',
             3,
-            '#abd9e9',
+            '@@#params.color_mid1',
             5,
-            '#fdae61',
+            '@@#params.color_mid3',
             7,
             '@@#params.color_high',
           ],
@@ -113,25 +121,37 @@ const config = {
             '@@#params.transition_end',
             '@@#params.opacity',
           ],
-          'circle-stroke-width': 1,
-          'circle-stroke-opacity': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            '@@#params.transition_start',
-            0,
-            '@@#params.transition_end',
-            1,
-          ],
-          'circle-stroke-color': '#ffffff',
+        },
+        layout: {
+          visibility: '@@#params.visibility',
         },
       },
     ],
   },
   params_config: [
     {
+      key: 'color_bg',
+      default: 'rgba(0,0,0,0)',
+      group: 'legend' as const,
+    },
+    {
       key: 'color_low',
       default: '#2c7bb6',
+      group: 'legend' as const,
+    },
+    {
+      key: 'color_mid1',
+      default: '#abd9e9',
+      group: 'legend' as const,
+    },
+    {
+      key: 'color_mid2',
+      default: '#ffffbf',
+      group: 'legend' as const,
+    },
+    {
+      key: 'color_mid3',
+      default: '#fdae61',
       group: 'legend' as const,
     },
     {
@@ -166,6 +186,11 @@ const config = {
       min: 0,
       max: 1,
       step: 0.05,
+    },
+    {
+      key: 'visibility',
+      default: 'visible',
+      options: ['visible', 'none'],
     },
   ],
 } satisfies ExampleConfig

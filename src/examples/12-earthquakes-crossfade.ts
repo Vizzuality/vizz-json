@@ -19,6 +19,7 @@ const config = {
         legend_config: {
           type: 'gradient',
           items: [
+            { label: '', value: '@@#params.heatmap_bg' },
             { label: 'Sparse', value: '@@#params.heatmap_low' },
             { label: 'Dense', value: '@@#params.heatmap_high' },
           ],
@@ -33,6 +34,7 @@ const config = {
           items: [
             { label: 'Mag 2', value: '@@#params.circle_color_low' },
             { label: 'Mag 7', value: '@@#params.circle_color_high' },
+            { label: 'Stroke', value: '@@#params.circles_stroke_color' },
           ],
         },
       },
@@ -65,7 +67,7 @@ const config = {
             ['linear'],
             ['heatmap-density'],
             0,
-            'rgba(0,0,0,0)',
+            '@@#params.heatmap_bg',
             0.2,
             '@@#params.heatmap_low',
             1.0,
@@ -77,10 +79,13 @@ const config = {
             ['linear'],
             ['zoom'],
             6,
-            '@@#params.heatmap_opacity',
+            '@@#params.earthquakes_heatmap_opacity',
             8,
             0,
           ],
+        },
+        layout: {
+          visibility: '@@#params.earthquakes_heatmap_visibility',
         },
       },
       {
@@ -105,7 +110,7 @@ const config = {
             7,
             '@@#params.circle_color_high',
           ],
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-color': '@@#params.circles_stroke_color',
           'circle-stroke-width': [
             'interpolate',
             ['linear'],
@@ -122,7 +127,7 @@ const config = {
             6,
             0,
             8,
-            '@@#params.circle_opacity',
+            '@@#params.earthquakes_circles_opacity',
           ],
           'circle-stroke-opacity': [
             'interpolate',
@@ -134,27 +139,46 @@ const config = {
             1,
           ],
         },
+        layout: {
+          visibility: '@@#params.earthquakes_circles_visibility',
+        },
       },
     ],
   },
   params_config: [
+    { key: 'heatmap_bg', default: 'rgba(0,0,0,0)', group: 'legend' },
     { key: 'heatmap_low', default: '#2c7bb6', group: 'legend' },
     { key: 'heatmap_high', default: '#d7191c', group: 'legend' },
     {
-      key: 'heatmap_opacity',
+      key: 'earthquakes_heatmap_opacity',
+      source: 'earthquakes_heatmap',
       default: 0.9,
       min: 0,
       max: 1,
       step: 0.05,
     },
+    {
+      key: 'earthquakes_heatmap_visibility',
+      source: 'earthquakes_heatmap',
+      default: 'visible',
+      options: ['visible', 'none'],
+    },
     { key: 'circle_color_low', default: '#fee08b', group: 'legend' },
     { key: 'circle_color_high', default: '#7a0177', group: 'legend' },
+    { key: 'circles_stroke_color', default: '#ffffff', group: 'legend' },
     {
-      key: 'circle_opacity',
+      key: 'earthquakes_circles_opacity',
+      source: 'earthquakes_circles',
       default: 0.85,
       min: 0,
       max: 1,
       step: 0.05,
+    },
+    {
+      key: 'earthquakes_circles_visibility',
+      source: 'earthquakes_circles',
+      default: 'visible',
+      options: ['visible', 'none'],
     },
   ],
 } satisfies ExampleConfig

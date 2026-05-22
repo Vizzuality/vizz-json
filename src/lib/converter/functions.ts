@@ -47,3 +47,21 @@ export const registeredFunctions: Readonly<
   ifParam,
   buildColormap,
 }
+
+// ── Function metadata ──────────────────────────────────────────────
+
+export type FunctionMeta = {
+  /** jsonpath-like expressions identifying color-typed arg positions. Supports `[*]` and `[N]` wildcards. */
+  readonly colorArgPaths?: readonly string[]
+}
+
+const functionMetaMap: Readonly<Record<string, FunctionMeta>> = {
+  buildColormap: { colorArgPaths: ['stops[*][1]'] },
+}
+
+/**
+ * Returns metadata for a registered function, or `undefined` if none was declared.
+ */
+export function getFunctionMeta(name: string): FunctionMeta | undefined {
+  return functionMetaMap[name]
+}

@@ -5,7 +5,8 @@ import type { ResolvedParams } from '../types'
 
 export { resolveParams } from './params-resolver'
 export { createConverter } from './converter-config'
-export { registeredFunctions } from './functions'
+export { registeredFunctions, getFunctionMeta } from './functions'
+export type { FunctionMeta } from './functions'
 export { buildLayerItems } from './build-layer-items'
 export type { BuiltLayerItem, BuildLayerItemsInput } from './build-layer-items'
 

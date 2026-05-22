@@ -1,4 +1,5 @@
 import rasterOpacity from '#/examples/01-raster-opacity'
+import choroplethMatch from '#/examples/03-choropleth-match'
 import graduated from '#/examples/04-graduated-interpolate'
 import dataDriven from '#/examples/06-data-driven-circles'
 import multiSource from '#/examples/11-multi-source-heatmap'
@@ -113,6 +114,11 @@ function toFewShot(example: LayerSchemaExample): FewShotExample {
 
 export const FEW_SHOT_EXAMPLES = [
   toFewShot(rasterOpacity as LayerSchemaExample),
+  // Canonical `match` example: every paint output slot AND the trailing default
+  // are @@#params.X refs, and `legend_config.items` mirrors the same keys.
+  // Without this, the model tends to parameterize only the legend and leave
+  // paint outputs as hex literals (broken-match shape).
+  toFewShot(choroplethMatch as LayerSchemaExample),
   toFewShot(graduated as LayerSchemaExample),
   toFewShot(dataDriven as LayerSchemaExample),
   toFewShot(multiSource as LayerSchemaExample),

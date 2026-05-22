@@ -15,7 +15,10 @@ const config = {
         data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
         legend_config: {
           type: 'basic',
-          items: [{ label: 'Country fill', value: '@@#params.fill_color' }],
+          items: [
+            { label: 'Country fill', value: '@@#params.fill_color' },
+            { label: 'Outline', value: '@@#params.countries_outline_color' },
+          ],
         },
       },
       {
@@ -25,7 +28,9 @@ const config = {
         legend_config: {
           type: 'gradient',
           items: [
+            { label: '', value: '@@#params.heatmap_color_bg' },
             { label: 'Heatmap low', value: '@@#params.heatmap_color_low' },
+            { label: 'Heatmap mid', value: '@@#params.heatmap_color_mid' },
             { label: 'Heatmap high', value: '@@#params.heatmap_color_high' },
           ],
         },
@@ -37,8 +42,11 @@ const config = {
         type: 'fill',
         paint: {
           'fill-color': '@@#params.fill_color',
-          'fill-opacity': '@@#params.fill_opacity',
-          'fill-outline-color': '#ffffff',
+          'fill-opacity': '@@#params.countries_opacity',
+          'fill-outline-color': '@@#params.countries_outline_color',
+        },
+        layout: {
+          visibility: '@@#params.countries_visibility',
         },
       },
       {
@@ -60,7 +68,7 @@ const config = {
             ['linear'],
             ['heatmap-density'],
             0,
-            'rgba(0,0,0,0)',
+            '@@#params.heatmap_color_bg',
             0.2,
             '@@#params.heatmap_color_low',
             0.6,
@@ -69,29 +77,48 @@ const config = {
             '@@#params.heatmap_color_high',
           ],
           'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 8, 6, 30],
-          'heatmap-opacity': '@@#params.heatmap_opacity',
+          'heatmap-opacity': '@@#params.capitals_opacity',
+        },
+        layout: {
+          visibility: '@@#params.capitals_visibility',
         },
       },
     ],
   },
   params_config: [
     { key: 'fill_color', default: '#dbeafe', group: 'legend' },
+    { key: 'countries_outline_color', default: '#ffffff', group: 'legend' },
     {
-      key: 'fill_opacity',
+      key: 'countries_opacity',
+      source: 'countries',
       default: 0.6,
       min: 0,
       max: 1,
       step: 0.05,
     },
+    {
+      key: 'countries_visibility',
+      source: 'countries',
+      default: 'visible',
+      options: ['visible', 'none'],
+    },
+    { key: 'heatmap_color_bg', default: 'rgba(0,0,0,0)', group: 'legend' },
     { key: 'heatmap_color_low', default: '#2c7bb6', group: 'legend' },
     { key: 'heatmap_color_mid', default: '#fdae61', group: 'legend' },
     { key: 'heatmap_color_high', default: '#d7191c', group: 'legend' },
     {
-      key: 'heatmap_opacity',
+      key: 'capitals_opacity',
+      source: 'capitals',
       default: 0.85,
       min: 0,
       max: 1,
       step: 0.05,
+    },
+    {
+      key: 'capitals_visibility',
+      source: 'capitals',
+      default: 'visible',
+      options: ['visible', 'none'],
     },
   ],
 } satisfies ExampleConfig

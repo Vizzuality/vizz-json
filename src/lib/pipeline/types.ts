@@ -3,6 +3,7 @@ import type {
   ItemParamMapping,
   RawLegendConfig,
 } from '#/lib/legend-param-mapping'
+import type { Diagnostic } from '#/lib/validator'
 
 export type PipelineOutput =
   | {
@@ -32,4 +33,6 @@ export type PipelineResult = {
   readonly previewMode: 'map' | 'components'
   readonly output: PipelineOutput
   readonly parsedConfig: Readonly<Record<string, unknown>> | null
+  /** Validator diagnostics for the current snapshot. Empty array when no issues. */
+  readonly diagnostics: readonly Diagnostic[]
 }
