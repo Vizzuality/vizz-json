@@ -69,7 +69,7 @@ export function GradientEditorInline({
   }, [state.stops, state.isDirty, sourceId])
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col">
       <InteractiveGradientBar
         stops={state.stops}
         selectedStopId={state.selectedStopId}
