@@ -13,6 +13,13 @@ const config = {
         id: 'earthquakes',
         type: 'geojson',
         data: 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson',
+        legend_config: {
+          type: 'gradient',
+          items: [
+            { label: 'Low magnitude', value: '@@#params.color_low' },
+            { label: 'High magnitude', value: '@@#params.color_high' },
+          ],
+        },
       },
     ],
     styles: [
@@ -45,7 +52,7 @@ const config = {
             0,
             'rgba(0, 0, 0, 0)',
             0.2,
-            '#2c7bb6',
+            '@@#params.color_low',
             0.4,
             '#abd9e9',
             0.6,
@@ -53,7 +60,7 @@ const config = {
             0.8,
             '#fdae61',
             1.0,
-            '#d7191c',
+            '@@#params.color_high',
           ],
           'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
           'heatmap-opacity': [
@@ -89,13 +96,13 @@ const config = {
             ['linear'],
             ['get', 'mag'],
             1,
-            '#2c7bb6',
+            '@@#params.color_low',
             3,
             '#abd9e9',
             5,
             '#fdae61',
             7,
-            '#d7191c',
+            '@@#params.color_high',
           ],
           'circle-opacity': [
             'interpolate',
@@ -122,6 +129,16 @@ const config = {
     ],
   },
   params_config: [
+    {
+      key: 'color_low',
+      default: '#2c7bb6',
+      group: 'legend' as const,
+    },
+    {
+      key: 'color_high',
+      default: '#d7191c',
+      group: 'legend' as const,
+    },
     {
       key: 'transition_start',
       default: 5,
@@ -151,13 +168,6 @@ const config = {
       step: 0.05,
     },
   ],
-  legend_config: {
-    type: 'gradient',
-    items: [
-      { label: 'Low magnitude', value: '#2c7bb6' },
-      { label: 'High magnitude', value: '#d7191c' },
-    ],
-  },
 } satisfies ExampleConfig
 
 export default config

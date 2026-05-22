@@ -11,7 +11,7 @@ const sampleMessage: Message = {
   role: 'user',
   text: 'hi',
   createdAt: 0,
-  schemaVersion: 1,
+  schemaVersion: 2,
 }
 
 describe('shouldRenameOnFirstUserMessage', () => {

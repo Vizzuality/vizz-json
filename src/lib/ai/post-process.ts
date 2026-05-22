@@ -1,14 +1,8 @@
 import type { AiOutput, ParameterizeEntry } from './output-schema'
-import type {
-  LayerSchema,
-  ParamConfig,
-  ExampleMetadata,
-  LegendConfig,
-} from '#/lib/types'
+import type { LayerSchema, ParamConfig, ExampleMetadata } from '#/lib/types'
 
 type PostProcessed = LayerSchema & {
   readonly metadata: ExampleMetadata
-  readonly legend_config?: LegendConfig
 }
 
 function tokenize(path: string): readonly (string | number)[] {
@@ -78,6 +72,5 @@ export function postProcess(output: AiOutput): PostProcessed {
     metadata: output.metadata,
     config,
     params_config,
-    ...(output.legend_config && { legend_config: output.legend_config }),
   }
 }

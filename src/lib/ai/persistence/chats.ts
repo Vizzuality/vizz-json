@@ -1,23 +1,23 @@
 import { db } from './db'
 import { migrateChat } from './migrations'
 import type { Chat } from './types'
-import type { ResolvedParams } from '#/lib/types'
 import type { RendererControls } from '#/lib/ai/types'
 
 function uuid(): string {
   return crypto.randomUUID()
 }
 
-export async function createChat(): Promise<Chat> {
+export async function createChat(
+  renderer: RendererControls = { renderer: 'maplibre' },
+): Promise<Chat> {
   const now = Date.now()
   const chat: Chat = {
     id: uuid(),
     title: 'New chat',
     createdAt: now,
     updatedAt: now,
-    schemaVersion: 1,
-    renderer: { renderer: 'maplibre' },
-    activeParamValues: {},
+    schemaVersion: 2,
+    renderer,
     activeMessageId: null,
   }
   await db.chats.add(chat)
@@ -50,13 +50,6 @@ export async function setRenderer(
   renderer: RendererControls,
 ): Promise<void> {
   await db.chats.update(id, { renderer, updatedAt: Date.now() })
-}
-
-export async function setParamValues(
-  id: string,
-  activeParamValues: ResolvedParams,
-): Promise<void> {
-  await db.chats.update(id, { activeParamValues, updatedAt: Date.now() })
 }
 
 export async function setActiveMessage(

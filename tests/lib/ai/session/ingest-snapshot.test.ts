@@ -52,7 +52,10 @@ describe('ingestSnapshot', () => {
     expect(rows[1].role).toBe('assistant')
     expect(rows[1].text).toBe('Imported pasted JSON.')
     expect(rows[1].schemaSnapshot?.metadata.title).toBe('Pasted Heatmap')
-    expect(rows[1].paramValues?.opacity).toBe(0.5)
+    expect(
+      rows[1].schemaSnapshot?.params_config.find((p) => p.key === 'opacity')
+        ?.default,
+    ).toBe(0.5)
   })
 
   it('renames the chat to snapshot title on first user message', async () => {
@@ -79,7 +82,7 @@ describe('ingestSnapshot', () => {
           role: 'user',
           text: 'prior',
           createdAt: 0,
-          schemaVersion: 1,
+          schemaVersion: 2,
         },
       ],
       snapshot: SNAPSHOT,

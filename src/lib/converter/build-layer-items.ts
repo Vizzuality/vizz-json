@@ -24,7 +24,15 @@ export function buildLayerItems({
     const typeSig = matched
       .map((s) => (typeof s.type === 'string' ? s.type : 'unknown'))
       .join(',')
-    items.push({ id: `${source.id}--${typeSig}`, source, styles: matched })
+    // Strip VizzJson-only metadata before handing source to the map runtime.
+    // Mapbox/MapLibre style validators reject unknown source properties.
+    const { legend_config: _legendConfig, ...runtimeSource } =
+      source as SourceConfig & { legend_config?: unknown }
+    items.push({
+      id: `${source.id}--${typeSig}`,
+      source: runtimeSource as SourceConfig,
+      styles: matched,
+    })
   }
   return items
 }

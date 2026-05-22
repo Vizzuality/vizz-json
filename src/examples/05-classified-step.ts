@@ -13,6 +13,14 @@ const config = {
         id: 'earthquakes',
         type: 'geojson',
         data: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson',
+        legend_config: {
+          type: 'choropleth',
+          items: [
+            { label: 'Low (< 3)', value: '@@#params.color1' },
+            { label: 'Moderate (3–5)', value: '@@#params.color2' },
+            { label: 'High (> 5)', value: '@@#params.color3' },
+          ],
+        },
       },
     ],
     styles: [
@@ -65,14 +73,6 @@ const config = {
       options: ['visible', 'none'],
     },
   ],
-  legend_config: {
-    type: 'choropleth',
-    items: [
-      { label: 'Low (< 3)', value: '@@#params.color1' },
-      { label: 'Moderate (3–5)', value: '@@#params.color2' },
-      { label: 'High (> 5)', value: '@@#params.color3' },
-    ],
-  },
 } satisfies ExampleConfig
 
 export default config

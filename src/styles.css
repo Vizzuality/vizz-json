@@ -32,8 +32,8 @@
   --muted-foreground: hsl(0 0% 32%);
   --popover: hsl(0 0% 98%);
   --popover-foreground: hsl(229 84% 5%);
-  --primary: hsl(0 0% 90%);
-  --primary-foreground: hsl(0 0% 9%);
+  --primary: hsl(0 0% 15%);
+  --primary-foreground: hsl(0 0% 100%);
   --ring: hsl(0 0% 45%);
   --focus: hsl(0 0% 45%);
   --secondary: hsl(0 0% 96%);
@@ -69,11 +69,11 @@
   --border: hsl(0 0% 15%);
   --card: hsl(0 0% 9%);
   --card-foreground: hsl(0 0% 90%);
-  --destructive: hsl(0 63% 31%);
-  --destructive-foreground: hsl(0 0% 90%);
+  --destructive: hsl(0 72% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
   --foreground: hsl(0 0% 90%);
   --hover-accent: hsl(152 76% 80%);
-  --hover-destructive: hsl(0 70% 35%);
+  --hover-destructive: hsl(0 72% 65%);
   --hover-primary: hsl(0 0% 32%);
   --hover-secondary: hsl(0 0% 15%);
   --input: hsl(0 0% 25%);
@@ -82,7 +82,7 @@
   --popover: hsl(0 0% 9%);
   --popover-foreground: hsl(0 0% 90%);
   --primary: hsl(0 0% 15%);
-  --primary-foreground: hsl(0 0% 90%);
+  --primary-foreground: hsl(0 0% 100%);
   --ring: hsl(0 0% 45%);
   --focus: hsl(0 0% 45%);
   --secondary: hsl(0 0% 9%);
@@ -185,6 +185,21 @@ pre code {
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* AI chat — generating state animations */
+@keyframes chat-tail-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes chat-generating-shimmer {
+  0% {
+    background-position: 200% 50%;
+  }
+  100% {
+    background-position: -200% 50%;
   }
 }
 

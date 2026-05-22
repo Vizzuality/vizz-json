@@ -19,6 +19,7 @@ import { m } from '#/paraglide/messages'
 import { buttonVariants } from '#/components/ui/button'
 import { Toaster } from '#/components/ui/sonner'
 import { TooltipProvider } from '#/components/ui/tooltip'
+import { cn } from '#/lib/utils'
 
 import appCss from '../styles.css?url'
 
@@ -82,7 +83,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const location = useRouterState({ select: (s) => s.location })
   const isPlayground = location.pathname === '/playground'
   const isPresentation = location.pathname === '/presentation'
-  const isAi = location.pathname === '/ai'
 
   return (
     <html lang={getLocale()} suppressHydrationWarning>
@@ -90,12 +90,21 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-primary/20">
+      <body
+        className={cn(
+          'font-sans antialiased [overflow-wrap:anywhere] selection:bg-accent/30',
+          isPlayground && 'flex h-dvh flex-col overflow-hidden',
+        )}
+      >
         <TanStackQueryProvider>
           <TooltipProvider>
-            {!isPresentation && !isAi && <Header />}
-            {children}
-            {!isPlayground && !isPresentation && !isAi && <Footer />}
+            {!isPresentation && <Header />}
+            {isPlayground ? (
+              <div className="min-h-0 flex-1">{children}</div>
+            ) : (
+              children
+            )}
+            {!isPlayground && !isPresentation && <Footer />}
           </TooltipProvider>
           <TanStackDevtools
             config={{

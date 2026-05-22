@@ -20,6 +20,7 @@ export type LegendConfig = {
 
 export type SourceConfig = {
   readonly id: string
+  readonly legend_config?: LegendConfig
 } & Record<string, unknown>
 
 export type StyleConfig = {
@@ -34,7 +35,6 @@ export type LayerConfig = {
 export type LayerSchema = {
   readonly config: LayerConfig | Record<string, unknown>
   readonly params_config: readonly ParamConfig[]
-  readonly legend_config?: LegendConfig
 }
 
 export type ExampleMetadata = {

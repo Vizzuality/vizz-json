@@ -36,6 +36,20 @@ const config = {
           },
         ],
         tileSize: 256,
+        legend_config: {
+          type: 'gradient',
+          items: [
+            { label: 'Deep ocean', value: '@@#params.color_1' },
+            { label: '', value: '@@#params.color_2' },
+            { label: '', value: '@@#params.color_3' },
+            { label: '', value: '@@#params.color_4' },
+            { label: '', value: '@@#params.color_5' },
+            { label: '', value: '@@#params.color_6' },
+            { label: '', value: '@@#params.color_7' },
+            { label: '', value: '@@#params.color_8' },
+            { label: 'Peak', value: '@@#params.color_9' },
+          ],
+        },
       },
     ],
     styles: [
@@ -140,20 +154,6 @@ const config = {
       options: ['visible', 'none'],
     },
   ],
-  legend_config: {
-    type: 'gradient',
-    items: [
-      { label: 'Deep ocean', value: '@@#params.color_1' },
-      { label: '', value: '@@#params.color_2' },
-      { label: '', value: '@@#params.color_3' },
-      { label: '', value: '@@#params.color_4' },
-      { label: '', value: '@@#params.color_5' },
-      { label: '', value: '@@#params.color_6' },
-      { label: '', value: '@@#params.color_7' },
-      { label: '', value: '@@#params.color_8' },
-      { label: 'Peak', value: '@@#params.color_9' },
-    ],
-  },
 } satisfies ExampleConfig
 
 export default config

@@ -13,6 +13,19 @@ const config = {
         id: 'countries',
         type: 'geojson',
         data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
+        legend_config: {
+          type: 'choropleth',
+          items: [
+            { label: 'High income: OECD', value: '@@#params.high_oecd_color' },
+            {
+              label: 'High income: non-OECD',
+              value: '@@#params.high_non_oecd_color',
+            },
+            { label: 'Upper middle', value: '@@#params.upper_middle_color' },
+            { label: 'Lower middle', value: '@@#params.lower_middle_color' },
+            { label: 'Low income', value: '@@#params.low_income_color' },
+          ],
+        },
       },
     ],
     styles: [
@@ -44,11 +57,11 @@ const config = {
     ],
   },
   params_config: [
-    { key: 'high_oecd_color', default: '#2563eb', group: 'legend' },
-    { key: 'high_non_oecd_color', default: '#60a5fa', group: 'legend' },
-    { key: 'upper_middle_color', default: '#fbbf24', group: 'legend' },
-    { key: 'lower_middle_color', default: '#f97316', group: 'legend' },
-    { key: 'low_income_color', default: '#dc2626', group: 'legend' },
+    { key: 'high_oecd_color', default: '#fde725', group: 'legend' },
+    { key: 'high_non_oecd_color', default: '#5ec962', group: 'legend' },
+    { key: 'upper_middle_color', default: '#21918c', group: 'legend' },
+    { key: 'lower_middle_color', default: '#3b528b', group: 'legend' },
+    { key: 'low_income_color', default: '#440154', group: 'legend' },
     { key: 'default_color', default: '#6b7280', group: 'legend' },
     { key: 'opacity', default: 0.8, min: 0, max: 1, step: 0.05 },
     {
@@ -57,19 +70,6 @@ const config = {
       options: ['visible', 'none'],
     },
   ],
-  legend_config: {
-    type: 'choropleth',
-    items: [
-      { label: 'High income: OECD', value: '@@#params.high_oecd_color' },
-      {
-        label: 'High income: non-OECD',
-        value: '@@#params.high_non_oecd_color',
-      },
-      { label: 'Upper middle', value: '@@#params.upper_middle_color' },
-      { label: 'Lower middle', value: '@@#params.lower_middle_color' },
-      { label: 'Low income', value: '@@#params.low_income_color' },
-    ],
-  },
 } satisfies ExampleConfig
 
 export default config

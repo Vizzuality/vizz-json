@@ -1,0 +1,173 @@
+import { useMemo } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import type { DragEndEvent, Modifier } from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable'
+import { SortableLayer } from './sortable-layer'
+import { ParamControl } from '#/containers/playground/param-control'
+import { deriveLayerGroups } from '#/lib/layer-groups'
+import { reorderSources } from '#/lib/json-mutations'
+import type { LayersPanelProps } from './types'
+
+// Restrict drag to vertical axis only (no x movement)
+const restrictToVerticalAxis: Modifier = ({ transform }) => ({
+  ...transform,
+  x: 0,
+})
+
+// Restrict drag to stay within parent element bounds
+const restrictToParentElement: Modifier = ({
+  transform,
+  draggingNodeRect,
+  containerNodeRect,
+}) => {
+  if (!draggingNodeRect || !containerNodeRect) return transform
+  const minY = containerNodeRect.top - draggingNodeRect.top
+  const maxY = containerNodeRect.bottom - draggingNodeRect.bottom
+  return {
+    ...transform,
+    y: Math.min(Math.max(transform.y, minY), maxY),
+  }
+}
+
+export function LayersPanel({
+  parsedConfig,
+  pipeline,
+  values,
+  onChange,
+  currentJson,
+  onApply,
+}: LayersPanelProps) {
+  const { groups, orphans } = useMemo(
+    () =>
+      deriveLayerGroups(
+        parsedConfig,
+        pipeline.inferredParams,
+        pipeline.sourceLegends,
+      ),
+    [parsedConfig, pipeline.inferredParams, pipeline.sourceLegends],
+  )
+
+  const globalLegendParamKeys = useMemo(() => {
+    const set = new Set<string>()
+    for (const entry of pipeline.sourceLegends) {
+      for (const m of entry.paramMapping.values()) {
+        if (m.valueParamKey) set.add(m.valueParamKey)
+        if (m.labelParamKey) set.add(m.labelParamKey)
+      }
+      for (const p of entry.thresholdParams) set.add(p.key)
+    }
+    return set
+  }, [pipeline.sourceLegends])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = groups.findIndex((g) => g.id === active.id)
+    const newIndex = groups.findIndex((g) => g.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+
+    onApply(reorderSources(currentJson, oldIndex, newIndex))
+  }
+
+  const showHandle = groups.length > 1
+
+  const sortableIds = groups.map((g) => g.id)
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* Orphan / global params section */}
+      {orphans.length > 0 && (
+        <div className="flex flex-col px-4 pb-4">
+          <span className="py-2 text-xs font-medium text-muted-foreground">
+            Global
+          </span>
+          {orphans.map((param) => {
+            const currentValue = Object.prototype.hasOwnProperty.call(
+              values,
+              param.key,
+            )
+              ? values[param.key]
+              : param.value
+            return (
+              <div key={param.key} className="flex flex-col gap-2 py-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  {param.key}
+                </label>
+                <ParamControl
+                  inferred={param}
+                  currentValue={currentValue}
+                  onChange={(newValue) => onChange(param.key, newValue)}
+                />
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Layer cards */}
+      {groups.length > 0 &&
+        (showHandle ? (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+          >
+            <SortableContext
+              items={sortableIds}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="flex flex-col gap-3">
+                {groups.map((group) => (
+                  <SortableLayer
+                    key={group.id}
+                    group={group}
+                    showHandle={showHandle}
+                    values={values}
+                    onChange={onChange}
+                    currentJson={currentJson}
+                    onApply={onApply}
+                    globalLegendParamKeys={globalLegendParamKeys}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {groups.map((group) => (
+              <SortableLayer
+                key={group.id}
+                group={group}
+                showHandle={false}
+                values={values}
+                onChange={onChange}
+                currentJson={currentJson}
+                onApply={onApply}
+                globalLegendParamKeys={globalLegendParamKeys}
+              />
+            ))}
+          </div>
+        ))}
+    </div>
+  )
+}

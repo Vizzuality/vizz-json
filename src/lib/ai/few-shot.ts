@@ -2,6 +2,7 @@ import rasterOpacity from '#/examples/01-raster-opacity'
 import graduated from '#/examples/04-graduated-interpolate'
 import dataDriven from '#/examples/06-data-driven-circles'
 import multiSource from '#/examples/11-multi-source-heatmap'
+import crossfade from '#/examples/12-earthquakes-crossfade'
 
 type LayerSchemaExample = {
   metadata: {
@@ -19,7 +20,6 @@ type LayerSchemaExample = {
     options?: readonly string[]
     group?: 'legend'
   }>
-  legend_config?: unknown
 }
 
 type FewShotExample = {
@@ -35,7 +35,6 @@ type FewShotExample = {
     options?: readonly string[]
     group?: 'legend'
   }>
-  legend_config?: unknown
 }
 
 const PLACEHOLDER_RE = /^@@#params\.(.+)$/
@@ -45,12 +44,14 @@ function walkAndReplace(
   path: string,
   placeholderToPath: Map<string, string>,
   paramsConfig: LayerSchemaExample['params_config'],
+  recordPaths = true,
 ): unknown {
   if (typeof value === 'string') {
     const m = PLACEHOLDER_RE.exec(value)
     if (m) {
       const key = m[1]
-      if (!placeholderToPath.has(key)) placeholderToPath.set(key, path)
+      if (recordPaths && !placeholderToPath.has(key))
+        placeholderToPath.set(key, path)
       const def = paramsConfig.find((p) => p.key === key)?.default
       return def
     }
@@ -58,14 +59,27 @@ function walkAndReplace(
   }
   if (Array.isArray(value)) {
     return value.map((item, i) =>
-      walkAndReplace(item, `${path}[${i}]`, placeholderToPath, paramsConfig),
+      walkAndReplace(
+        item,
+        `${path}[${i}]`,
+        placeholderToPath,
+        paramsConfig,
+        recordPaths,
+      ),
     )
   }
   if (value && typeof value === 'object') {
     const out: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(value)) {
       const nextPath = path === '' ? k : `${path}.${k}`
-      out[k] = walkAndReplace(v, nextPath, placeholderToPath, paramsConfig)
+      const nextRecord = recordPaths && k !== 'legend_config'
+      out[k] = walkAndReplace(
+        v,
+        nextPath,
+        placeholderToPath,
+        paramsConfig,
+        nextRecord,
+      )
     }
     return out
   }
@@ -94,14 +108,7 @@ function toFewShot(example: LayerSchemaExample): FewShotExample {
       ...(p.group && { group: p.group }),
     }))
 
-  return {
-    metadata: example.metadata,
-    style,
-    parameterize,
-    ...(example.legend_config !== undefined && {
-      legend_config: example.legend_config,
-    }),
-  }
+  return { metadata: example.metadata, style, parameterize }
 }
 
 export const FEW_SHOT_EXAMPLES = [
@@ -109,4 +116,5 @@ export const FEW_SHOT_EXAMPLES = [
   toFewShot(graduated as LayerSchemaExample),
   toFewShot(dataDriven as LayerSchemaExample),
   toFewShot(multiSource as LayerSchemaExample),
+  toFewShot(crossfade as LayerSchemaExample),
 ] as const

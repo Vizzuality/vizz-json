@@ -1,40 +1,29 @@
-import { useEffect, useRef, useState } from 'react'
-import { Sparkles } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowUp, Bot, Check, Square } from 'lucide-react'
 import { Button } from '#/components/ui/button'
 import { Textarea } from '#/components/ui/textarea'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '#/components/ui/alert-dialog'
 import { useAiSession, parsePastedSnapshot } from '#/lib/ai/session'
-import type { Chat, Message } from '#/lib/ai/persistence/types'
+import { cn } from '#/lib/utils'
+import type { AiSchema, Chat, Message } from '#/lib/ai/persistence/types'
 
 type Props = {
   readonly chat: Chat
   readonly messages: readonly Message[]
-  readonly onClear: () => void
-  readonly promptChips: readonly { label: string; prompt: string }[]
+  readonly chips: readonly { label: string; snapshot: AiSchema }[]
   readonly activeMessageId: string | null
   readonly onSelectMessage: (id: string) => void
 }
 
+type InputStatus = 'empty' | 'has-message' | 'stop'
+
 export function AiChat({
   chat,
   messages,
-  onClear,
-  promptChips,
+  chips,
   activeMessageId,
   onSelectMessage,
 }: Props) {
   const [draft, setDraft] = useState('')
-  const [confirmOpen, setConfirmOpen] = useState(false)
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const session = useAiSession(chat.id)
 
@@ -66,143 +55,210 @@ export function AiChat({
   }
 
   const hasAssistant = messages.some((m) => m.role === 'assistant')
+  const hasDraft = !!draft.trim()
+
+  // Per-message version index (count of preceding assistant snapshots).
+  const versionByMessageId = useMemo(() => {
+    const map = new Map<string, number>()
+    let n = 0
+    for (const m of messages) {
+      if (m.role === 'assistant' && m.schemaSnapshot) {
+        n += 1
+        map.set(m.id, n)
+      }
+    }
+    return map
+  }, [messages])
+
+  const inputStatus: InputStatus = session.isLoading
+    ? 'stop'
+    : hasDraft
+      ? 'has-message'
+      : 'empty'
 
   return (
     <div className="flex h-full flex-col">
-      <div
-        ref={scrollRef}
-        className="flex-1 space-y-2 overflow-y-auto p-3 text-sm"
-      >
-        {!hasAssistant && promptChips.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">Try one of these</p>
-            <div className="flex flex-col items-start gap-1.5">
-              {promptChips.map((chip) => (
-                <Button
-                  key={chip.label}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => submit(chip.prompt)}
-                  disabled={session.isLoading}
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={scrollRef}
+          className="absolute inset-0 flex flex-col gap-1 overflow-y-auto px-4 pt-4 pb-10"
+        >
+          {!hasAssistant && chips.length > 0 && (
+            <div className="flex flex-col gap-[9px] pb-2">
+              <p className="text-xs text-muted">Load an example:</p>
+              <div className="flex flex-col items-start gap-[9px]">
+                {chips.map((chip) => (
+                  <Button
+                    key={chip.label}
+                    variant="chip"
+                    onClick={() => {
+                      setDraft('')
+                      scrollToBottom()
+                      void session.ingest(chip.snapshot, chip.label)
+                    }}
+                    disabled={session.isLoading}
+                  >
+                    <Bot className="text-accent" />
+                    {chip.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+          {messages.map((m) => {
+            if (m.role === 'user') {
+              return (
+                <div
+                  key={m.id}
+                  className="flex w-full items-center justify-end rounded-tl-3xl rounded-tr-3xl rounded-bl-3xl bg-card px-4 py-3"
                 >
-                  <Sparkles />
-                  {chip.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        )}
-        {messages.map((m) => {
-          const isAssistantWithSnap =
-            m.role === 'assistant' && !!m.schemaSnapshot
-          const isActive = m.id === activeMessageId
-          return (
-            <div
-              key={m.id}
-              onClick={() => {
-                if (isAssistantWithSnap) onSelectMessage(m.id)
-              }}
-              onKeyDown={(e) => {
-                if (!isAssistantWithSnap) return
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  onSelectMessage(m.id)
-                }
-              }}
-              role={isAssistantWithSnap ? 'button' : undefined}
-              tabIndex={isAssistantWithSnap ? 0 : -1}
-              className={[
-                m.role === 'user'
-                  ? 'rounded-md bg-primary/10 p-2'
-                  : 'rounded-md bg-muted p-2',
-                isAssistantWithSnap
-                  ? 'cursor-pointer hover:ring-1 hover:ring-primary'
-                  : '',
-                isActive ? 'ring-2 ring-primary' : '',
-              ].join(' ')}
-            >
-              <span className="block text-[10px] uppercase text-muted-foreground">
-                {m.role}
-                {isActive && ' · active'}
+                  <p className="flex-1 text-sm leading-5 text-muted">
+                    {m.text}
+                  </p>
+                </div>
+              )
+            }
+            const hasSnapshot = !!m.schemaSnapshot
+            const isActive = m.id === activeMessageId
+            const version = versionByMessageId.get(m.id)
+            return (
+              <div key={m.id} className="flex flex-col gap-1">
+                {m.text && (
+                  <div className="flex w-full items-center rounded-tl-3xl rounded-tr-3xl rounded-bl-3xl px-4 py-3">
+                    <p className="flex-1 text-sm leading-5 whitespace-pre-wrap text-muted">
+                      {m.text}
+                    </p>
+                  </div>
+                )}
+                {hasSnapshot && (
+                  <Button
+                    variant="card-outline"
+                    size="card"
+                    onClick={() => onSelectMessage(m.id)}
+                    aria-pressed={isActive}
+                    className="group/version"
+                  >
+                    <span
+                      className={cn(
+                        'flex min-w-0 flex-col gap-1 transition-opacity',
+                        isActive ? 'opacity-100' : 'opacity-50',
+                      )}
+                    >
+                      <span className="truncate text-sm leading-5 font-medium">
+                        {m.schemaSnapshot?.metadata.title ?? 'Untitled map'}
+                      </span>
+                      <span className="text-xs leading-4 text-muted">
+                        {version ? `Version ${version}` : 'Version'}
+                      </span>
+                    </span>
+                    {isActive ? (
+                      <Check className="size-5 shrink-0 text-accent" />
+                    ) : (
+                      <span className="hidden text-sm italic text-muted-foreground group-hover/version:inline">
+                        Preview
+                      </span>
+                    )}
+                  </Button>
+                )}
+              </div>
+            )
+          })}
+          {session.isLoading && (
+            <div className="flex items-center gap-1 py-2 pl-2">
+              <Bot className="size-4 animate-pulse text-accent" />
+              <span className="animate-[chat-generating-shimmer_2.2s_linear_infinite] bg-gradient-to-r from-accent/30 via-accent to-accent/30 bg-[length:200%_100%] bg-clip-text text-sm leading-5 font-medium text-transparent">
+                Generating…
               </span>
-              <span className="whitespace-pre-wrap text-xs">{m.text}</span>
             </div>
-          )
-        })}
-        {session.isLoading && (
-          <div className="rounded-md bg-muted p-2 text-xs italic">
-            Generating…
-          </div>
-        )}
+          )}
+        </div>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-b from-transparent to-background backdrop-blur-[2px]"
+        />
       </div>
       {session.lastError && (
-        <div className="border-t bg-destructive/10 p-2 text-xs text-destructive">
+        <div className="mx-3 mb-2 rounded-xl border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
           {session.lastError}
         </div>
       )}
-      <div className="border-t p-3">
+      <ChatInput
+        status={inputStatus}
+        value={draft}
+        onChange={setDraft}
+        onSubmit={() => submit()}
+        onStop={session.stop}
+      />
+    </div>
+  )
+}
+
+type ChatInputProps = {
+  readonly status: InputStatus
+  readonly value: string
+  readonly onChange: (v: string) => void
+  readonly onSubmit: () => void
+  readonly onStop: () => void
+}
+
+function ChatInput({
+  status,
+  value,
+  onChange,
+  onSubmit,
+  onStop,
+}: ChatInputProps) {
+  const isStop = status === 'stop'
+  const isHasMessage = status === 'has-message'
+  return (
+    <div className="px-3 pt-3 pb-3">
+      <div className="relative">
         <Textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Describe a map…"
-          className="text-sm"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="How would you like your map?"
           rows={3}
           onKeyDown={(e) => {
             if (e.key !== 'Enter') return
             if (e.shiftKey) return
             if (e.nativeEvent.isComposing) return
-            if (session.isLoading) return
+            if (isStop) return
             e.preventDefault()
-            submit()
+            onSubmit()
           }}
-        />
-        <div className="mt-2 flex gap-2">
-          {session.isLoading ? (
-            <Button size="sm" variant="outline" onClick={session.stop}>
-              Stop
-            </Button>
-          ) : (
-            <Button size="sm" onClick={() => submit()} disabled={!draft.trim()}>
-              Send
-            </Button>
+          className={cn(
+            'min-h-20 resize-none rounded-xl bg-secondary px-3 py-2 pr-12 text-sm leading-5 text-foreground transition-colors placeholder:text-muted-foreground focus-visible:ring-0',
+            isHasMessage ? 'border-focus' : 'border-input',
           )}
-          <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="ml-auto"
-                  disabled={messages.length === 0}
-                >
-                  Clear
-                </Button>
-              }
+        />
+        {isStop ? (
+          <span className="absolute right-2 bottom-2 inline-block overflow-hidden rounded-2xl p-0">
+            <span
+              aria-hidden
+              className="absolute inset-[-50%] animate-[chat-tail-spin_1.4s_linear_infinite] bg-[conic-gradient(from_0deg,var(--color-accent)_0deg,var(--color-accent)_60deg,transparent_180deg)]"
             />
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Clear chat?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This removes the conversation and the generated map layer.
-                  Renderer settings stay.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    session.stop()
-                    setConfirmOpen(false)
-                    onClear()
-                  }}
-                >
-                  Clear
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+            <Button
+              size="icon-xl"
+              variant="default"
+              onClick={onStop}
+              aria-label="Stop"
+              className="relative"
+            >
+              <Square />
+            </Button>
+          </span>
+        ) : (
+          <Button
+            size="icon-xl"
+            variant={isHasMessage ? 'accent' : 'default'}
+            onClick={onSubmit}
+            disabled={!isHasMessage}
+            aria-label="Send"
+            className="absolute right-2 bottom-2"
+          >
+            <ArrowUp />
+          </Button>
+        )}
       </div>
     </div>
   )

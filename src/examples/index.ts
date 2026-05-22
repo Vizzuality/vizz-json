@@ -23,6 +23,7 @@ export const EXAMPLE_SLUGS = [
   'conditional-case',
   'react-components',
   'multi-source-heatmap',
+  'earthquakes-crossfade',
 ] as const
 
 export type ExampleSlug = (typeof EXAMPLE_SLUGS)[number]

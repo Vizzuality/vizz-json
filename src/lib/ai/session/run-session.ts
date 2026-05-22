@@ -5,7 +5,8 @@ import {
 } from '#/lib/ai/persistence/messages'
 import { renameChat } from '#/lib/ai/persistence/chats'
 import { postProcess } from '#/lib/ai/post-process'
-import { reconcileParamValues } from '#/lib/ai/reconcile-param-values'
+import { reconcileSnapshot } from '#/lib/ai/reconcile-param-values'
+import { buildDefaultParams } from '#/lib/pipeline/build-default-params'
 import type { AiSchema } from '#/lib/ai/persistence/types'
 import {
   shouldRenameOnEnvelope,
@@ -29,8 +30,10 @@ export async function runAiSession(
 
     const fullHistory = [...history, userMsg]
     const activeMessage = history.find((m) => m.id === chat.activeMessageId)
-    const currentParamValues =
-      activeMessage?.paramValues ?? chat.activeParamValues
+    const activeSnapshot = activeMessage?.schemaSnapshot ?? null
+    const currentParamValues = activeSnapshot
+      ? buildDefaultParams(activeSnapshot.params_config)
+      : {}
     const body = {
       messages: fullHistory.map((m) => ({
         id: m.id,
@@ -41,6 +44,7 @@ export async function runAiSession(
       mapboxToken: chat.renderer.mapboxToken,
       mapboxStyleUrl: chat.renderer.mapboxStyleUrl,
       paramValues: currentParamValues,
+      currentSnapshot: activeSnapshot ?? undefined,
     }
 
     const res = await fetch('/api/ai-generate', {
@@ -66,13 +70,9 @@ export async function runAiSession(
     const parsed = aiResponseSchema.parse(json)
 
     if (parsed.envelope) {
-      const snapshot = postProcess(parsed.envelope) as AiSchema
-      const reconciled = reconcileParamValues(
-        activeMessage?.schemaSnapshot ?? null,
-        snapshot,
-        currentParamValues,
-      )
-      await appendAssistantMessage(chat.id, parsed.reply, snapshot, reconciled)
+      const rawSnapshot = postProcess(parsed.envelope) as AiSchema
+      const snapshot = reconcileSnapshot(activeSnapshot, rawSnapshot)
+      await appendAssistantMessage(chat.id, parsed.reply, snapshot)
       if (shouldRenameOnEnvelope(chat.title, prompt)) {
         await renameChat(chat.id, snapshot.metadata.title)
       }

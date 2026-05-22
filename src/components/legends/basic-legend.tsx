@@ -1,5 +1,6 @@
 import type { LegendItem } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
+import { resolveItemColor } from '#/lib/legend-color'
 
 type BasicLegendProps = {
   readonly items: readonly LegendItem[]
@@ -20,7 +21,7 @@ function EditableRow({
   readonly onChange: (key: string, value: unknown) => void
 }) {
   const colorValue = mapping.valueParamKey
-    ? String(values[mapping.valueParamKey] ?? item.value)
+    ? resolveItemColor(item, mapping, values)
     : undefined
   const resolvedLabel = mapping.labelParamKey
     ? values[mapping.labelParamKey]
@@ -48,8 +49,7 @@ function EditableRow({
         <div
           className="w-4 h-4 rounded-sm border border-border shrink-0"
           style={{
-            backgroundColor:
-              typeof item.value === 'string' ? item.value : undefined,
+            backgroundColor: resolveItemColor(item, undefined, undefined),
           }}
         />
       )}
@@ -59,14 +59,12 @@ function EditableRow({
 }
 
 function StaticRow({ item }: { readonly item: LegendItem }) {
+  const color = resolveItemColor(item, undefined, undefined)
   return (
     <div className="flex items-center gap-2 px-1.5 py-1 -mx-1.5">
       <div
         className="w-4 h-4 rounded-sm border border-border shrink-0"
-        style={{
-          backgroundColor:
-            typeof item.value === 'string' ? item.value : undefined,
-        }}
+        style={{ backgroundColor: color }}
       />
       <span className="text-xs text-muted-foreground">{item.label}</span>
     </div>

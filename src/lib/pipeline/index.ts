@@ -1,4 +1,5 @@
 export { runResolutionPipeline } from './run-pipeline'
 export { useResolutionPipeline } from './use-pipeline'
 export { buildDefaultParams } from './build-default-params'
+export { mergeParamValues } from './merge-param-values'
 export type { PipelineOutput, PipelineResult } from './types'

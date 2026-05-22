@@ -7,13 +7,12 @@ const baseChat = (): Chat => ({
   title: 't',
   createdAt: 0,
   updatedAt: 0,
-  schemaVersion: 1,
+  schemaVersion: 2,
   renderer: {
     renderer: 'mapbox',
     mapboxToken: 'pk.secret',
     mapboxStyleUrl: 'mapbox://styles/x/y',
   },
-  activeParamValues: {},
   activeMessageId: null,
 })
 

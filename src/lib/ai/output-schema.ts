@@ -30,7 +30,10 @@ const parameterizeEntrySchema = z.object({
 })
 
 const sourceConfigSchema = z
-  .object({ id: z.string().min(1) })
+  .object({
+    id: z.string().min(1),
+    legend_config: legendConfigSchema.optional(),
+  })
   .catchall(z.unknown())
 
 const styleConfigSchema = z
@@ -48,7 +51,6 @@ export const aiOutputSchema = z.object({
   metadata: metadataSchema,
   style: styleSchema,
   parameterize: z.array(parameterizeEntrySchema),
-  legend_config: legendConfigSchema.optional(),
 })
 
 export const aiResponseSchema = z.object({

@@ -31,7 +31,14 @@ function buildSyntheticStyle(style: unknown): Record<string, unknown> {
 
   const sources: Record<string, unknown> = {}
   for (const entry of explicitSourcesArray) {
-    const { id, ...rest } = entry as { id?: string } & Record<string, unknown>
+    const {
+      id,
+      legend_config: _legendConfig,
+      ...rest
+    } = entry as {
+      id?: string
+      legend_config?: unknown
+    } & Record<string, unknown>
     if (typeof id !== 'string') continue
     sources[id] = rest
   }
@@ -81,17 +88,87 @@ function customSemanticErrors(style: unknown): readonly StyleError[] {
   return errors
 }
 
-export function validateLegendColors(legend: unknown): readonly StyleError[] {
-  if (!legend || typeof legend !== 'object') return []
-  const items = (legend as { items?: unknown }).items
-  if (!Array.isArray(items)) return []
+function tokenizePath(path: string): readonly (string | number)[] {
+  const normalised = path.replace(/\[(\d+)\]/g, '.$1')
+  return normalised
+    .split('.')
+    .filter(Boolean)
+    .map((t) => (/^\d+$/.test(t) ? Number(t) : t))
+}
+
+export function validateParameterizeTargets(envelope: {
+  readonly style: unknown
+  readonly parameterize: ReadonlyArray<{ readonly path: string }>
+}): readonly StyleError[] {
   const errors: StyleError[] = []
-  items.forEach((item, i) => {
-    const value = (item as { value?: unknown }).value
-    if (typeof value !== 'string') return
-    if (/^@@#params\..+/.test(value)) return
-    errors.push({
-      message: `legend_config.items[${i}].value is a literal value "${value}"; it must be a @@#params.<key> reference so every legend swatch stays editable.`,
+  for (const entry of envelope.parameterize) {
+    const tokens = tokenizePath(entry.path)
+    if (tokens.length === 0) continue
+    let cursor: unknown = envelope.style
+    let ok = true
+    for (let i = 0; i < tokens.length - 1; i++) {
+      const t = tokens[i]
+      cursor =
+        typeof t === 'number'
+          ? Array.isArray(cursor)
+            ? cursor[t]
+            : undefined
+          : cursor && typeof cursor === 'object'
+            ? (cursor as Record<string, unknown>)[t]
+            : undefined
+      if (cursor === undefined || cursor === null) {
+        ok = false
+        break
+      }
+    }
+    if (!ok || !Array.isArray(cursor)) continue
+    const leaf = tokens[tokens.length - 1]
+    if (typeof leaf !== 'number') continue
+    if (cursor[0] !== 'match') continue
+    const N = cursor.length
+    if (leaf < 2) {
+      errors.push({
+        message: `parameterize path "${entry.path}" targets the "match" keyword or its input expression (index ${leaf}); only output slots are parameterizable. Move the entry to a colour slot at an odd index ≥ 3 (or the trailing default at index ${N - 1}).`,
+      })
+      continue
+    }
+    if (leaf === N - 1) continue
+    if (leaf % 2 === 0) {
+      errors.push({
+        message: `parameterize path "${entry.path}" targets a "match" label (index ${leaf}, value ${JSON.stringify(cursor[leaf])}) — labels are the literal data values matched against the input and MUST stay as the original strings/numbers. Only output values (odd indices ≥ 3 and the trailing default) can be parameterized. To parameterize the colour for this band, point the path at index ${leaf + 1} instead.`,
+      })
+    }
+  }
+  return errors
+}
+
+export function validateLegendColors(envelope: {
+  readonly style: unknown
+}): readonly StyleError[] {
+  const style = envelope.style
+  if (!style || typeof style !== 'object') return []
+  const sources = (style as { sources?: unknown }).sources
+  if (!Array.isArray(sources)) return []
+
+  const errors: StyleError[] = []
+  sources.forEach((rawSource, srcIdx) => {
+    if (!rawSource || typeof rawSource !== 'object') return
+    const legend = (rawSource as { legend_config?: unknown }).legend_config
+    if (!legend || typeof legend !== 'object') return
+    const items = (legend as { items?: unknown }).items
+    if (!Array.isArray(items)) return
+    const sourceId = (rawSource as { id?: unknown }).id
+    const idHint =
+      typeof sourceId === 'string'
+        ? ` (source "${sourceId}")`
+        : ` (source[${srcIdx}])`
+    items.forEach((item, i) => {
+      const value = (item as { value?: unknown }).value
+      if (typeof value !== 'string') return
+      if (/^@@#params\..+/.test(value)) return
+      errors.push({
+        message: `legend_config.items[${i}].value is a literal value "${value}"${idHint}; it must be a @@#params.<key> reference so every legend swatch stays editable.`,
+      })
     })
   })
   return errors

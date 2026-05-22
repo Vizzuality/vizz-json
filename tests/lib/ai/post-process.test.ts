@@ -36,7 +36,7 @@ const baseOutput: AiOutput = {
 }
 
 describe('postProcess', () => {
-  it('builds a LayerSchema with @@ placeholders inserted at every path', () => {
+  it('builds a config with @@ placeholders inserted at every path', () => {
     const result = postProcess(baseOutput)
 
     expect(result.config).toMatchObject({
@@ -75,16 +75,74 @@ describe('postProcess', () => {
     expect(() => postProcess(bad)).toThrow(/path/)
   })
 
-  it('preserves legend_config and metadata in the output', () => {
-    const withLegend: AiOutput = {
-      ...baseOutput,
-      legend_config: {
-        type: 'basic',
-        items: [{ label: 'Sentinel-2', value: 'visible' }],
+  it('output has NO top-level legend_config', () => {
+    const result = postProcess(baseOutput) as Record<string, unknown>
+    expect(result).not.toHaveProperty('legend_config')
+  })
+
+  it('when source has legend_config, it is preserved on sources[0] after parameterize substitutions', () => {
+    const withSourceLegend: AiOutput = {
+      metadata: { title: 'Choropleth', description: 'd', tier: 'basic' },
+      style: {
+        sources: [
+          {
+            id: 'countries',
+            type: 'geojson',
+            legend_config: {
+              type: 'choropleth',
+              items: [{ label: 'High', value: '#ff0000' }],
+            },
+          },
+        ],
+        styles: [
+          {
+            source: 'countries',
+            type: 'fill',
+            paint: { 'fill-color': '#ff0000' },
+          },
+        ],
       },
+      parameterize: [
+        {
+          path: 'styles[0].paint.fill-color',
+          key: 'fill_color',
+          default: '#ff0000',
+          group: 'legend',
+        },
+      ],
     }
-    const result = postProcess(withLegend)
-    expect(result.metadata).toEqual(withLegend.metadata)
-    expect(result.legend_config).toEqual(withLegend.legend_config)
+
+    const result = postProcess(withSourceLegend)
+
+    // legend_config is on the source (via the cloned config.sources[0]), not top-level
+    const configSources = (
+      result.config as { sources?: Array<Record<string, unknown>> }
+    ).sources
+    expect(configSources).toBeDefined()
+    expect(configSources![0]).toHaveProperty('legend_config')
+    // Top-level must still be absent
+    expect(result).not.toHaveProperty('legend_config')
+  })
+
+  it('preserves metadata in the output', () => {
+    const result = postProcess(baseOutput)
+    expect(result.metadata).toEqual(baseOutput.metadata)
+  })
+
+  it('parameterize with group=legend is reflected in params_config', () => {
+    const withLegendParam: AiOutput = {
+      ...baseOutput,
+      parameterize: [
+        {
+          path: 'styles[0].paint.raster-opacity',
+          key: 'my_color',
+          default: '#ff0000',
+          group: 'legend',
+        },
+      ],
+    }
+    const result = postProcess(withLegendParam)
+    const param = result.params_config.find((p) => p.key === 'my_color')
+    expect(param?.group).toBe('legend')
   })
 })

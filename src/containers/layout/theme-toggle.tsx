@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Sun, Moon, Monitor } from 'lucide-react'
-import { buttonVariants } from '#/components/ui/button'
+import { Sun, Moon, SunMoon } from 'lucide-react'
+import { Button } from '#/components/ui/button'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '#/components/ui/tooltip'
 import { cn } from '#/lib/utils'
 
 type ThemeMode = 'light' | 'dark' | 'auto'
@@ -34,6 +39,12 @@ function applyThemeMode(mode: ThemeMode) {
   document.documentElement.style.colorScheme = resolved
 }
 
+const SEGMENTS: { mode: ThemeMode; label: string; Icon: typeof Sun }[] = [
+  { mode: 'auto', label: 'Auto', Icon: SunMoon },
+  { mode: 'dark', label: 'Dark', Icon: Moon },
+  { mode: 'light', label: 'Light', Icon: Sun },
+]
+
 export default function ThemeToggle() {
   const [mode, setMode] = useState<ThemeMode>('auto')
 
@@ -57,34 +68,42 @@ export default function ThemeToggle() {
     }
   }, [mode])
 
-  function toggleMode() {
-    const nextMode: ThemeMode =
-      mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light'
-    setMode(nextMode)
-    applyThemeMode(nextMode)
-    window.localStorage.setItem('theme', nextMode)
+  function selectMode(next: ThemeMode) {
+    setMode(next)
+    applyThemeMode(next)
+    window.localStorage.setItem('theme', next)
   }
 
-  const label =
-    mode === 'auto'
-      ? 'Theme mode: auto (system). Click to switch to light mode.'
-      : `Theme mode: ${mode}. Click to switch mode.`
-
   return (
-    <button
-      type="button"
-      onClick={toggleMode}
-      aria-label={label}
-      title={label}
-      className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
+    <div
+      className="flex items-center rounded-lg border border-border bg-secondary p-0.5"
+      role="group"
+      aria-label="Theme mode"
     >
-      {mode === 'auto' ? (
-        <Monitor className="size-4" />
-      ) : mode === 'dark' ? (
-        <Moon className="size-4" />
-      ) : (
-        <Sun className="size-4" />
-      )}
-    </button>
+      {SEGMENTS.map(({ mode: segMode, label, Icon }) => (
+        <Tooltip key={segMode}>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={label}
+                aria-pressed={mode === segMode}
+                onClick={() => selectMode(segMode)}
+                className={cn(
+                  'size-7 rounded-md',
+                  mode === segMode &&
+                    'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground',
+                )}
+              />
+            }
+          >
+            <Icon className="size-4" />
+          </TooltipTrigger>
+          <TooltipContent side="bottom">{label}</TooltipContent>
+        </Tooltip>
+      ))}
+    </div>
   )
 }

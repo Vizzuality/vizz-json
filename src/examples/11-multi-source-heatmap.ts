@@ -13,11 +13,22 @@ const config = {
         id: 'countries',
         type: 'geojson',
         data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
+        legend_config: {
+          type: 'basic',
+          items: [{ label: 'Country fill', value: '@@#params.fill_color' }],
+        },
       },
       {
         id: 'capitals',
         type: 'geojson',
         data: 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_populated_places_simple.geojson',
+        legend_config: {
+          type: 'gradient',
+          items: [
+            { label: 'Heatmap low', value: '@@#params.heatmap_color_low' },
+            { label: 'Heatmap high', value: '@@#params.heatmap_color_high' },
+          ],
+        },
       },
     ],
     styles: [
@@ -83,14 +94,6 @@ const config = {
       step: 0.05,
     },
   ],
-  legend_config: {
-    type: 'gradient',
-    items: [
-      { label: 'Country fill', value: '@@#params.fill_color' },
-      { label: 'Heatmap low', value: '@@#params.heatmap_color_low' },
-      { label: 'Heatmap high', value: '@@#params.heatmap_color_high' },
-    ],
-  },
 } satisfies ExampleConfig
 
 export default config

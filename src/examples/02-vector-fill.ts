@@ -12,6 +12,10 @@ const config = {
         id: 'countries',
         type: 'geojson',
         data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson',
+        legend_config: {
+          type: 'basic',
+          items: [{ label: 'Countries', value: '@@#params.fill_color' }],
+        },
       },
     ],
     styles: [
@@ -39,10 +43,6 @@ const config = {
       options: ['visible', 'none'],
     },
   ],
-  legend_config: {
-    type: 'basic',
-    items: [{ label: 'Countries', value: '@@#params.fill_color' }],
-  },
 } satisfies ExampleConfig
 
 export default config

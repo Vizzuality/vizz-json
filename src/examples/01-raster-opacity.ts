@@ -16,6 +16,10 @@ const config = {
           'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
         ],
         tileSize: 256,
+        legend_config: {
+          type: 'basic',
+          items: [{ label: 'Sentinel-2 Imagery', value: 'visible' }],
+        },
       },
     ],
     styles: [
@@ -39,10 +43,6 @@ const config = {
       options: ['visible', 'none'],
     },
   ],
-  legend_config: {
-    type: 'basic',
-    items: [{ label: 'Sentinel-2 Imagery', value: 'visible' }],
-  },
 } satisfies ExampleConfig
 
 export default config

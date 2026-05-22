@@ -2,9 +2,10 @@ import { getConverter, resolveConfig } from '#/lib/converter'
 import { resolveParams } from '#/lib/converter/params-resolver'
 import { inferParamControl } from '#/lib/param-inference'
 import {
-  extractLegendParamKeys,
-  getOrphanLegendParams,
+  extractSourceLegendMappings,
+  getOrphanLegendParamsAcrossSources,
 } from '#/lib/legend-param-mapping'
+import { collectParamRefs } from '#/lib/layer-groups'
 import type {
   ExampleMetadata,
   InferredParam,
@@ -12,18 +13,26 @@ import type {
   ParamConfig,
   ResolvedParams,
 } from '#/lib/types'
-import type { RawLegendConfig } from '#/lib/legend-param-mapping'
-import type { PipelineOutput, PipelineResult } from './types'
+import type { PipelineOutput, PipelineResult, SourceLegendEntry } from './types'
 
 const EMPTY_RESULT: PipelineResult = {
   inferredParams: [],
-  rawLegendConfig: null,
-  resolvedLegendConfig: null,
-  legendParamMapping: new Map(),
+  sourceLegends: [],
   orphanLegendParams: [],
   metadata: null,
   previewMode: 'map',
   output: { kind: 'map', resolvedConfig: null, error: null },
+  parsedConfig: null,
+}
+
+function readStylesArray(
+  parsedConfig: Readonly<Record<string, unknown>>,
+): readonly Record<string, unknown>[] {
+  const withConfig = parsedConfig.config as Record<string, unknown> | undefined
+  const styles = withConfig?.styles ?? parsedConfig.styles
+  return Array.isArray(styles)
+    ? (styles as readonly Record<string, unknown>[])
+    : []
 }
 
 function deriveInferredParams(
@@ -104,22 +113,53 @@ export function runResolutionPipeline(
   const metadata = deriveMetadata(parsedConfig)
   const previewMode = derivePreviewMode(metadata)
 
-  const rawLegendConfig =
-    (parsedConfig.legend_config as RawLegendConfig | undefined) ?? null
-
-  const resolvedLegendConfig = rawLegendConfig
-    ? (resolveParams(
-        rawLegendConfig as unknown as Record<string, unknown>,
-        paramValues,
-      ) as unknown as LegendConfig)
-    : null
-
-  const legendParamMapping = extractLegendParamKeys(rawLegendConfig)
+  const sourceLegendRaw = extractSourceLegendMappings(parsedConfig)
   const legendParams = inferredParams.filter((p) => p.group === 'legend')
-  const orphanLegendParams = getOrphanLegendParams(
+  const stylesArray = readStylesArray(parsedConfig)
+
+  const sourceLegends: readonly SourceLegendEntry[] = sourceLegendRaw.map(
+    (entry) => {
+      const resolvedLegend = resolveParams(
+        entry.rawLegend as unknown as Record<string, unknown>,
+        paramValues,
+      ) as unknown as LegendConfig
+
+      // Collect all @@#params refs used by this source's styles
+      const refs = new Set<string>()
+      for (const style of stylesArray) {
+        if (style.source === entry.sourceId) {
+          collectParamRefs(style.paint, refs)
+          collectParamRefs(style.layout, refs)
+          collectParamRefs(style.filter, refs)
+        }
+      }
+
+      // Color-stop param keys bound by legend item mapping
+      const colorKeys = new Set<string>()
+      for (const mapping of entry.paramMapping.values()) {
+        if (mapping.valueParamKey) colorKeys.add(mapping.valueParamKey)
+      }
+
+      // Threshold params: slider + group=legend + referenced by this source's styles + not a color stop
+      const thresholdParams = legendParams.filter(
+        (p) =>
+          p.control_type === 'slider' &&
+          refs.has(p.key) &&
+          !colorKeys.has(p.key),
+      )
+
+      return {
+        sourceId: entry.sourceId,
+        rawLegend: entry.rawLegend,
+        resolvedLegend,
+        paramMapping: entry.paramMapping,
+        thresholdParams,
+      }
+    },
+  )
+  const orphanLegendParams = getOrphanLegendParamsAcrossSources(
     legendParams,
-    legendParamMapping,
-    rawLegendConfig?.type,
+    sourceLegendRaw,
   )
 
   const output =
@@ -129,12 +169,11 @@ export function runResolutionPipeline(
 
   return {
     inferredParams,
-    rawLegendConfig,
-    resolvedLegendConfig,
-    legendParamMapping,
+    sourceLegends,
     orphanLegendParams,
     metadata,
     previewMode,
     output,
+    parsedConfig,
   }
 }

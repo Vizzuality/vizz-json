@@ -12,7 +12,11 @@ import { aiResponseSchema } from '#/lib/ai/output-schema'
 import type { AiOutput } from '#/lib/ai/output-schema'
 import { createFetchTileJsonTool } from '#/lib/ai/tools/fetch-tilejson'
 import { postProcess } from '#/lib/ai/post-process'
-import { validateLegendColors, validateStyle } from '#/lib/ai/style-validator'
+import {
+  validateLegendColors,
+  validateParameterizeTargets,
+  validateStyle,
+} from '#/lib/ai/style-validator'
 import { resolveParams } from '#/lib/converter/params-resolver'
 import type { RendererId } from '#/lib/ai/types'
 
@@ -29,6 +33,10 @@ function validateEnvelopeStyle(
   envelope: AiOutput,
   renderer: RendererId,
 ): readonly string[] {
+  const matchTargetErrors = validateParameterizeTargets(envelope).map(
+    (e) => e.message,
+  )
+  if (matchTargetErrors.length > 0) return matchTargetErrors
   let processed: ReturnType<typeof postProcess>
   try {
     processed = postProcess(envelope)
@@ -43,7 +51,7 @@ function validateEnvelopeStyle(
   )
   const resolved = resolveParams(processed.config, defaults)
   const styleErrors = validateStyle(resolved, renderer).map((e) => e.message)
-  const legendErrors = validateLegendColors(envelope.legend_config).map(
+  const legendErrors = validateLegendColors({ style: envelope.style }).map(
     (e) => e.message,
   )
   return [...styleErrors, ...legendErrors]
@@ -54,13 +62,20 @@ export const Route = createFileRoute('/api/ai-generate')({
     handlers: {
       POST: async ({ request }) => {
         const body = await request.json()
-        const { messages, renderer, mapboxToken, mapboxStyleUrl, paramValues } =
-          aiGenerateInputSchema.parse(body)
+        const {
+          messages,
+          renderer,
+          mapboxToken,
+          mapboxStyleUrl,
+          paramValues,
+          currentSnapshot,
+        } = aiGenerateInputSchema.parse(body)
 
         const systemPrompts = buildSystemPrompts({
           renderer,
           mapboxStyleUrl,
           paramValues,
+          currentSnapshot,
           // mapboxToken intentionally omitted from system prompts
         })
 
@@ -150,11 +165,17 @@ export const Route = createFileRoute('/api/ai-generate')({
               const hasPathError = styleErrors.some((m) =>
                 m.startsWith('parameterize entry has an unresolvable path'),
               )
+              const hasMatchLabelError = styleErrors.some((m) =>
+                m.includes('targets a "match" label'),
+              )
               const legendHint = hasLegendError
                 ? ' Legend items[].value must be a "@@#params.<key>" reference with a matching parameterize entry (default = the hex colour) — never a literal colour.'
                 : ''
               const pathHint = hasPathError
                 ? ' For "step"/"interpolate" expressions, each stop value (threshold or colour) is a top-level element of the expression array. Index them directly — e.g. for `"fill-color": ["step", ["get", "x"], "#aaa", 10, "#bbb", 50, "#ccc"]` the parameterize paths are "styles[0].paint.fill-color[2]" (#aaa), "styles[0].paint.fill-color[3]" (10), "styles[0].paint.fill-color[4]" (#bbb), etc. Never use nested bracket indices unless the literal at that path is itself an array.'
+                : ''
+              const matchHint = hasMatchLabelError
+                ? ' For "match" expressions `["match", input, label1, output1, label2, output2, ..., default]`, the labels (indices 2, 4, 6, ...) are the literal data values being compared and MUST stay as the original strings/numbers. Only parameterize the output slots at odd indices ≥ 3 and the trailing default. Parameterizing a label slot breaks the match: it compares feature values against colour hex strings and every feature falls through to the default colour.'
                 : ''
               lastFailure = { raw: parsedJson, issues: styleErrors }
               conversation.push(
@@ -169,7 +190,7 @@ export const Route = createFileRoute('/api/ai-generate')({
                   parts: [
                     {
                       type: 'text',
-                      content: `Your previous envelope failed validation with these errors: ${styleErrors.join(' | ')}. Return a corrected JSON object.${legendHint}${pathHint} Common gotchas: check property names against the ${renderer === 'mapbox' ? 'Mapbox' : 'MapLibre'} style spec; ensure layer types match source types.`,
+                      content: `Your previous envelope failed validation with these errors: ${styleErrors.join(' | ')}. Return a corrected JSON object.${legendHint}${pathHint}${matchHint} Common gotchas: check property names against the ${renderer === 'mapbox' ? 'Mapbox' : 'MapLibre'} style spec; ensure layer types match source types.`,
                     },
                   ],
                 } as unknown as UIMessage,

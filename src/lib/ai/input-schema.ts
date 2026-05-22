@@ -22,6 +22,14 @@ export const aiGenerateInputSchema = z.object({
   mapboxToken: z.string().optional(),
   mapboxStyleUrl: z.string().optional(),
   paramValues: z.record(z.string(), z.unknown()).optional(),
+  currentSnapshot: z
+    .object({
+      metadata: z.object({}).passthrough(),
+      config: z.record(z.string(), z.unknown()),
+      params_config: z.array(z.record(z.string(), z.unknown())),
+    })
+    .passthrough()
+    .optional(),
 })
 
 export type AiGenerateInput = z.infer<typeof aiGenerateInputSchema>
