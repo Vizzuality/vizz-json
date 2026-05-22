@@ -109,9 +109,46 @@ export function serializeGradientToJson(
     ),
   )
 
+  // Keys the OLD legend pointed at — used to identify stops that were
+  // removed in the new state and need their params + paint refs cleaned up.
+  // Custom legacy names (e.g. heatmap_color_mid) don't match the synthetic
+  // color_N / threshold_N cleanup pattern, so we track them explicitly.
+  const oldLegendColorKeys = new Set<string>()
+  {
+    const rawSources0 = (parsed.config as Record<string, unknown> | undefined)
+      ?.sources as readonly unknown[] | undefined
+    const matchedSource0 = Array.isArray(rawSources0)
+      ? (rawSources0.find(
+          (src) => (src as { id?: unknown }).id === sourceId,
+        ) as Record<string, unknown> | undefined)
+      : undefined
+    const items0 = (
+      matchedSource0?.legend_config as
+        | { items?: readonly { value?: unknown }[] }
+        | undefined
+    )?.items
+    if (items0) {
+      for (const item of items0) {
+        if (
+          typeof item.value === 'string' &&
+          item.value.startsWith('@@#params.')
+        ) {
+          oldLegendColorKeys.add(item.value.slice('@@#params.'.length))
+        }
+      }
+    }
+  }
+  const removedColorKeys = new Set<string>(
+    [...oldLegendColorKeys].filter((k) => !newKeysSet.has(k)),
+  )
+  const removedColorRefs = new Set<string>(
+    [...removedColorKeys].map((k) => `@@#params.${k}`),
+  )
+
   const preservedParams = oldParams.filter((p) => {
     if (p.group !== 'legend') return true
     if (newKeysSet.has(p.key)) return false
+    if (removedColorKeys.has(p.key)) return false
     return !/^(color_|threshold_)/.test(p.key)
   })
 
@@ -253,6 +290,44 @@ export function serializeGradientToJson(
           const owns = [...refs].some((r) => managedRefs.has(r))
           if (!owns) return [prop, val]
           return [prop, [...val.slice(0, 3), ...interpolatePairs]]
+        }),
+      )
+      return { ...style, paint: newPaint }
+    })
+  } else if (
+    !sourceHasThresholds &&
+    newStylesArr &&
+    removedColorRefs.size > 0
+  ) {
+    // No-threshold gradients (e.g. heatmap-color anchored on heatmap-density)
+    // don't get a full rewrite — the data-value anchors are external literals
+    // we can't fabricate. But if the user removed a stop, the paint still
+    // references the dropped color and the validator fires
+    // LEGEND_LAYER_MISMATCH. Strip each (input, color) pair whose color is in
+    // the removed set so the interpolate keeps shrinking with the legend.
+    newStylesArr = newStylesArr.map((style) => {
+      if (style.source !== sourceId) return style
+      const paint = style.paint as Record<string, unknown> | undefined
+      if (!paint) return style
+
+      const newPaint = Object.fromEntries(
+        Object.entries(paint).map(([prop, val]) => {
+          if (!Array.isArray(val) || val[0] !== 'interpolate')
+            return [prop, val]
+          const refs = new Set<string>()
+          collectStringRefs(val, refs)
+          const touchesRemoved = [...refs].some((r) => removedColorRefs.has(r))
+          const touchesManaged = [...refs].some((r) => managedRefs.has(r))
+          if (!touchesRemoved || !touchesManaged) return [prop, val]
+          const header = val.slice(0, 3)
+          const pairs: unknown[] = []
+          for (let i = 3; i + 1 < val.length; i += 2) {
+            const color = val[i + 1]
+            if (typeof color === 'string' && removedColorRefs.has(color))
+              continue
+            pairs.push(val[i], color)
+          }
+          return [prop, [...header, ...pairs]]
         }),
       )
       return { ...style, paint: newPaint }

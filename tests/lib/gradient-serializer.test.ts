@@ -921,4 +921,40 @@ describe('serializeGradientToJson — source without thresholds', () => {
     // Must NOT be at top-level
     expect(result).not.toHaveProperty('legend_config')
   })
+
+  it('drops removed stop from params_config + paint interpolate', () => {
+    const stops: GradientStop[] = [
+      {
+        id: '1',
+        color: '#2c7bb6',
+        position: 0,
+        dataValue: 0,
+        label: 'Heatmap low',
+        colorParamKey: 'heatmap_color_low',
+      },
+    ]
+
+    const result = JSON.parse(
+      serializeGradientToJson(NO_THRESHOLD_JSON, stops, 'capitals'),
+    )
+
+    const paramsKeys = result.params_config.map((p: { key: string }) => p.key)
+    expect(paramsKeys).toContain('heatmap_color_low')
+    expect(paramsKeys).not.toContain('heatmap_color_high')
+    expect(paramsKeys).toContain('heatmap_opacity')
+
+    const heatmapColor = result.config.styles[0].paint['heatmap-color']
+    expect(heatmapColor).toEqual([
+      'interpolate',
+      ['linear'],
+      ['heatmap-density'],
+      0,
+      'rgba(0,0,0,0)',
+      0.2,
+      '@@#params.heatmap_color_low',
+    ])
+    expect(result.config.sources[0].legend_config.items).toEqual([
+      { label: 'Heatmap low', value: '@@#params.heatmap_color_low' },
+    ])
+  })
 })
