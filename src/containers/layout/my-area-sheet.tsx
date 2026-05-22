@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Github, Menu, Plus, Presentation } from 'lucide-react'
+import { Github, Menu, Plus, Presentation, Trash2 } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from '#/components/ui/button'
 import {
@@ -16,6 +16,17 @@ import {
   TooltipTrigger,
 } from '#/components/ui/tooltip'
 import { Separator } from '#/components/ui/separator'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '#/components/ui/alert-dialog'
 import { db } from '#/lib/ai/persistence/db'
 import {
   createChat,
@@ -59,6 +70,18 @@ export default function MyAreaSheet() {
     if (!wasActive) return
     await db.meta.delete('lastActiveChatId')
     void navigate({ to: '/playground', search: {} })
+  }
+
+  const handleDeleteAll = async () => {
+    await db.transaction('rw', db.chats, db.messages, db.meta, async () => {
+      await Promise.all([
+        db.chats.clear(),
+        db.messages.clear(),
+        db.meta.clear(),
+      ])
+    })
+    void navigate({ to: '/playground', search: {} })
+    setOpen(false)
   }
 
   const handleNewProject = async () => {
@@ -129,25 +152,74 @@ export default function MyAreaSheet() {
 
           <Separator />
 
-          <div className="flex flex-col gap-1 text-sm">
-            <Link
-              to="/presentation"
-              search={{ slide: 1 }}
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              onClick={() => setOpen(false)}
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="w-full justify-start"
+                  disabled={chats.length === 0}
+                >
+                  <Trash2 className="size-4" />
+                  Delete all projects
+                </Button>
+              }
+            />
+            <AlertDialogContent size="sm">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete all projects?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This permanently removes every project, chat, and message
+                  stored locally in your browser. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => void handleDeleteAll()}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
+          <Separator />
+
+          <div className="flex flex-col gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start"
+              render={
+                <Link
+                  to="/presentation"
+                  search={{ slide: 1 }}
+                  onClick={() => setOpen(false)}
+                />
+              }
             >
               <Presentation className="size-4" />
               Presentation
-            </Link>
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start"
+              render={
+                <a
+                  href={GITHUB_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
             >
               <Github className="size-4" />
               GitHub
-            </a>
+            </Button>
           </div>
         </div>
       </SheetContent>

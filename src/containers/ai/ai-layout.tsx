@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Bot, FileJson2, Layers } from 'lucide-react'
 import {
@@ -28,6 +29,7 @@ export function AiLayout({
   params,
   validationOverlay,
 }: AiLayoutProps) {
+  const [activePane, setActivePane] = useState<'chat' | 'map'>('chat')
   return (
     <div className="flex h-full bg-background px-4 pb-4">
       <ResizablePanelGroup orientation="horizontal">
@@ -37,7 +39,12 @@ export function AiLayout({
           minSize="380px"
           groupResizeBehavior="preserve-pixel-size"
         >
-          <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-background py-4">
+          <div
+            data-active={activePane === 'chat'}
+            onPointerDown={() => setActivePane('chat')}
+            onFocusCapture={() => setActivePane('chat')}
+            className="gradient-border flex h-full flex-col overflow-hidden rounded-2xl py-4"
+          >
             <div className="shrink-0 px-4 pb-2">
               <Tabs
                 value={mainTab}
@@ -65,7 +72,12 @@ export function AiLayout({
         </ResizablePanel>
         <ResizableHandle className="w-2 bg-transparent" />
         <ResizablePanel id="map" minSize="30%">
-          <div className="flex h-full overflow-hidden rounded-2xl border border-border">
+          <div
+            data-active={activePane === 'map'}
+            onPointerDown={() => setActivePane('map')}
+            onFocusCapture={() => setActivePane('map')}
+            className="gradient-border flex h-full overflow-hidden rounded-2xl"
+          >
             <div className="flex h-full w-[300px] shrink-0 flex-col overflow-hidden border-r border-border bg-background">
               <div className="flex shrink-0 items-center gap-2 p-4">
                 <Layers className="size-4 text-muted-foreground" />
