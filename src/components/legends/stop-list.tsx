@@ -22,7 +22,7 @@ function ColorSwatch({
 }) {
   return (
     <label
-      className="size-5 shrink-0 cursor-pointer rounded border border-border transition-shadow hover:ring-2 hover:ring-primary/20"
+      className="size-5 shrink-0 cursor-pointer rounded border border-border transition-shadow hover:ring-2 hover:ring-primary/20 group-data-[selected]/stop:border-accent-foreground/40"
       style={{ backgroundColor: color }}
       onClick={(e) => {
         e.stopPropagation()
@@ -55,7 +55,7 @@ function InlineValueInput({
     return (
       <button
         type="button"
-        className="shrink-0 rounded px-1.5 py-0.5 text-right font-mono text-[10px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="shrink-0 rounded px-1.5 py-0.5 text-right font-mono text-[10px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground group-data-[selected]/stop:text-accent-foreground/80 group-data-[selected]/stop:hover:bg-accent-foreground/10 group-data-[selected]/stop:hover:text-accent-foreground"
         onClick={(e) => {
           e.stopPropagation()
           setDraft(value.toString())
@@ -84,7 +84,7 @@ function InlineValueInput({
         if (e.key === 'Escape') setIsEditing(false)
       }}
       onClick={(e) => e.stopPropagation()}
-      className="w-16 shrink-0 rounded border border-input bg-background px-1.5 py-0.5 text-right font-mono text-[10px] outline-none focus:ring-1 focus:ring-ring"
+      className="w-16 shrink-0 rounded border border-input bg-background px-1.5 py-0.5 text-right font-mono text-[10px] text-foreground outline-none focus:ring-1 focus:ring-ring"
     />
   )
 }
@@ -134,9 +134,12 @@ export function StopList({
         return (
           <div
             key={stop.id}
+            data-selected={isSelected || undefined}
             className={cn(
-              'group flex items-center gap-1.5 rounded-md px-1.5 py-1 transition-colors',
-              isSelected ? 'bg-accent' : 'hover:bg-muted/50',
+              'group/stop flex items-center gap-1.5 rounded-md px-1.5 py-1 transition-colors',
+              isSelected
+                ? 'bg-accent text-accent-foreground'
+                : 'hover:bg-muted/50',
             )}
             onClick={() => onSelectStop(isSelected ? null : stop.id)}
           >
@@ -155,7 +158,7 @@ export function StopList({
                 onSelectStop(stop.id)
               }}
               placeholder="Label"
-              className="min-w-0 flex-1 truncate border-none bg-transparent px-0.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/50"
+              className="min-w-0 flex-1 truncate border-none bg-transparent px-0.5 text-xs text-foreground outline-none placeholder:text-muted-foreground/50 group-data-[selected]/stop:text-accent-foreground group-data-[selected]/stop:placeholder:text-accent-foreground/60"
             />
 
             {hasThresholds && (
@@ -174,8 +177,10 @@ export function StopList({
                 onRemoveStop(stop.id)
               }}
               className={cn(
-                'shrink-0 overflow-hidden rounded p-0.5 text-muted-foreground transition-all duration-500 max-w-0 opacity-0 group-hover:max-w-6 group-hover:opacity-100',
-                canDelete ? 'hover:text-destructive' : 'cursor-not-allowed',
+                'shrink-0 overflow-hidden rounded p-0.5 text-muted-foreground transition-all duration-500 max-w-0 opacity-0 group-hover/stop:max-w-6 group-hover/stop:opacity-100 group-data-[selected]/stop:text-accent-foreground/70',
+                canDelete
+                  ? 'hover:text-destructive group-data-[selected]/stop:hover:text-destructive'
+                  : 'cursor-not-allowed',
               )}
             >
               <Trash2 className="size-3" />

@@ -1,38 +1,36 @@
-// src/components/legends/gradient-editor-popover.tsx
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useGradientEditor } from '#/hooks/use-gradient-editor'
 import { initializeGradientStops } from '#/lib/gradient-stops-init'
 import { serializeGradientToJson } from '#/lib/gradient-serializer'
 
 import { InteractiveGradientBar } from '#/components/legends/interactive-gradient-bar'
 import { StopList } from '#/components/legends/stop-list'
-import { Button } from '#/components/ui/button'
 import type { LegendItem, InferredParam } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
 
-type GradientEditorPopoverProps = {
+type GradientEditorInlineProps = {
   readonly items: readonly LegendItem[]
   readonly paramMapping: ReadonlyMap<number, ItemParamMapping>
   readonly legendParams: readonly InferredParam[]
   readonly values: Record<string, unknown>
   readonly currentJson: string
   readonly onApply: (updatedJson: string) => void
-  readonly onClose: () => void
   readonly sourceId: string
   readonly fullRange?: readonly [number, number]
 }
 
-export function GradientEditorPopover({
+const COMMIT_DEBOUNCE_MS = 150
+
+export function GradientEditorInline({
   items,
   paramMapping,
   legendParams,
   values,
   currentJson,
   onApply,
-  onClose,
   sourceId,
   fullRange,
-}: GradientEditorPopoverProps) {
+}: GradientEditorInlineProps) {
   const initialStops = useMemo(
     () => initializeGradientStops(items, paramMapping, legendParams, values),
     [items, paramMapping, legendParams, values],
@@ -45,26 +43,33 @@ export function GradientEditorPopover({
   const { state, selectStop, updateStop, addStop, removeStop } =
     useGradientEditor(initialStops)
 
-  const handleApply = () => {
-    // Always route through the serializer so every stop's color + threshold
-    // lands in a single JSON write. Looping `onChange` per stop caused later
-    // calls to overwrite earlier ones because each `onChange` rebuilds the
-    // snapshot from a closure-captured `activeSnapshot`.
-    const updatedJson = serializeGradientToJson(
-      currentJson,
-      [...state.stops],
-      sourceId,
-    )
-    onApply(updatedJson)
-    onClose()
-  }
+  // Always read the latest JSON so successive commits stack on each other
+  // instead of overwriting from a stale snapshot.
+  const currentJsonRef = useRef(currentJson)
+  useEffect(() => {
+    currentJsonRef.current = currentJson
+  }, [currentJson])
+
+  const onApplyRef = useRef(onApply)
+  useEffect(() => {
+    onApplyRef.current = onApply
+  }, [onApply])
+
+  useEffect(() => {
+    if (!state.isDirty) return
+    const timer = window.setTimeout(() => {
+      const updated = serializeGradientToJson(
+        currentJsonRef.current,
+        [...state.stops],
+        sourceId,
+      )
+      onApplyRef.current(updated)
+    }, COMMIT_DEBOUNCE_MS)
+    return () => window.clearTimeout(timer)
+  }, [state.stops, state.isDirty, sourceId])
 
   return (
-    <div className="flex w-72 flex-col gap-3 p-3">
-      <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-        Gradient Editor
-      </div>
-
+    <div className="flex flex-col gap-3">
       <InteractiveGradientBar
         stops={state.stops}
         selectedStopId={state.selectedStopId}
@@ -83,20 +88,6 @@ export function GradientEditorPopover({
         onUpdateStop={updateStop}
         onRemoveStop={removeStop}
       />
-
-      <div className="flex gap-2">
-        <Button variant="ghost" size="sm" className="flex-1" onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          size="sm"
-          className="flex-1"
-          disabled={!state.isDirty}
-          onClick={handleApply}
-        >
-          Apply
-        </Button>
-      </div>
     </div>
   )
 }
