@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
 import { Check, ChevronDown, Plus } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from '#/components/ui/button'
@@ -23,13 +23,17 @@ import MyAreaSheet from '#/containers/layout/my-area-sheet'
 
 export default function Header() {
   const navigate = useNavigate()
+  const isPlayground = useRouterState({
+    select: (s) => s.location.pathname === '/playground',
+  })
 
   const activeChat = useLiveQuery(async () => {
+    if (!isPlayground) return null
     const meta = await db.meta.get('lastActiveChatId')
     if (!meta) return null
     const chat = await db.chats.get(meta.value)
     return chat ?? null
-  }, [])
+  }, [isPlayground])
 
   const chatMessages = useLiveQuery(async () => {
     if (!activeChat?.id) return []
@@ -84,7 +88,7 @@ export default function Header() {
     void navigate({ to: '/playground', search: { chat: fresh.id } })
   }
 
-  const isLoadingChat = activeChat === undefined
+  const isLoadingChat = isPlayground && activeChat === undefined
   const hasChat = !!activeChat
 
   return (
@@ -101,9 +105,9 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Center: title + version */}
+        {/* Center: title + version (playground only) */}
         <div className="flex items-center justify-center gap-1">
-          {isLoadingChat ? (
+          {!isPlayground ? null : isLoadingChat ? (
             <>
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-20" />
@@ -167,12 +171,14 @@ export default function Header() {
           ) : null}
         </div>
 
-        {/* Right: actions */}
+        {/* Right: actions (playground only) */}
         <div className="flex flex-1 items-center justify-end gap-2">
-          <Button onClick={() => void handleNewProject()}>
-            <Plus />
-            New project
-          </Button>
+          {isPlayground && (
+            <Button onClick={() => void handleNewProject()}>
+              <Plus />
+              New project
+            </Button>
+          )}
         </div>
       </div>
     </header>
