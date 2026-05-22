@@ -19,6 +19,7 @@ import {
 } from '#/lib/ai/persistence/chats'
 import { migrateMessage } from '#/lib/ai/persistence/migrations'
 import { initialBasemapForTheme } from '#/lib/ai/types'
+import MyAreaSheet from '#/containers/layout/my-area-sheet'
 
 export default function Header() {
   const navigate = useNavigate()
@@ -89,8 +90,9 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm">
       <div className="flex items-center px-6 py-3">
-        {/* Left: logo */}
+        {/* Left: menu + logo */}
         <div className="flex flex-1 items-center gap-2 px-2">
+          <MyAreaSheet />
           <Link to="/" className="flex items-center gap-1 no-underline">
             <span className="font-mono text-lg text-accent">{'{@@}'}</span>
             <span className="font-sans text-lg font-bold tracking-tight text-foreground">
