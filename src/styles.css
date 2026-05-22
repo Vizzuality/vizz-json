@@ -225,3 +225,27 @@ pre code {
     transparent 100%
   );
 }
+
+/* Gradient border — two-layer background trick:
+   inner background fills padding-box, gradient fills border-box.
+   Quiet by default (solid border), active state shows the accent gradient. */
+.gradient-border {
+  border: 1px solid var(--border);
+  background: var(--background) padding-box;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease;
+}
+.gradient-border[data-active='true'] {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(
+        140deg,
+        color-mix(in oklab, var(--accent) 25%, var(--border)) 0%,
+        var(--border) 50%,
+        var(--border) 70%,
+        color-mix(in oklab, var(--accent) 15%, var(--border)) 100%
+      )
+      border-box;
+}
