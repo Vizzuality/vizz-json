@@ -82,14 +82,8 @@ function setupLiveQuery(chats: unknown, activeId: unknown) {
   })
 }
 
-vi.mock('#/paraglide/runtime', () => ({
-  getLocale: () => 'en',
-  locales: ['en', 'es'],
-  setLocale: vi.fn(),
-}))
-
-vi.mock('#/paraglide/messages', () => ({
-  m: { language_label: () => 'Language' },
+vi.mock('#/containers/layout/locale-switcher', () => ({
+  default: () => null,
 }))
 
 beforeEach(() => {
