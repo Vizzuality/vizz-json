@@ -1,12 +1,20 @@
 import { Settings } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '#/components/ui/button'
 import type { MapView, RendererControls } from '#/lib/ai/types'
 import { DEFAULT_BASEMAP, basemapLabel } from '#/lib/ai/types'
+import {
+  ExportMenu,
+  buildFilename,
+  buildPngFilename,
+} from '#/containers/ai/export/export-menu'
 
 type Props = {
   readonly view: MapView
   readonly renderer: RendererControls
   readonly onOpenConfig: () => void
+  readonly schemaJson: string
+  readonly title: string | undefined
 }
 
 function basemapDisplay(renderer: RendererControls): string {
@@ -27,7 +35,13 @@ function Property({ label, value }: { label: string; value: string }) {
   )
 }
 
-export function MapHeader({ view, renderer, onOpenConfig }: Props) {
+export function MapHeader({
+  view,
+  renderer,
+  onOpenConfig,
+  schemaJson,
+  title,
+}: Props) {
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-10">
       <div className="pointer-events-auto flex h-14 items-center gap-4 bg-black/70 px-4 py-3 backdrop-blur-md">
@@ -38,6 +52,15 @@ export function MapHeader({ view, renderer, onOpenConfig }: Props) {
             value={`${view.longitude.toFixed(4)}, ${view.latitude.toFixed(4)}`}
           />
           <Property label="Basemap:" value={basemapDisplay(renderer)} />
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <ExportMenu
+            schemaJson={schemaJson}
+            jsonFilename={buildFilename(title)}
+            pngFilename={buildPngFilename(title)}
+            mapId="playground-map"
+            onError={(msg) => toast.error(msg)}
+          />
         </div>
         <Button
           variant="default"
