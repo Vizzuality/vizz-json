@@ -1,13 +1,8 @@
 // src/components/legends/gradient-legend.tsx
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { LegendItem, InferredParam } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from '#/components/ui/popover'
-import { GradientEditorPopover } from '#/components/legends/gradient-editor-popover'
+import { GradientEditorInline } from '#/components/legends/gradient-editor-inline'
 import { initializeGradientStops } from '#/lib/gradient-stops-init'
 import { buildTransparencyGradient } from '#/lib/gradient-css'
 import { resolveItemColor } from '#/lib/legend-color'
@@ -111,7 +106,8 @@ export function GradientLegend({
   onApply,
   sourceId,
 }: GradientLegendProps) {
-  const [open, setOpen] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   const hasEditor =
     paramMapping &&
@@ -139,35 +135,61 @@ export function GradientLegend({
     return buildTransparencyGradient(stops, fullRange[0], fullRange[1])
   }, [hasEditor, fullRange, items, paramMapping, legendParams, values])
 
+  useEffect(() => {
+    if (!isEditing) return
+    const handlePointerDown = (event: PointerEvent) => {
+      const node = containerRef.current
+      if (!node) return
+      if (!node.contains(event.target as Node)) setIsEditing(false)
+    }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsEditing(false)
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isEditing])
+
   if (!hasEditor) {
     return (
       <GradientBar items={items} paramMapping={paramMapping} values={values} />
     )
   }
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="w-full cursor-pointer text-left">
-        <GradientBar
-          items={items}
-          gradientCss={gradientCss}
-          paramMapping={paramMapping}
-          values={values}
-        />
-      </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={8} className="w-auto p-0">
-        <GradientEditorPopover
+  if (isEditing) {
+    return (
+      <div ref={containerRef}>
+        <GradientEditorInline
           items={items}
           paramMapping={paramMapping}
           legendParams={legendParams}
           values={values}
           currentJson={currentJson}
           onApply={onApply}
-          onClose={() => setOpen(false)}
           sourceId={sourceId}
           fullRange={fullRange}
         />
-      </PopoverContent>
-    </Popover>
+      </div>
+    )
+  }
+
+  return (
+    <div ref={containerRef}>
+      <button
+        type="button"
+        className="block w-full cursor-pointer text-left"
+        onClick={() => setIsEditing(true)}
+      >
+        <GradientBar
+          items={items}
+          gradientCss={gradientCss}
+          paramMapping={paramMapping}
+          values={values}
+        />
+      </button>
+    </div>
   )
 }
