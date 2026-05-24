@@ -69,9 +69,11 @@ export function MapRenderer({
     <div className="h-full w-full relative">
       <Map
         ref={mapRef}
+        id="playground-map"
         initialViewState={initialView}
         style={{ width: '100%', height: '100%' }}
         mapStyle={basemapStyle}
+        canvasContextAttributes={{ preserveDrawingBuffer: true }}
         onMove={onMove}
       >
         <LayerManager items={items} />

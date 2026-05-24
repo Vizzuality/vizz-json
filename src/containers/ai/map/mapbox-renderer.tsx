@@ -63,11 +63,13 @@ export function MapboxRenderer({
     <div className="relative h-full w-full">
       <Map
         ref={mapRef}
+        id="playground-map"
         initialViewState={initialView}
         style={{ width: '100%', height: '100%' }}
         mapStyle={mapboxStyleUrl ?? 'mapbox://styles/mapbox/light-v11'}
         mapboxAccessToken={mapboxToken}
         projection={{ name: 'mercator' }}
+        preserveDrawingBuffer={true}
         onMove={onMove}
       >
         {items.map((item) => {

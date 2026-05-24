@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { MapProvider as MaplibreMapProvider } from 'react-map-gl/maplibre'
+import { MapProvider as MapboxMapProvider } from 'react-map-gl/mapbox'
 import type { Monaco } from '@monaco-editor/react'
 import { toast } from 'sonner'
 import { AiLayout } from './ai-layout'
@@ -288,19 +290,23 @@ export function AiPage() {
         map={
           <PaneErrorBoundary label="Map" resetKey={schemaJson}>
             {chat ? (
-              <>
-                <MapHeader
-                  view={liveView}
-                  renderer={renderer}
-                  onOpenConfig={() => setConfigOpen(true)}
-                />
-                <RendererSwitch
-                  resolvedConfig={resolved}
-                  error={error}
-                  renderer={renderer}
-                  onViewChange={setLiveView}
-                />
-              </>
+              <MaplibreMapProvider>
+                <MapboxMapProvider>
+                  <MapHeader
+                    view={liveView}
+                    renderer={renderer}
+                    onOpenConfig={() => setConfigOpen(true)}
+                    schemaJson={schemaJson}
+                    title={activeSnapshot?.metadata.title}
+                  />
+                  <RendererSwitch
+                    resolvedConfig={resolved}
+                    error={error}
+                    renderer={renderer}
+                    onViewChange={setLiveView}
+                  />
+                </MapboxMapProvider>
+              </MaplibreMapProvider>
             ) : (
               <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
                 Loading map…
