@@ -39,10 +39,12 @@ describe('BasicLegend — rendering', () => {
         onChange={onChange}
       />,
     )
-    // The editable label wraps a color input — the label's backgroundColor should be the resolved color
-    const label = container.querySelector('label') as HTMLElement
-    expect(label).not.toBeNull()
-    expect(label.style.backgroundColor).toBe('rgb(219, 234, 254)') // #dbeafe parsed by browser
+    // The editable path renders a ColorInput popover trigger — the trigger's backgroundColor should be the resolved color
+    const trigger = container.querySelector(
+      '[aria-label="Edit legend color"]',
+    ) as HTMLElement
+    expect(trigger).not.toBeNull()
+    expect(trigger.style.backgroundColor).toBe('rgb(219, 234, 254)') // #dbeafe parsed by browser
   })
 })
 

@@ -1,3 +1,5 @@
+import { parseColor, formatColor } from './color'
+
 export type GradientStop = {
   readonly id: string
   readonly color: string
@@ -20,16 +22,20 @@ export function interpolateHexColor(
   t: number,
 ): string {
   const clamped = Math.max(0, Math.min(1, t))
-  const r1 = parseInt(color1.slice(1, 3), 16)
-  const g1 = parseInt(color1.slice(3, 5), 16)
-  const b1 = parseInt(color1.slice(5, 7), 16)
-  const r2 = parseInt(color2.slice(1, 3), 16)
-  const g2 = parseInt(color2.slice(3, 5), 16)
-  const b2 = parseInt(color2.slice(5, 7), 16)
+  const c1 = parseColor(color1)
+  const c2 = parseColor(color2)
+  const r1 = parseInt(c1.hex.slice(1, 3), 16)
+  const g1 = parseInt(c1.hex.slice(3, 5), 16)
+  const b1 = parseInt(c1.hex.slice(5, 7), 16)
+  const r2 = parseInt(c2.hex.slice(1, 3), 16)
+  const g2 = parseInt(c2.hex.slice(3, 5), 16)
+  const b2 = parseInt(c2.hex.slice(5, 7), 16)
   const r = Math.round(r1 + (r2 - r1) * clamped)
   const g = Math.round(g1 + (g2 - g1) * clamped)
   const b = Math.round(b1 + (b2 - b1) * clamped)
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+  const a = c1.alpha + (c2.alpha - c1.alpha) * clamped
+  const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+  return formatColor({ hex, alpha: a })
 }
 
 export function positionToDataValue(
