@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { cn } from '#/lib/utils'
 import { Trash2 } from 'lucide-react'
 import type { GradientStop } from '#/lib/gradient-types'
+import { ColorInput } from '#/components/legends/color-input'
 
 function formatCompactValue(value: number): string {
   const abs = Math.abs(value)
@@ -21,21 +22,17 @@ function ColorSwatch({
   readonly onOpen?: () => void
 }) {
   return (
-    <label
-      className="size-5 shrink-0 cursor-pointer rounded border border-border transition-shadow hover:ring-2 hover:ring-primary/20 group-data-[selected]/stop:border-accent-foreground/40"
-      style={{ backgroundColor: color }}
-      onClick={(e) => {
-        e.stopPropagation()
-        onOpen?.()
-      }}
-    >
-      <input
-        type="color"
+    <span onClick={(e) => e.stopPropagation()} className="contents">
+      <ColorInput
         value={color}
-        onChange={(e) => onColorChange(e.target.value)}
-        className="sr-only"
+        onChange={onColorChange}
+        swatchClassName="group-data-[selected]/stop:border-accent-foreground/40"
+        ariaLabel="Edit stop color"
+        onOpenChange={(open) => {
+          if (open) onOpen?.()
+        }}
       />
-    </label>
+    </span>
   )
 }
 

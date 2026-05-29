@@ -1,6 +1,7 @@
 import type { LegendItem } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
 import { resolveItemColor } from '#/lib/legend-color'
+import { ColorInput } from '#/components/legends/color-input'
 
 type BasicLegendProps = {
   readonly items: readonly LegendItem[]
@@ -34,17 +35,12 @@ function EditableRow({
   return (
     <div className="flex items-center gap-2 px-1.5 py-1 -mx-1.5">
       {colorValue !== undefined && mapping.valueParamKey ? (
-        <label
-          className="w-4 h-4 rounded-sm border border-border shrink-0 cursor-pointer"
-          style={{ backgroundColor: colorValue }}
-        >
-          <input
-            type="color"
-            value={colorValue}
-            onChange={(e) => onChange(mapping.valueParamKey!, e.target.value)}
-            className="sr-only"
-          />
-        </label>
+        <ColorInput
+          value={colorValue}
+          onChange={(next) => onChange(mapping.valueParamKey!, next)}
+          swatchClassName="size-4 rounded-sm"
+          ariaLabel="Edit legend color"
+        />
       ) : (
         <div
           className="w-4 h-4 rounded-sm border border-border shrink-0"

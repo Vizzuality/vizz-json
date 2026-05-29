@@ -1,6 +1,7 @@
 import type { LegendItem } from '#/lib/types'
 import type { ItemParamMapping } from '#/lib/legend-param-mapping'
 import { resolveItemColor } from '#/lib/legend-color'
+import { ColorInput } from '#/components/legends/color-input'
 
 type ChoroplethLegendProps = {
   readonly items: readonly LegendItem[]
@@ -38,20 +39,13 @@ function ColorBar({
 
         if (mapping?.valueParamKey && onChange) {
           return (
-            <label
+            <ColorInput
               key={i}
-              className="flex-1 cursor-pointer"
-              style={{ backgroundColor: color }}
-            >
-              <input
-                type="color"
-                value={color}
-                onChange={(e) =>
-                  onChange(mapping.valueParamKey!, e.target.value)
-                }
-                className="sr-only"
-              />
-            </label>
+              value={color}
+              onChange={(next) => onChange(mapping.valueParamKey!, next)}
+              swatchClassName="flex-1 size-auto h-full rounded-none border-0 hover:ring-0"
+              ariaLabel="Edit color stop"
+            />
           )
         }
 
