@@ -140,7 +140,12 @@ export function GradientLegend({
     const handlePointerDown = (event: PointerEvent) => {
       const node = containerRef.current
       if (!node) return
-      if (!node.contains(event.target as Node)) setIsEditing(false)
+      const target = event.target as HTMLElement | null
+      // Skip pointerdowns inside portaled popover content (e.g. the color
+      // picker popover anchored to a stop) — those targets live outside
+      // containerRef but logically belong to the editor.
+      if (target?.closest('[data-slot="popover-content"]')) return
+      if (!node.contains(target)) setIsEditing(false)
     }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setIsEditing(false)
